@@ -360,21 +360,39 @@ func (s *Server) renderTunnels() (string, error) {
 }
 
 func (s *Server) createTunnel(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	var name, providerStr string
+	var port int
+
+	contentType := r.Header.Get("Content-Type")
+	if strings.Contains(contentType, "application/json") {
+		var req struct {
+			Name       string `json:"name"`
+			Provider   string `json:"provider"`
+			LocalPort  int    `json:"localPort"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		name = req.Name
+		providerStr = req.Provider
+		port = req.LocalPort
+	} else {
+		if err := r.ParseForm(); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		name = r.FormValue("name")
+		providerStr = r.FormValue("provider")
+		portStr := r.FormValue("port")
+		port, _ = strconv.Atoi(portStr)
 	}
 
-	name := r.FormValue("name")
-	providerStr := r.FormValue("provider")
-	portStr := r.FormValue("port")
-
-	if name == "" || providerStr == "" || portStr == "" {
+	if name == "" || providerStr == "" || port < 1 {
 		http.Error(w, "missing fields", http.StatusBadRequest)
 		return
 	}
 
-	port, _ := strconv.Atoi(portStr)
 	if port < 1 || port > 65535 {
 		port = 30000
 	}
@@ -398,7 +416,8 @@ func (s *Server) createTunnel(w http.ResponseWriter, r *http.Request) {
 	s.config.Tunnels = append(s.config.Tunnels, tunnel)
 	s.config.Save()
 
-	s.listTunnels(w)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tunnel)
 }
 
 func (s *Server) updateTunnel(w http.ResponseWriter, r *http.Request) {

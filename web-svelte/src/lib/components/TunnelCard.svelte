@@ -1,189 +1,239 @@
 <script>
   let { tunnel, onStart, onStop, onDelete } = $props();
   
-  const icons = {
-    cloudflared: '☁️',
-    playitgg: '🎮',
-    localhostrun: '🌐',
-    serveo: '🔌',
-    pinggy: '📡',
-    tunnelmole: '🕳️',
-    zrok: '🔒',
-    exposesh: '🚀',
-    localtunnel: '🔧'
+  let showActions = $state(false);
+  
+  const providerNames = {
+    cloudflared: 'Cloudflare',
+    playitgg: 'Playit.gg',
+    localhostrun: 'localhost.run',
+    pinggy: 'Pinggy',
+    tunnelmole: 'Tunnelmole',
+    zrok: 'Zrok',
+    localtunnel: 'localtunnel'
   };
+  
+  function getStatusClass() {
+    if (tunnel.status === 'running') return 'running';
+    if (tunnel.status === 'starting') return 'starting';
+    if (tunnel.status === 'error') return 'error';
+    return 'stopped';
+  }
+  
+  function getStatusText() {
+    if (tunnel.status === 'running') return 'Running';
+    if (tunnel.status === 'starting') return 'Starting...';
+    if (tunnel.status === 'error') return 'Error';
+    return 'Stopped';
+  }
   
   function copyUrl(url) {
     navigator.clipboard.writeText(url);
   }
 </script>
 
-<div class="card {tunnel.status}">
-  <div class="header">
-    <span class="icon">{icons[tunnel.provider] || '🔗'}</span>
-    <div class="info">
-      <h3>{tunnel.name}</h3>
-      <span class="provider">{tunnel.provider}</span>
+<div class="connection-item {getStatusClass()}">
+  <div class="connection-content">
+    <div class="connection-main">
+      <div class="connection-info">
+        <div class="connection-name">{tunnel.name}</div>
+        <div class="connection-meta">{providerNames[tunnel.provider] || tunnel.provider} — Port {tunnel.port}</div>
+        <div class="connection-status status-{getStatusClass()}">
+          <span class="status-dot"></span>
+          <span class="status-text">{getStatusText()}</span>
+        </div>
+      </div>
+      <div class="connection-actions">
+        {#if tunnel.status === 'running'}
+          <button class="btn" onclick={() => onStop(tunnel.id)}>Stop</button>
+        {:else}
+          <button class="btn btn-start" onclick={() => onStart(tunnel.id)}>Start</button>
+        {/if}
+        <button class="btn" onclick={() => showActions = !showActions}>Logs</button>
+        <button class="btn" onclick={() => onDelete(tunnel.id)}>Delete</button>
+      </div>
     </div>
-    <span class="status {tunnel.status}">
-      {tunnel.status === 'running' ? '● Online' : 
-       tunnel.status === 'starting' ? '◐ Starting...' : 
-       tunnel.status === 'error' ? '● Error' : '● Offline'}
-    </span>
-  </div>
-  
-  <div class="details">
-    <div>Port: <code>localhost:{tunnel.localPort}</code></div>
     {#if tunnel.publicUrl}
-      <div class="url" onclick={() => copyUrl(tunnel.publicUrl)}>
-        {tunnel.publicUrl}
+      <div class="connection-url-row" onclick={() => copyUrl(tunnel.publicUrl)}>
+        <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <span class="url-text">{tunnel.publicUrl}</span>
+        <span class="copy-hint">Click to copy</span>
       </div>
     {/if}
-  </div>
-  
-  <div class="actions">
-    {#if tunnel.status === 'running'}
-      <button class="stop" onclick={() => onStop(tunnel.id)}>Stop</button>
-      {#if tunnel.publicUrl}
-        <button onclick={() => copyUrl(tunnel.publicUrl)}>Copy</button>
-      {/if}
-    {:else if tunnel.status === 'starting'}
-      <button disabled>Starting...</button>
-    {:else}
-      <button class="start" onclick={() => onStart(tunnel.id)}>Start</button>
-    {/if}
-    <button class="delete" onclick={() => onDelete(tunnel.id)}>Delete</button>
   </div>
 </div>
 
 <style>
-  .card {
+  .connection-item {
     background: white;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid #e7e5e4;
+    border-radius: 10px;
+    overflow: hidden;
     transition: all 0.2s;
   }
-  
-  .card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    transform: translateY(-2px);
+
+  .connection-item:hover {
+    border-color: #d6d3d1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   }
-  
-  .card.running {
-    background: #f0fdf4;
-    border: 1px solid #86efac;
-  }
-  
-  .card.starting {
-    background: #fffbeb;
-    border: 1px solid #fcd34d;
-  }
-  
-  .card.error {
-    background: #fef2f2;
-    border: 1px solid #fca5a5;
-  }
-  
-  .header {
+
+  .connection-content {
     display: flex;
+    flex-direction: column;
+  }
+
+  .connection-main {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
+    padding: 16px;
+    gap: 16px;
   }
-  
-  .icon {
-    font-size: 24px;
-  }
-  
-  .info {
+
+  .connection-info {
     flex: 1;
+    min-width: 0;
   }
-  
-  h3 {
-    margin: 0;
-    font-size: 18px;
+
+  .connection-name {
+    font-weight: 600;
+    font-size: 15px;
     color: #1c1917;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  
-  .provider {
-    font-size: 12px;
+
+  .connection-meta {
+    font-size: 13px;
     color: #78716c;
-    text-transform: capitalize;
+    margin-bottom: 8px;
   }
-  
-  .status {
-    font-size: 14px;
+
+  .connection-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
     font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 12px;
   }
-  
-  .status.running { color: #16a34a; }
-  .status.starting { color: #d97706; }
-  .status.error { color: #dc2626; }
-  .status.stopped { color: #78716c; }
-  
-  .details {
-    margin-bottom: 16px;
-    font-size: 14px;
-    color: #44403c;
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
   }
-  
-  code {
+
+  .status-running {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .status-running .status-dot {
+    background: #22c55e;
+  }
+
+  .status-starting {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .status-starting .status-dot {
+    background: #f59e0b;
+    animation: pulse 1.5s infinite;
+  }
+
+  .status-error {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .status-error .status-dot {
+    background: #ef4444;
+  }
+
+  .status-stopped {
     background: #f5f5f4;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-family: monospace;
+    color: #78716c;
   }
-  
-  .url {
-    margin-top: 8px;
-    color: #16a34a;
-    cursor: pointer;
-    text-decoration: underline;
+
+  .status-stopped .status-dot {
+    background: #a8a29e;
   }
-  
-  .actions {
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .connection-actions {
     display: flex;
     gap: 8px;
   }
-  
-  button {
-    padding: 8px 16px;
-    border: none;
+
+  .btn {
+    padding: 8px 14px;
+    font-size: 13px;
     border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
   }
-  
-  button:hover:not(:disabled) {
-    opacity: 0.8;
-  }
-  
-  button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  
-  button.start {
+
+  .btn-start {
     background: #16a34a;
     color: white;
+    border-color: #16a34a;
   }
-  
-  button.stop {
-    background: #78716c;
-    color: white;
+
+  .btn-start:hover {
+    background: #15803d;
+    border-color: #15803d;
   }
-  
-  button.delete {
-    background: transparent;
-    color: #dc2626;
-    border: 1px solid #dc2626;
+
+  .connection-url-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: #fafaf9;
+    border-top: 1px solid #f5f5f4;
+    cursor: pointer;
+    transition: all 0.15s;
   }
-  
-  button.delete:hover {
-    background: #dc2626;
-    color: white;
+
+  .connection-url-row:hover {
+    background: #f5f5f4;
+  }
+
+  .copy-icon {
+    width: 14px;
+    height: 14px;
+    color: #78716c;
+    flex-shrink: 0;
+  }
+
+  .url-text {
+    flex: 1;
+    font-size: 13px;
+    color: #92400e;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .copy-hint {
+    font-size: 11px;
+    color: #a8a29e;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .connection-url-row:hover .copy-hint {
+    opacity: 1;
   }
 </style>
