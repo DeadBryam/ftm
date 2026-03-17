@@ -1,0 +1,29 @@
+# Binaries
+ftm
+ftm-*
+*.exe
+
+# Go
+*.o
+*.a
+*.so
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+*.test
+*.out
+coverage.txt
+
+# Config (user data)
+.config/
