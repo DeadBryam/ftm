@@ -324,8 +324,16 @@ func (m *Model) copyTunnelURL(item TunnelItem) {
 			m.showMessage("Copied short URL!")
 			return
 		}
-		// No cache mapping means no API key configured
-		m.showMessage("Configure API key (press 'k') for short URL")
+		// No cache mapping - check why
+		if m.App.Config.Shortener.APIKeys["bitly"] == "" {
+			m.showMessage("Configure API key (press 'k') for short URL")
+		} else if !item.Status.Running {
+			m.showMessage("Start tunnel to create short URL")
+		} else if item.Status.Starting {
+			m.showMessage("Wait for tunnel to be ready...")
+		} else {
+			m.showMessage("Short URL pending - restart tunnel if stuck")
+		}
 		return
 	}
 	
