@@ -100,6 +100,17 @@ func (c *URLCache) EnsureShortURL(tunnelID, currentURL, preferredShort string, c
 				c.Delete(tunnelID)
 				c.Save()
 			}
+			
+			// Try to update if provider supports it
+			if updater, ok := client.(UpdateableProvider); ok && mapping.ShortURL != "" {
+				updatedURL, err := updater.Update(mapping.ShortURL, currentURL)
+				if err == nil {
+					c.Set(tunnelID, updatedURL, currentURL, client.Name())
+					c.Save()
+					return updatedURL, nil
+				}
+			}
+			
 			shortURL, err := client.Shorten(currentURL, preferredShort)
 			if err != nil {
 				if IsDomainBlocked(err) {

@@ -5,6 +5,11 @@ type Provider interface {
 	Shorten(longURL, custom string) (string, error)
 }
 
+type UpdateableProvider interface {
+	Provider
+	Update(shortURL, newLongURL string) (string, error)
+}
+
 type ShortenError struct {
 	Reason  string
 	Message string
@@ -17,6 +22,13 @@ func (e ShortenError) Error() string {
 func IsDomainBlocked(err error) bool {
 	if se, ok := err.(ShortenError); ok {
 		return se.Reason == "DOMAIN_BLOCKED"
+	}
+	return false
+}
+
+func IsAlreadyExists(err error) bool {
+	if se, ok := err.(ShortenError); ok {
+		return se.Reason == "ALREADY_EXISTS"
 	}
 	return false
 }
