@@ -14,7 +14,7 @@ import (
 type App struct {
 	Config      *config.Config
 	Manager     *process.Manager
-	Shortener   *shortener.ISGDClient
+	Shortener   shortener.Provider
 	URLCache    *shortener.URLCache
 }
 
@@ -32,7 +32,7 @@ func New() (*App, error) {
 	return &App{
 		Config:    cfg,
 		Manager:   process.NewManager(),
-		Shortener: shortener.NewISGD(),
+		Shortener: shortener.DefaultMulti(),
 		URLCache:  cache,
 	}, nil
 }
@@ -75,8 +75,3 @@ func (a *App) EnsureShortURL(tunnelID, publicURL, preferred string) (string, err
 	return a.URLCache.EnsureShortURL(tunnelID, publicURL, preferred, a.Shortener)
 }
 
-func (a *App) IsShortenerBlocked() bool {
-	// Test with a known blocked domain
-	_, err := a.Shortener.Shorten("https://xxx.trycloudflare.com", "")
-	return shortener.IsDomainBlocked(err)
-}

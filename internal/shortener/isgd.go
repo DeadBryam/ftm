@@ -18,21 +18,16 @@ type ISGDClient struct {
 	client *http.Client
 }
 
-type ShortenError struct {
-	Reason  string
-	Message string
-}
-
-func (e ShortenError) Error() string {
-	return fmt.Sprintf("is.gd: %s - %s", e.Reason, e.Message)
-}
-
 func NewISGD() *ISGDClient {
 	return &ISGDClient{
 		client: &http.Client{
 			Timeout: 10 * time.Second,
 		},
 	}
+}
+
+func (c *ISGDClient) Name() string {
+	return "isgd"
 }
 
 func (c *ISGDClient) Shorten(longURL, custom string) (string, error) {
@@ -65,7 +60,7 @@ func (c *ISGDClient) Shorten(longURL, custom string) (string, error) {
 		if strings.Contains(errMsg, "blacklist") {
 			return "", ShortenError{
 				Reason:  "DOMAIN_BLOCKED",
-				Message: "This tunnel domain is blocked by is.gd (try playit.gg instead)",
+				Message: "Domain blocked by is.gd",
 			}
 		}
 
@@ -111,9 +106,4 @@ func cleanCustomURL(s string) string {
 	return strings.ToLower(result.String())
 }
 
-func IsDomainBlocked(err error) bool {
-	if shortenErr, ok := err.(ShortenError); ok {
-		return shortenErr.Reason == "DOMAIN_BLOCKED"
-	}
-	return false
-}
+

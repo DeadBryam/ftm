@@ -85,17 +85,17 @@ func cachePath() string {
 	return filepath.Join(config.ConfigDir(), "url-cache.yaml")
 }
 
-func (c *URLCache) EnsureShortURL(tunnelID, currentURL, preferredShort string, client *ISGDClient) (string, error) {
+func (c *URLCache) EnsureShortURL(tunnelID, currentURL, preferredShort string, client Provider) (string, error) {
 	if mapping, ok := c.Get(tunnelID); ok {
 		if mapping.CurrentURL != currentURL && currentURL != "" {
-			shortURL, err := client.Update(preferredShort, currentURL)
+			shortURL, err := client.Shorten(currentURL, preferredShort)
 			if err != nil {
 				if IsDomainBlocked(err) {
 					return "", err
 				}
 				return mapping.ShortURL, nil
 			}
-			c.Set(tunnelID, shortURL, currentURL, "isgd")
+			c.Set(tunnelID, shortURL, currentURL, client.Name())
 			c.Save()
 			return shortURL, nil
 		}
@@ -107,7 +107,7 @@ func (c *URLCache) EnsureShortURL(tunnelID, currentURL, preferredShort string, c
 		return "", err
 	}
 	
-	c.Set(tunnelID, shortURL, currentURL, "isgd")
+	c.Set(tunnelID, shortURL, currentURL, client.Name())
 	c.Save()
 	
 	return shortURL, nil
