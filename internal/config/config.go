@@ -16,6 +16,7 @@ const (
 type Config struct {
 	Version int            `yaml:"version"`
 	Tunnels []TunnelConfig `yaml:"tunnels"`
+	WebPort int            `yaml:"web_port,omitempty"`
 }
 
 func DefaultConfig() *Config {
