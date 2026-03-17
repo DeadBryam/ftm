@@ -103,33 +103,41 @@ func stripANSI(s string) string {
 	return ansiEscape.ReplaceAllString(s, "")
 }
 
-var urlRegex = regexp.MustCompile(`https?://[a-zA-Z0-9][-a-zA-Z0-9.]*[a-zA-Z0-9]`)
+var localhostRunRegex = regexp.MustCompile(`https?://[a-z0-9]+\.lhr\.life`)
+var serveoRegex = regexp.MustCompile(`https?://[a-z0-9-]+\.serveousercontent\.com`)
 
 func (p *SSHProvider) ParseURL(line string) string {
 	clean := stripANSI(line)
 	cleanLower := strings.ToLower(clean)
 	
 	if p.host == "localhost.run" {
-		if !strings.Contains(cleanLower, "localhost.run") && !strings.Contains(cleanLower, "lhr.life") {
-			return ""
+		matches := localhostRunRegex.FindStringSubmatch(cleanLower)
+		if len(matches) > 0 {
+			return matches[0]
+		}
+		if strings.Contains(cleanLower, ".lhr.life") {
+			if idx := strings.Index(cleanLower, "https://"); idx != -1 {
+				rest := clean[idx:]
+				if endIdx := strings.IndexAny(rest, " \t\n\r,"); endIdx != -1 {
+					return rest[:endIdx]
+				}
+				return rest
+			}
 		}
 	} else if p.host == "serveo.net" {
-		if !strings.Contains(cleanLower, "serveo") && !strings.Contains(cleanLower, "serveousercontent") {
-			return ""
+		matches := serveoRegex.FindStringSubmatch(cleanLower)
+		if len(matches) > 0 {
+			return matches[0]
 		}
-	}
-	
-	matches := urlRegex.FindStringSubmatch(clean)
-	if len(matches) > 0 {
-		return matches[0]
-	}
-	
-	if idx := strings.Index(cleanLower, "https://"); idx != -1 {
-		rest := clean[idx:]
-		if endIdx := strings.IndexAny(rest, " \t\n\r"); endIdx != -1 {
-			rest = rest[:endIdx]
+		if strings.Contains(cleanLower, "serveo") || strings.Contains(cleanLower, "serveousercontent") {
+			if idx := strings.Index(cleanLower, "https://"); idx != -1 {
+				rest := clean[idx:]
+				if endIdx := strings.IndexAny(rest, " \t\n\r"); endIdx != -1 {
+					return rest[:endIdx]
+				}
+				return rest
+			}
 		}
-		return rest
 	}
 	
 	return ""
@@ -140,8 +148,8 @@ func (p *SSHProvider) IsReady(line string) bool {
 	cleanLower := strings.ToLower(clean)
 	
 	if p.host == "localhost.run" {
-		return strings.Contains(cleanLower, "localhost.run") || 
-		       strings.Contains(cleanLower, "lhr.life")
+		return strings.Contains(cleanLower, ".lhr.life") ||
+		       strings.Contains(cleanLower, "tunneled")
 	}
 	
 	return strings.Contains(cleanLower, "serveo") || 
