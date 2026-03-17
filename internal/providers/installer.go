@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -30,15 +31,15 @@ func (i *Installer) SetProgressChannel(ch chan<- DownloadProgress) {
 
 func (i *Installer) EnsureInstalled(p Provider) (string, error) {
 	binPath := filepath.Join(i.binDir, p.BinaryName())
-	
+
 	if _, err := os.Stat(binPath); err == nil {
 		return binPath, nil
 	}
-	
+
 	if err := os.MkdirAll(i.binDir, 0755); err != nil {
 		return "", fmt.Errorf("failed to create bin dir: %w", err)
 	}
-	
+
 	switch p.Name() {
 	case "Playit.gg":
 		return i.installPlayitgg()
@@ -56,13 +57,13 @@ func (i *Installer) installPlayitgg() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	binPath := filepath.Join(i.binDir, "playit")
-	
+
 	if err := i.downloadBinary(url, binPath); err != nil {
 		return "", fmt.Errorf("download failed: %w", err)
 	}
-	
+
 	return binPath, nil
 }
 
@@ -71,16 +72,16 @@ func (i *Installer) installCloudflared() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	binPath := filepath.Join(i.binDir, "cloudflared")
-	
+
 	if strings.HasSuffix(url, ".tgz") {
 		tmpFile := binPath + ".tgz"
 		if err := i.downloadFile(url, tmpFile); err != nil {
 			return "", fmt.Errorf("download failed: %w", err)
 		}
 		defer os.Remove(tmpFile)
-		
+
 		if err := i.extractTgz(tmpFile, binPath); err != nil {
 			return "", fmt.Errorf("extract failed: %w", err)
 		}
@@ -89,15 +90,15 @@ func (i *Installer) installCloudflared() (string, error) {
 			return "", fmt.Errorf("download failed: %w", err)
 		}
 	}
-	
+
 	if _, err := os.Stat(binPath); err != nil {
 		return "", fmt.Errorf("binary not found after install: %w", err)
 	}
-	
+
 	if err := os.Chmod(binPath, 0755); err != nil {
 		return "", fmt.Errorf("chmod failed: %w", err)
 	}
-	
+
 	return binPath, nil
 }
 
@@ -108,7 +109,7 @@ func (i *Installer) installTunnelmole() (string, error) {
 func (i *Installer) playitggURL() (string, error) {
 	os := runtime.GOOS
 	arch := runtime.GOARCH
-	
+
 	switch os {
 	case "darwin":
 		return "", fmt.Errorf("playit.gg no tiene build para macOS. Usa Cloudflared o instala manualmente con: brew install playit")
@@ -127,9 +128,9 @@ func (i *Installer) playitggURL() (string, error) {
 func (i *Installer) cloudflaredURL() (string, error) {
 	os := runtime.GOOS
 	arch := runtime.GOARCH
-	
+
 	base := "https://github.com/cloudflare/cloudflared/releases/latest/download"
-	
+
 	switch os {
 	case "darwin":
 		if arch == "arm64" {
@@ -157,28 +158,54 @@ func (i *Installer) downloadFile(url, dest string) error {
 }
 
 func (i *Installer) extractTgz(src, dest string) error {
+
+	cmd := exec.Command("tar", "-xzf", src, "-C", filepath.Dir(dest))
+	if err := cmd.Run(); err != nil {
+
+		return i.extractGzipFallback(src, dest)
+	}
+
+	entries, err := os.ReadDir(filepath.Dir(dest))
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() && entry.Name() == "cloudflared" {
+			extractedPath := filepath.Join(filepath.Dir(dest), entry.Name())
+			if extractedPath != dest {
+				return os.Rename(extractedPath, dest)
+			}
+			return os.Chmod(dest, 0755)
+		}
+	}
+
+	return fmt.Errorf("cloudflared binary not found in extracted archive")
+}
+
+func (i *Installer) extractGzipFallback(src, dest string) error {
 	file, err := os.Open(src)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
-	
+
 	gzr, err := gzip.NewReader(file)
 	if err != nil {
 		return err
 	}
 	defer gzr.Close()
-	
+
 	out, err := os.Create(dest)
 	if err != nil {
 		return err
 	}
 	defer out.Close()
-	
+
 	if _, err := io.Copy(out, gzr); err != nil {
 		return err
 	}
-	
+
 	return os.Chmod(dest, 0755)
 }
 
@@ -188,7 +215,7 @@ func (i *Installer) extractZip(src, dest string) error {
 		return err
 	}
 	defer r.Close()
-	
+
 	for _, f := range r.File {
 		if f.Name == "cloudflared" || f.Name == "cloudflared.exe" {
 			rc, err := f.Open()
@@ -196,21 +223,21 @@ func (i *Installer) extractZip(src, dest string) error {
 				return err
 			}
 			defer rc.Close()
-			
+
 			out, err := os.Create(dest)
 			if err != nil {
 				return err
 			}
 			defer out.Close()
-			
+
 			if _, err := io.Copy(out, rc); err != nil {
 				return err
 			}
-			
+
 			return os.Chmod(dest, 0755)
 		}
 	}
-	
+
 	return fmt.Errorf("binary not found in zip")
 }
 
