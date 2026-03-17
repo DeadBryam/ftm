@@ -21,8 +21,6 @@ func (m *Model) View() string {
 		return m.viewAddForm()
 	case viewDownloading:
 		return m.viewDownloading()
-	case viewAPIKeyForm:
-		return m.viewAPIKeyForm()
 	default:
 		return m.viewList()
 	}
@@ -58,14 +56,6 @@ func (m *Model) viewList() string {
 
 	b.WriteString("\n")
 	b.WriteString(m.Help.View(m.Keys))
-
-	if m.App.Config.Shortener.APIKeys["bitly"] == "" {
-		b.WriteString("\n")
-		hintStyle := lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FFA500")).
-			Italic(true)
-		b.WriteString(hintStyle.Render("💡 Press 'k' to configure Bit.ly API key for short URLs"))
-	}
 
 	return b.String()
 }
@@ -108,15 +98,7 @@ func (m *Model) renderTunnelItem(idx int, item TunnelItem) string {
 
 	if item.Status.Running && !item.Status.Starting {
 		if item.Status.PublicURL != "" {
-			parts = append(parts, URLStyle.Render("│ "+truncate(item.Status.PublicURL, 30)))
-		}
-
-		if item.Tunnel.ShortURL != "" {
-			shortDisplay := item.Tunnel.ShortURL
-			if mapping, ok := m.App.URLCache.Get(item.Tunnel.ID); ok {
-				shortDisplay = mapping.ShortURL
-			}
-			parts = append(parts, ShortURLStyle.Render("│ "+truncate(shortDisplay, 25)))
+			parts = append(parts, URLStyle.Render("│ "+truncate(item.Status.PublicURL, 40)))
 		}
 	}
 
@@ -172,7 +154,6 @@ func (m *Model) viewAddForm() string {
 		{"Name", m.FormValues.Name, m.FormFocus == 0},
 		{"Provider", m.FormValues.Provider, m.FormFocus == 1},
 		{"Local Port", m.FormValues.Port, m.FormFocus == 2},
-		{"Short URL (optional)", m.FormValues.ShortURL, m.FormFocus == 3},
 	}
 
 	for _, f := range fields {
@@ -201,7 +182,7 @@ func (m *Model) viewAddForm() string {
 	}
 
 	submitStyle := lipgloss.NewStyle()
-	if m.FormFocus == 4 {
+	if m.FormFocus == 3 {
 		submitStyle = submitStyle.Background(lipgloss.Color("#00AA00")).
 			Foreground(lipgloss.Color("#FFFFFF")).
 			Bold(true)
@@ -243,56 +224,6 @@ func (m *Model) viewDownloading() string {
 
 	b.WriteString("\n")
 	b.WriteString(HelpStyle.Render("esc: cancel"))
-
-	return b.String()
-}
-
-func (m *Model) viewAPIKeyForm() string {
-	var b strings.Builder
-
-	title := TitleStyle.Render(" 🔑 Configure API Key ")
-	b.WriteString(title)
-	b.WriteString("\n\n")
-
-	b.WriteString("Enter your Bit.ly API key to enable editable short URLs.\n")
-	b.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color("#666666")).
-		Render("Get your token at: https://app.bitly.com/settings/api/"))
-	b.WriteString("\n\n")
-
-	labelStyle := lipgloss.NewStyle().Width(15)
-	if m.APIKeyFormFocus == 0 {
-		labelStyle = labelStyle.Bold(true).Foreground(lipgloss.Color("#FFD700"))
-	}
-
-	valueStyle := lipgloss.NewStyle()
-	if m.APIKeyFormFocus == 0 {
-		valueStyle = valueStyle.Background(lipgloss.Color("#333333"))
-	}
-
-	displayValue := m.APIKeyFormValues.BitlyKey
-	if displayValue == "" {
-		valueStyle = valueStyle.Foreground(lipgloss.Color("#666666"))
-		displayValue = "paste your API key here..."
-	} else if len(displayValue) > 4 {
-		displayValue = strings.Repeat("•", len(displayValue)-4) + displayValue[len(displayValue)-4:]
-	}
-
-	b.WriteString(labelStyle.Render("Bit.ly API:"))
-	b.WriteString(" ")
-	b.WriteString(valueStyle.Render(displayValue))
-	b.WriteString("\n\n")
-
-	submitStyle := lipgloss.NewStyle()
-	if m.APIKeyFormFocus == 1 {
-		submitStyle = submitStyle.Background(lipgloss.Color("#00AA00")).
-			Foreground(lipgloss.Color("#FFFFFF")).
-			Bold(true)
-	}
-	b.WriteString(strings.Repeat(" ", 16))
-	b.WriteString(submitStyle.Render(" [ Save ] "))
-
-	b.WriteString("\n\n")
-	b.WriteString(HelpStyle.Render("tab: next • enter: save • esc: cancel"))
 
 	return b.String()
 }

@@ -3,12 +3,12 @@ package config
 type Provider string
 
 const (
-	ProviderPlayitgg    Provider = "playitgg"
-	ProviderCloudflared Provider = "cloudflared"
-	ProviderTunnelmole  Provider = "tunnelmole"
+	ProviderPlayitgg     Provider = "playitgg"
+	ProviderCloudflared  Provider = "cloudflared"
+	ProviderTunnelmole   Provider = "tunnelmole"
 	ProviderLocalhostRun Provider = "localhostrun"
-	ProviderServeo      Provider = "serveo"
-	ProviderPinggy      Provider = "pinggy"
+	ProviderServeo       Provider = "serveo"
+	ProviderPinggy       Provider = "pinggy"
 )
 
 type TunnelConfig struct {
@@ -16,25 +16,23 @@ type TunnelConfig struct {
 	Name       string   `yaml:"name"`
 	Provider   Provider `yaml:"provider"`
 	LocalPort  int      `yaml:"local_port"`
-	ShortURL   string   `yaml:"short_url,omitempty"`
 	AutoStart  bool     `yaml:"auto_start"`
 	CustomArgs []string `yaml:"custom_args,omitempty"`
 }
 
 type TunnelStatus struct {
-	ID           string
-	Name         string
-	Provider     Provider
-	LocalPort    int
-	PublicURL    string
-	ShortURL     string
-	Running      bool
-	Starting     bool
-	Stopping     bool
-	Error        string
-	LogLines     []string
-	Players      int
-	MaxPlayers   int
+	ID         string
+	Name       string
+	Provider   Provider
+	LocalPort  int
+	PublicURL  string
+	Running    bool
+	Starting   bool
+	Stopping   bool
+	Error      string
+	LogLines   []string
+	Players    int
+	MaxPlayers int
 }
 
 func (tc *TunnelConfig) Status() TunnelStatus {
@@ -43,7 +41,6 @@ func (tc *TunnelConfig) Status() TunnelStatus {
 		Name:       tc.Name,
 		Provider:   tc.Provider,
 		LocalPort:  tc.LocalPort,
-		ShortURL:   tc.ShortURL,
 		MaxPlayers: 8,
 	}
 }

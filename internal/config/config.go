@@ -14,24 +14,14 @@ const (
 )
 
 type Config struct {
-	Version  int                `yaml:"version"`
-	Tunnels  []TunnelConfig     `yaml:"tunnels"`
-	Shortener ShortenerConfig   `yaml:"shortener"`
-}
-
-type ShortenerConfig struct {
-	Provider string            `yaml:"provider"`
-	APIKeys  map[string]string `yaml:"api_keys,omitempty"`
+	Version int            `yaml:"version"`
+	Tunnels []TunnelConfig `yaml:"tunnels"`
 }
 
 func DefaultConfig() *Config {
 	return &Config{
 		Version: 1,
 		Tunnels: []TunnelConfig{},
-		Shortener: ShortenerConfig{
-			Provider: "multi",
-			APIKeys:  make(map[string]string),
-		},
 	}
 }
 
@@ -68,7 +58,7 @@ func (c *Config) Save() error {
 
 func Load() (*Config, error) {
 	path := ConfigPath()
-	
+
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		cfg := DefaultConfig()
 		if err := cfg.Save(); err != nil {

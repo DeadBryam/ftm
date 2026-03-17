@@ -2,22 +2,17 @@ package app
 
 import (
 	"fmt"
-	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
 
 	"foundry-tunnel/internal/config"
 	"foundry-tunnel/internal/process"
 	"foundry-tunnel/internal/providers"
-	"foundry-tunnel/internal/shortener"
 )
 
 type App struct {
-	Config      *config.Config
-	Manager     *process.Manager
-	Shortener   shortener.Provider
-	URLCache    *shortener.URLCache
-	
+	Config           *config.Config
+	Manager          *process.Manager
 	DownloadProgress chan providers.DownloadProgress
 }
 
@@ -27,21 +22,14 @@ func New() (*App, error) {
 		return nil, fmt.Errorf("failed to load config: %w", err)
 	}
 
-	cache := shortener.NewCache()
-	if err := cache.Load(); err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: failed to load URL cache: %v\n", err)
-	}
-
 	app := &App{
-		Config:    cfg,
-		Manager:   process.NewManager(),
-		Shortener: shortener.NewMulti(cfg.Shortener.APIKeys),
-		URLCache:  cache,
+		Config:           cfg,
+		Manager:          process.NewManager(),
 		DownloadProgress: make(chan providers.DownloadProgress, 10),
 	}
-	
+
 	app.Manager.SetProgressChannel(app.DownloadProgress)
-	
+
 	return app, nil
 }
 
@@ -68,7 +56,6 @@ func (a *App) createDefaultTunnels() {
 			Name:      "Foundry VTT (Default)",
 			Provider:  config.ProviderPlayitgg,
 			LocalPort: 30000,
-			ShortURL:  "",
 			AutoStart: false,
 		},
 	}
@@ -78,8 +65,3 @@ func (a *App) createDefaultTunnels() {
 func (a *App) SaveConfig() error {
 	return a.Config.Save()
 }
-
-func (a *App) EnsureShortURL(tunnelID, publicURL, preferred string) (string, error) {
-	return a.URLCache.EnsureShortURL(tunnelID, publicURL, preferred, a.Shortener)
-}
-

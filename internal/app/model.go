@@ -23,24 +23,21 @@ const (
 	viewAddForm
 	viewConfirm
 	viewDownloading
-	viewAPIKeyForm
 )
 
 type KeyMap struct {
-	Up       key.Binding
-	Down     key.Binding
-	Enter    key.Binding
-	Start    key.Binding
-	Stop     key.Binding
-	Logs     key.Binding
-	Copy     key.Binding
-	Add      key.Binding
-	Delete   key.Binding
-	APIKey   key.Binding
-
-	Back     key.Binding
-	Quit     key.Binding
-	Help     key.Binding
+	Up     key.Binding
+	Down   key.Binding
+	Enter  key.Binding
+	Start  key.Binding
+	Stop   key.Binding
+	Logs   key.Binding
+	Copy   key.Binding
+	Add    key.Binding
+	Delete key.Binding
+	Back   key.Binding
+	Quit   key.Binding
+	Help   key.Binding
 }
 
 var DefaultKeys = KeyMap{
@@ -80,11 +77,6 @@ var DefaultKeys = KeyMap{
 		key.WithKeys("d"),
 		key.WithHelp("d", "delete"),
 	),
-	APIKey: key.NewBinding(
-		key.WithKeys("k"),
-		key.WithHelp("k", "set API key"),
-	),
-
 	Back: key.NewBinding(
 		key.WithKeys("esc", "b"),
 		key.WithHelp("esc/b", "back"),
@@ -120,10 +112,6 @@ var (
 		Foreground(lipgloss.Color("#00BFFF")).
 		Underline(true)
 
-	ShortURLStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#FF69B4")).
-		Bold(true)
-
 	HelpStyle = lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#666666"))
 
@@ -133,44 +121,28 @@ var (
 )
 
 type Model struct {
-	App       *App
-	Keys      KeyMap
-	Help      help.Model
-	
-	State     viewState
-	Width     int
-	Height    int
-	
-	Cursor    int
-	Items     []list.Item
-	
-	LogViewport viewport.Model
-	SelectedTunnel string
-	
-	FormFocus int
-	FormValues FormData
-	
-	APIKeyFormFocus int
-	APIKeyFormValues APIKeyFormData
-	
-	Message   string
-	MessageTimer int
-	
-	DownloadProgress providers.DownloadProgress
+	App                 *App
+	Keys                KeyMap
+	Help                help.Model
+	State               viewState
+	Width               int
+	Height              int
+	Cursor              int
+	Items               []list.Item
+	LogViewport         viewport.Model
+	SelectedTunnel      string
+	FormFocus           int
+	FormValues          FormData
+	Message             string
+	MessageTimer        int
+	DownloadProgress    providers.DownloadProgress
 	DownloadingProvider string
-	
-
 }
 
 type FormData struct {
-	Name      string
-	Provider  string
-	Port      string
-	ShortURL  string
-}
-
-type APIKeyFormData struct {
-	BitlyKey string
+	Name     string
+	Provider string
+	Port     string
 }
 
 type TunnelItem struct {
@@ -203,19 +175,19 @@ type (
 func NewModel(app *App) *Model {
 	h := help.New()
 	h.ShowAll = true
-	
+
 	m := &Model{
-		App:       app,
-		Keys:      DefaultKeys,
-		Help:      h,
-		State:     viewList,
-		Cursor:    0,
+		App:    app,
+		Keys:   DefaultKeys,
+		Help:   h,
+		State:  viewList,
+		Cursor: 0,
 		FormValues: FormData{
 			Provider: string(config.ProviderPlayitgg),
 			Port:     "30000",
 		},
 	}
-	
+
 	m.refreshItems()
 	return m
 }
@@ -270,16 +242,8 @@ func truncate(s string, max int) string {
 func (m *Model) startTunnel(item TunnelItem) tea.Cmd {
 	return func() tea.Msg {
 		err := m.App.Manager.Start(item.Tunnel, func(status config.TunnelStatus) {
-			if status.PublicURL != "" && item.Tunnel.ShortURL != "" {
-				shortURL, err := m.App.EnsureShortURL(item.Tunnel.ID, status.PublicURL, item.Tunnel.ShortURL)
-				if err != nil {
-					m.showMessage("Short URL error: " + err.Error())
-				} else {
-					m.showMessage("Short URL: " + shortURL)
-				}
-			}
 		})
-		
+
 		if err != nil {
 			if err.Error() == "installing" {
 				m.DownloadingProvider = string(item.Tunnel.Provider)
@@ -291,7 +255,7 @@ func (m *Model) startTunnel(item TunnelItem) tea.Cmd {
 				status:   config.TunnelStatus{Error: err.Error()},
 			}
 		}
-		
+
 		return nil
 	}
 }
