@@ -215,6 +215,12 @@ func (m *Model) handleFormInput(s string) {
 				m.FormValues.Provider = string(config.ProviderCloudflared)
 			case string(config.ProviderCloudflared):
 				m.FormValues.Provider = string(config.ProviderTunnelmole)
+			case string(config.ProviderTunnelmole):
+				m.FormValues.Provider = string(config.ProviderLocalhostRun)
+			case string(config.ProviderLocalhostRun):
+				m.FormValues.Provider = string(config.ProviderServeo)
+			case string(config.ProviderServeo):
+				m.FormValues.Provider = string(config.ProviderPlayitgg)
 			default:
 				m.FormValues.Provider = string(config.ProviderPlayitgg)
 			}
