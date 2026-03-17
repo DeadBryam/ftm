@@ -1,6 +1,6 @@
 # Binaries
-ftm
-ftm-*
+/ftm
+/ftm-*
 *.exe
 
 # Go
