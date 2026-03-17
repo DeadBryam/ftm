@@ -217,9 +217,94 @@ func (m *Model) viewSingleColumn() string {
 	return b.String()
 }
 
-// Placeholder functions for renderTunnelList, renderDetailPanel, and renderHelpBar
 func (m *Model) renderTunnelList(width int) string {
-	return ""
+	var b strings.Builder
+
+	for i, item := range m.Items {
+		tunnelItem := item.(TunnelItem)
+		line := m.renderTunnelListItem(i, tunnelItem, width)
+		b.WriteString(line)
+		if i < len(m.Items)-1 {
+			b.WriteString("\n")
+		}
+	}
+
+	return b.String()
+}
+
+func (m *Model) renderTunnelListItem(idx int, item TunnelItem, width int) string {
+	selected := idx == m.Cursor
+
+	var statusEmoji, statusColor, bgColor string
+	if item.Status.Running {
+		if item.Status.Starting {
+			statusEmoji = "🟡"
+			statusColor = ColorText
+			bgColor = ColorStarting
+		} else {
+			statusEmoji = "🟢"
+			statusColor = ColorText
+			bgColor = ColorOnline
+		}
+	} else {
+		statusEmoji = "🔴"
+		statusColor = ColorTextDim
+		bgColor = ColorOffline
+	}
+
+	// Build content
+	var parts []string
+
+	if selected {
+		parts = append(parts, lipgloss.NewStyle().Foreground(lipgloss.Color(ColorGold)).Render("▶"))
+	} else {
+		parts = append(parts, " ")
+	}
+
+	parts = append(parts, statusEmoji)
+
+	nameStyle := lipgloss.NewStyle().
+		Bold(selected).
+		Foreground(lipgloss.Color(ColorText))
+	parts = append(parts, nameStyle.Render(truncate(item.Tunnel.Name, 20)))
+
+	// Status text
+	var statusText string
+	if item.Status.Running {
+		if item.Status.Starting {
+			statusText = "Starting..."
+		} else {
+			statusText = "Online"
+		}
+	} else {
+		statusText = "Offline"
+	}
+	statusStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(statusColor))
+
+	parts = append(parts, statusStyle.Render(statusText))
+
+	// Provider and port
+	metaStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(ColorTextDim))
+	meta := fmt.Sprintf("%s • :%d", item.Tunnel.Provider, item.Tunnel.LocalPort)
+	parts = append(parts, metaStyle.Render(meta))
+
+	content := strings.Join(parts, "  ")
+
+	// Apply background
+	itemStyle := lipgloss.NewStyle().
+		Background(lipgloss.Color(bgColor)).
+		Width(width).
+		Padding(0, 1)
+
+	if selected {
+		itemStyle = itemStyle.BorderStyle(lipgloss.Border{
+			Left: "█",
+		}).BorderLeft(true).BorderForeground(lipgloss.Color(ColorGold))
+	}
+
+	return itemStyle.Render(content)
 }
 
 func (m *Model) renderDetailPanel(width int) string {
@@ -228,51 +313,6 @@ func (m *Model) renderDetailPanel(width int) string {
 
 func (m *Model) renderHelpBar() string {
 	return ""
-}
-
-func (m *Model) renderTunnelItem(idx int, item TunnelItem) string {
-	selected := idx == m.Cursor
-
-	var statusStr, statusColor string
-	if item.Status.Running {
-		if item.Status.Starting {
-			statusStr = "⟳ STARTING"
-			statusColor = "#FFA500"
-		} else {
-			statusStr = "▶ ONLINE"
-			statusColor = "#00FF00"
-		}
-	} else {
-		statusStr = "● OFFLINE"
-		statusColor = "#FF0000"
-	}
-
-	statusStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(statusColor))
-
-	var parts []string
-
-	if selected {
-		parts = append(parts, "▶ ")
-	} else {
-		parts = append(parts, "  ")
-	}
-
-	nameStyle := lipgloss.NewStyle().Bold(selected)
-	if selected {
-		nameStyle = nameStyle.Background(lipgloss.Color("#333333"))
-	}
-	parts = append(parts, nameStyle.Render(truncate(item.Tunnel.Name, 25)))
-	parts = append(parts, fmt.Sprintf("│ %s", item.Tunnel.Provider))
-	parts = append(parts, fmt.Sprintf("│ :%d", item.Tunnel.LocalPort))
-	parts = append(parts, statusStyle.Render("│ "+statusStr))
-
-	if item.Status.Running && !item.Status.Starting {
-		if item.Status.PublicURL != "" {
-			parts = append(parts, URLStyle.Render("│ "+truncate(item.Status.PublicURL, 40)))
-		}
-	}
-
-	return strings.Join(parts, " ")
 }
 
 func (m *Model) viewLogs() string {
