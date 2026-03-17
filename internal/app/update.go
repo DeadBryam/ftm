@@ -220,6 +220,8 @@ func (m *Model) handleFormInput(s string) {
 			case string(config.ProviderLocalhostRun):
 				m.FormValues.Provider = string(config.ProviderServeo)
 			case string(config.ProviderServeo):
+				m.FormValues.Provider = string(config.ProviderPinggy)
+			case string(config.ProviderPinggy):
 				m.FormValues.Provider = string(config.ProviderPlayitgg)
 			default:
 				m.FormValues.Provider = string(config.ProviderPlayitgg)
