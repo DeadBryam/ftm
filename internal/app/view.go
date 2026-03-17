@@ -173,6 +173,15 @@ func (m *Model) viewTwoColumn() string {
 	}
 
 	b.WriteString("\n")
+
+	if m.Message != "" {
+		msgStyle := lipgloss.NewStyle().
+			Foreground(lipgloss.Color(ColorGold)).
+			Bold(true)
+		b.WriteString(msgStyle.Render("✓ " + m.Message))
+		b.WriteString("\n")
+	}
+
 	b.WriteString(m.renderHelpBar())
 
 	return b.String()
@@ -204,6 +213,15 @@ func (m *Model) viewSingleColumn() string {
 
 	b.WriteString(m.renderTunnelList(m.Width - 2))
 	b.WriteString("\n")
+
+	if m.Message != "" {
+		msgStyle := lipgloss.NewStyle().
+			Foreground(lipgloss.Color(ColorGold)).
+			Bold(true)
+		b.WriteString(msgStyle.Render("✓ " + m.Message))
+		b.WriteString("\n")
+	}
+
 	b.WriteString(m.renderHelpBar())
 
 	return b.String()
