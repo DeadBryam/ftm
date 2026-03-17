@@ -324,12 +324,8 @@ func (m *Model) copyTunnelURL(item TunnelItem) {
 			m.showMessage("Copied short URL!")
 			return
 		}
-		shortURL := item.Tunnel.ShortURL
-		if !strings.HasPrefix(shortURL, "http") {
-			shortURL = "https://is.gd/" + shortURL
-		}
-		clipboard.Write(shortURL)
-		m.showMessage("Copied short URL!")
+		// No cache mapping means no API key configured
+		m.showMessage("Configure API key (press 'k') for short URL")
 		return
 	}
 	
