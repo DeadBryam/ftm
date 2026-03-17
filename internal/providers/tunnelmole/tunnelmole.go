@@ -24,7 +24,7 @@ func New() providers.Provider {
 		configDir = "."
 	}
 	baseDir := filepath.Join(configDir, ".config", "foundry-tunnel")
-	
+
 	return &TunnelmoleProvider{
 		installer: NewNodeInstaller(baseDir),
 	}
@@ -47,14 +47,14 @@ func (p *TunnelmoleProvider) RequiresAuth() bool {
 }
 
 func (p *TunnelmoleProvider) IsInstalled() bool {
-	// Check system-installed tunnelmole
+
 	if _, err := exec.LookPath("tmole"); err == nil {
 		return true
 	}
 	if _, err := exec.LookPath("tunnelmole"); err == nil {
 		return true
 	}
-	// Check our bundled installation
+
 	return p.installer.IsInstalled()
 }
 
@@ -63,20 +63,18 @@ func (p *TunnelmoleProvider) Install(progress chan<- providers.DownloadProgress)
 }
 
 func (p *TunnelmoleProvider) FindBinary() string {
-	// First check system PATH
+
 	if path, err := exec.LookPath("tmole"); err == nil {
 		return path
 	}
 	if path, err := exec.LookPath("tunnelmole"); err == nil {
 		return path
 	}
-	
-	// Check our bundled installation
+
 	if p.installer.IsInstalled() {
 		return p.installer.TunnelmoleBin()
 	}
-	
-	// Check common npm locations
+
 	home, _ := os.UserHomeDir()
 	candidates := []string{
 		filepath.Join(home, ".npm-global", "bin", "tmole"),
@@ -84,13 +82,13 @@ func (p *TunnelmoleProvider) FindBinary() string {
 		"/usr/local/bin/tmole",
 		"/usr/local/bin/tunnelmole",
 	}
-	
+
 	for _, path := range candidates {
 		if _, err := os.Stat(path); err == nil {
 			return path
 		}
 	}
-	
+
 	return ""
 }
 
@@ -101,16 +99,16 @@ func (p *TunnelmoleProvider) Start(ctx context.Context, tunnel config.TunnelConf
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
-	
+
 	args := []string{fmt.Sprintf("%d", tunnel.LocalPort)}
 	if len(tunnel.CustomArgs) > 0 {
 		args = append(args, tunnel.CustomArgs...)
 	}
-	
+
 	cmd := exec.CommandContext(ctx, binary, args...)
 	cmd.Stdout = logWriter
-		cmd.Stderr = logWriter
-	
+	cmd.Stderr = logWriter
+
 	if err := cmd.Start(); err != nil {
 		cancel()
 		return nil, fmt.Errorf("failed to start tunnelmole: %w", err)
@@ -124,18 +122,16 @@ func (p *TunnelmoleProvider) Start(ctx context.Context, tunnel config.TunnelConf
 var tunnelmoleURLRegex = regexp.MustCompile(`https?://[a-zA-Z0-9-]+-ip-[0-9-]+\.tunnelmole\.net`)
 
 func (p *TunnelmoleProvider) ParseURL(line string) string {
-	// Ignore dashboard URLs
+
 	if strings.Contains(line, "dashboard.tunnelmole.com") {
 		return ""
 	}
-	
-	// Match direct tunnel URLs (format: xxxx-ip-xx-xx-xx-xx.tunnelmole.net)
+
 	matches := tunnelmoleURLRegex.FindStringSubmatch(line)
 	if len(matches) > 0 {
 		return matches[0]
 	}
-	
-	// Fallback: look for any tunnelmole.net URL that's not the dashboard
+
 	lineLower := strings.ToLower(line)
 	if idx := strings.Index(lineLower, "https://"); idx != -1 {
 		rest := line[idx:]
@@ -143,21 +139,21 @@ func (p *TunnelmoleProvider) ParseURL(line string) string {
 			rest = rest[:endIdx]
 		}
 		lowerRest := strings.ToLower(rest)
-		if strings.Contains(lowerRest, "tunnelmole.net") && 
-		   !strings.Contains(lowerRest, "dashboard") {
+		if strings.Contains(lowerRest, "tunnelmole.net") &&
+			!strings.Contains(lowerRest, "dashboard") {
 			return rest
 		}
 	}
-	
+
 	return ""
 }
 
 func (p *TunnelmoleProvider) IsReady(line string) bool {
 	lineLower := strings.ToLower(line)
-	// Check for direct tunnel URL format
+
 	if tunnelmoleURLRegex.MatchString(line) {
 		return true
 	}
 	return strings.Contains(lineLower, "your site is available at") ||
-		   strings.Contains(lineLower, "tunnelmole.net")
+		strings.Contains(lineLower, "tunnelmole.net")
 }

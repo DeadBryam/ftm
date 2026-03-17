@@ -204,8 +204,7 @@ func (m *Model) viewDownloading() string {
 	b.WriteString("\n\n")
 
 	percent := m.DownloadProgress.Percent
-	
-	// Show current step
+
 	var step string
 	switch {
 	case percent < 45:
@@ -217,14 +216,14 @@ func (m *Model) viewDownloading() string {
 	default:
 		step = "Complete!"
 	}
-	
+
 	b.WriteString(fmt.Sprintf("%s\n\n", step))
 
 	barWidth := 40
 	filled := int(float64(barWidth) * percent / 100)
 	bar := strings.Repeat("█", filled) + strings.Repeat("░", barWidth-filled)
 	b.WriteString(fmt.Sprintf("[%s] %d%%\n", bar, int(percent)))
-	
+
 	if m.DownloadProgress.Total > 0 && percent < 50 {
 		b.WriteString(fmt.Sprintf("%.1f MB / %.1f MB\n",
 			float64(m.DownloadProgress.Current)/(1024*1024),

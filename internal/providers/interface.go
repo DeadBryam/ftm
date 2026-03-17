@@ -12,13 +12,12 @@ type Provider interface {
 	BinaryName() string
 	InstallURL() string
 	RequiresAuth() bool
-	
+
 	Start(ctx context.Context, tunnel config.TunnelConfig, logWriter io.Writer) (*Process, error)
 	ParseURL(line string) string
 	IsReady(line string) bool
 }
 
-// AutoInstaller is implemented by providers that can auto-install themselves
 type AutoInstaller interface {
 	Provider
 	IsInstalled() bool
@@ -26,12 +25,12 @@ type AutoInstaller interface {
 }
 
 type Process struct {
-	Cancel context.CancelFunc
+	Cancel    context.CancelFunc
 	PublicURL string
 }
 
 type LogLine struct {
-	Line      string
-	IsError   bool
+	Line        string
+	IsError     bool
 	ContainsURL bool
 }

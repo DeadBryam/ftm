@@ -93,31 +93,31 @@ var DefaultKeys = KeyMap{
 
 var (
 	TitleStyle = lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#FFD700")).
-		Background(lipgloss.Color("#4B0082")).
-		Padding(0, 1)
+			Bold(true).
+			Foreground(lipgloss.Color("#FFD700")).
+			Background(lipgloss.Color("#4B0082")).
+			Padding(0, 1)
 
 	StatusOnline = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#00FF00")).
-		Bold(true)
+			Foreground(lipgloss.Color("#00FF00")).
+			Bold(true)
 
 	StatusOffline = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#FF0000"))
+			Foreground(lipgloss.Color("#FF0000"))
 
 	StatusStarting = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#FFA500"))
+			Foreground(lipgloss.Color("#FFA500"))
 
 	URLStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#00BFFF")).
-		Underline(true)
+			Foreground(lipgloss.Color("#00BFFF")).
+			Underline(true)
 
 	HelpStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#666666"))
+			Foreground(lipgloss.Color("#666666"))
 
 	SelectedStyle = lipgloss.NewStyle().
-		Background(lipgloss.Color("#333333")).
-		Bold(true)
+			Background(lipgloss.Color("#333333")).
+			Bold(true)
 )
 
 type Model struct {
@@ -242,7 +242,7 @@ func truncate(s string, max int) string {
 
 func (m *Model) startTunnel(item TunnelItem) tea.Cmd {
 	return func() tea.Msg {
-		// Check if provider needs installation
+
 		if needsInstall, canInstall := m.App.Manager.CheckInstallation(item.Tunnel.Provider); needsInstall && canInstall {
 			m.DownloadingProvider = string(item.Tunnel.Provider)
 			m.State = viewDownloading

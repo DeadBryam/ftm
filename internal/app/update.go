@@ -3,8 +3,8 @@ package app
 import (
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/bubbles/key"
+	tea "github.com/charmbracelet/bubbletea"
 
 	"foundry-tunnel/internal/clipboard"
 	"foundry-tunnel/internal/config"
@@ -41,7 +41,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.DownloadProgress.Done {
 			m.State = viewList
 			if m.PendingTunnel != nil {
-				// Find the item and start the tunnel
+
 				for _, item := range m.Items {
 					if ti, ok := item.(TunnelItem); ok && ti.Tunnel.ID == m.PendingTunnel.ID {
 						m.PendingTunnel = nil
