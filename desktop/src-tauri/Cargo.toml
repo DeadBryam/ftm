@@ -1,0 +1,23 @@
+[package]
+name = "foundry-tunnel-desktop"
+version = "0.1.0"
+description = "Foundry Tunnel Manager Desktop"
+edition = "2021"
+
+[[bin]]
+name = "foundry-tunnel-desktop"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tokio = { version = "1", features = ["process", "rt-multi-thread", "net", "time"] }
+serde = { version = "1", features = ["derive"] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
