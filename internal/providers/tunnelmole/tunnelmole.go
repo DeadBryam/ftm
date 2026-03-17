@@ -121,14 +121,21 @@ func (p *TunnelmoleProvider) Start(ctx context.Context, tunnel config.TunnelConf
 	}, nil
 }
 
-var tunnelmoleURLRegex = regexp.MustCompile(`https?://[a-zA-Z0-9-]+\.tunnelmole\.net`)
+var tunnelmoleURLRegex = regexp.MustCompile(`https?://[a-zA-Z0-9-]+-ip-[0-9-]+\.tunnelmole\.net`)
 
 func (p *TunnelmoleProvider) ParseURL(line string) string {
+	// Ignore dashboard URLs
+	if strings.Contains(line, "dashboard.tunnelmole.com") {
+		return ""
+	}
+	
+	// Match direct tunnel URLs (format: xxxx-ip-xx-xx-xx-xx.tunnelmole.net)
 	matches := tunnelmoleURLRegex.FindStringSubmatch(line)
 	if len(matches) > 0 {
 		return matches[0]
 	}
 	
+	// Fallback: look for any tunnelmole.net URL that's not the dashboard
 	lineLower := strings.ToLower(line)
 	if idx := strings.Index(lineLower, "https://"); idx != -1 {
 		rest := line[idx:]
@@ -136,7 +143,8 @@ func (p *TunnelmoleProvider) ParseURL(line string) string {
 			rest = rest[:endIdx]
 		}
 		lowerRest := strings.ToLower(rest)
-		if strings.Contains(lowerRest, "tunnelmole") || strings.Contains(lowerRest, "tunnelmole.net") {
+		if strings.Contains(lowerRest, "tunnelmole.net") && 
+		   !strings.Contains(lowerRest, "dashboard") {
 			return rest
 		}
 	}
@@ -145,7 +153,11 @@ func (p *TunnelmoleProvider) ParseURL(line string) string {
 }
 
 func (p *TunnelmoleProvider) IsReady(line string) bool {
-	line = strings.ToLower(line)
-	return strings.Contains(line, "tunnelmole") ||
-		   strings.Contains(line, "your site is available at")
+	lineLower := strings.ToLower(line)
+	// Check for direct tunnel URL format
+	if tunnelmoleURLRegex.MatchString(line) {
+		return true
+	}
+	return strings.Contains(lineLower, "your site is available at") ||
+		   strings.Contains(lineLower, "tunnelmole.net")
 }
