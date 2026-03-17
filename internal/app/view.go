@@ -446,45 +446,96 @@ func (m *Model) viewAddForm() string {
 	b.WriteString(header)
 	b.WriteString("\n\n")
 
-	fields := []struct {
-		label   string
-		value   string
-		focused bool
-	}{
-		{"Name", m.FormValues.Name, m.FormFocus == 0},
-		{"Provider", m.FormValues.Provider, m.FormFocus == 1},
-		{"Local Port", m.FormValues.Port, m.FormFocus == 2},
+	nameLabel := "Name"
+	nameValue := m.FormValues.Name
+	if nameValue == "" {
+		nameValue = "..."
+	}
+	nameHint := ""
+	if m.FormFocus == 0 {
+		nameLabel = "> Name"
+		nameHint = "type to enter"
 	}
 
-	for _, f := range fields {
-		labelStyle := lipgloss.NewStyle().
-			Width(15).
-			Foreground(lipgloss.Color(ColorTextDim))
-		if f.focused {
-			labelStyle = labelStyle.Bold(true).Foreground(lipgloss.Color(ColorGold))
-		}
-
-		valueStyle := lipgloss.NewStyle().
-			Foreground(lipgloss.Color(ColorText))
-		if f.focused {
-			valueStyle = valueStyle.Background(lipgloss.Color(ColorBg)).
-				BorderStyle(lipgloss.NormalBorder()).
-				BorderForeground(lipgloss.Color(ColorGold))
-		}
-		if f.value == "" {
-			valueStyle = valueStyle.Foreground(lipgloss.Color(ColorTextDim))
-		}
-
-		displayValue := f.value
-		if displayValue == "" {
-			displayValue = "..."
-		}
-
-		b.WriteString(labelStyle.Render(f.label + ":"))
-		b.WriteString(" ")
-		b.WriteString(valueStyle.Render(" " + displayValue + " "))
-		b.WriteString("\n\n")
+	labelStyle := lipgloss.NewStyle().Width(15).Foreground(lipgloss.Color(ColorTextDim))
+	if m.FormFocus == 0 {
+		labelStyle = labelStyle.Bold(true).Foreground(lipgloss.Color(ColorGold))
 	}
+	valueStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(ColorText))
+	if m.FormFocus == 0 {
+		valueStyle = valueStyle.Background(lipgloss.Color(ColorBg)).
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color(ColorGold))
+	}
+
+	b.WriteString(labelStyle.Render(nameLabel + ":"))
+	b.WriteString(" ")
+	b.WriteString(valueStyle.Render(" " + nameValue + " "))
+	if nameHint != "" {
+		hintStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(ColorBronze))
+		b.WriteString(" " + hintStyle.Render(nameHint))
+	}
+	b.WriteString("\n\n")
+
+	providerLabel := "Provider"
+	providerValue := m.FormValues.Provider
+	providerHint := ""
+	if m.FormFocus == 1 {
+		providerLabel = "> Provider"
+		providerValue = "← " + providerValue + " →"
+		providerHint = "arrow keys to change"
+	}
+
+	labelStyle = lipgloss.NewStyle().Width(15).Foreground(lipgloss.Color(ColorTextDim))
+	if m.FormFocus == 1 {
+		labelStyle = labelStyle.Bold(true).Foreground(lipgloss.Color(ColorGold))
+	}
+	valueStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(ColorText))
+	if m.FormFocus == 1 {
+		valueStyle = valueStyle.Background(lipgloss.Color(ColorBg)).
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color(ColorGold))
+	}
+
+	b.WriteString(labelStyle.Render(providerLabel + ":"))
+	b.WriteString(" ")
+	b.WriteString(valueStyle.Render(" " + providerValue + " "))
+	if providerHint != "" {
+		hintStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(ColorBronze))
+		b.WriteString(" " + hintStyle.Render(providerHint))
+	}
+	b.WriteString("\n\n")
+
+	portLabel := "Local Port"
+	portValue := m.FormValues.Port
+	if portValue == "" {
+		portValue = "..."
+	}
+	portHint := ""
+	if m.FormFocus == 2 {
+		portLabel = "> Local Port"
+		portHint = "numbers only"
+	}
+
+	labelStyle = lipgloss.NewStyle().Width(15).Foreground(lipgloss.Color(ColorTextDim))
+	if m.FormFocus == 2 {
+		labelStyle = labelStyle.Bold(true).Foreground(lipgloss.Color(ColorGold))
+	}
+	valueStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(ColorText))
+	if m.FormFocus == 2 {
+		valueStyle = valueStyle.Background(lipgloss.Color(ColorBg)).
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color(ColorGold))
+	}
+
+	b.WriteString(labelStyle.Render(portLabel + ":"))
+	b.WriteString(" ")
+	b.WriteString(valueStyle.Render(" " + portValue + " "))
+	if portHint != "" {
+		hintStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(ColorBronze))
+		b.WriteString(" " + hintStyle.Render(portHint))
+	}
+	b.WriteString("\n\n")
 
 	submitStyle := lipgloss.NewStyle()
 	if m.FormFocus == 3 {

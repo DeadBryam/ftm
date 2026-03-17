@@ -30,8 +30,7 @@ type KeyMap struct {
 	Up       key.Binding
 	Down     key.Binding
 	Enter    key.Binding
-	Start    key.Binding
-	Stop     key.Binding
+	Toggle   key.Binding
 	Logs     key.Binding
 	Copy     key.Binding
 	Web      key.Binding
@@ -55,13 +54,9 @@ var DefaultKeys = KeyMap{
 		key.WithKeys("enter"),
 		key.WithHelp("enter", "toggle"),
 	),
-	Start: key.NewBinding(
+	Toggle: key.NewBinding(
 		key.WithKeys("s"),
-		key.WithHelp("s", "start"),
-	),
-	Stop: key.NewBinding(
-		key.WithKeys("x"),
-		key.WithHelp("x", "stop"),
+		key.WithHelp("s", "start/stop"),
 	),
 	Logs: key.NewBinding(
 		key.WithKeys("l"),

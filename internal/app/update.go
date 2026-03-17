@@ -115,18 +115,12 @@ func (m *Model) handleListKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.Cursor++
 		}
 
-	case key.Matches(msg, m.Keys.Enter), key.Matches(msg, m.Keys.Start):
-		if item, ok := m.selectedItem(); ok {
-			if !m.App.Manager.IsRunning(item.Tunnel.ID) {
-				return m, m.startTunnel(item)
-			}
-		}
-
-	case key.Matches(msg, m.Keys.Stop):
+	case key.Matches(msg, m.Keys.Enter), key.Matches(msg, m.Keys.Toggle):
 		if item, ok := m.selectedItem(); ok {
 			if m.App.Manager.IsRunning(item.Tunnel.ID) {
 				return m, m.stopTunnel(item)
 			}
+			return m, m.startTunnel(item)
 		}
 
 	case key.Matches(msg, m.Keys.Logs):
@@ -204,6 +198,16 @@ func (m *Model) handleFormKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "esc":
 		m.State = viewList
 
+	case "left":
+		if m.FormFocus == 1 {
+			m.handleFormInput("left")
+		}
+
+	case "right":
+		if m.FormFocus == 1 {
+			m.handleFormInput("right")
+		}
+
 	default:
 		m.handleFormInput(msg.String())
 	}
@@ -223,7 +227,7 @@ func (m *Model) handleFormInput(s string) {
 		}
 
 	case 1:
-		if s == " " || s == "right" {
+		if s == "right" {
 			switch m.FormValues.Provider {
 			case string(config.ProviderPlayitgg):
 				m.FormValues.Provider = string(config.ProviderCloudflared)
@@ -236,6 +240,23 @@ func (m *Model) handleFormInput(s string) {
 			case string(config.ProviderServeo):
 				m.FormValues.Provider = string(config.ProviderPinggy)
 			case string(config.ProviderPinggy):
+				m.FormValues.Provider = string(config.ProviderPlayitgg)
+			default:
+				m.FormValues.Provider = string(config.ProviderPlayitgg)
+			}
+		} else if s == "left" {
+			switch m.FormValues.Provider {
+			case string(config.ProviderPlayitgg):
+				m.FormValues.Provider = string(config.ProviderPinggy)
+			case string(config.ProviderPinggy):
+				m.FormValues.Provider = string(config.ProviderServeo)
+			case string(config.ProviderServeo):
+				m.FormValues.Provider = string(config.ProviderLocalhostRun)
+			case string(config.ProviderLocalhostRun):
+				m.FormValues.Provider = string(config.ProviderTunnelmole)
+			case string(config.ProviderTunnelmole):
+				m.FormValues.Provider = string(config.ProviderCloudflared)
+			case string(config.ProviderCloudflared):
 				m.FormValues.Provider = string(config.ProviderPlayitgg)
 			default:
 				m.FormValues.Provider = string(config.ProviderPlayitgg)
@@ -337,7 +358,7 @@ func (k KeyMap) ShortHelp() []key.Binding {
 func (k KeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.Up, k.Down, k.Enter},
-		{k.Start, k.Stop, k.Logs, k.Copy, k.Web},
+		{k.Toggle, k.Logs, k.Copy, k.Web},
 		{k.Add, k.Delete},
 		{k.Back, k.Help, k.Quit},
 	}
