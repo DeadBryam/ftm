@@ -256,7 +256,7 @@ func (s *Server) handleSSE(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleTunnels(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		s.listTunnels(w, r)
+		s.listTunnels(w)
 	case http.MethodPost:
 		s.createTunnel(w, r)
 	case http.MethodPut:
@@ -266,7 +266,7 @@ func (s *Server) handleTunnels(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) listTunnels(w http.ResponseWriter, r *http.Request) {
+func (s *Server) listTunnels(w http.ResponseWriter) {
 	html, err := s.renderTunnels()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -363,7 +363,7 @@ func (s *Server) createTunnel(w http.ResponseWriter, r *http.Request) {
 	s.config.Tunnels = append(s.config.Tunnels, tunnel)
 	s.config.Save()
 
-	s.listTunnels(w, r)
+	s.listTunnels(w)
 }
 
 func (s *Server) updateTunnel(w http.ResponseWriter, r *http.Request) {
@@ -397,7 +397,7 @@ func (s *Server) updateTunnel(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 			s.config.Save()
-			s.listTunnels(w, r)
+			s.listTunnels(w)
 			return
 		}
 	}
@@ -423,20 +423,20 @@ func (s *Server) handleTunnelActions(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		switch action {
 		case "start":
-			s.startTunnel(w, r, id)
+			s.startTunnel(w, id)
 		case "stop":
-			s.stopTunnel(w, r, id)
+			s.stopTunnel(w, id)
 		default:
 			http.Error(w, "unknown action", http.StatusBadRequest)
 		}
 	case http.MethodDelete:
-		s.deleteTunnel(w, r, id)
+		s.deleteTunnel(w, id)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 }
 
-func (s *Server) startTunnel(w http.ResponseWriter, r *http.Request, id string) {
+func (s *Server) startTunnel(w http.ResponseWriter, id string) {
 	var tunnel *config.TunnelConfig
 	for i := range s.config.Tunnels {
 		if s.config.Tunnels[i].ID == id {
@@ -466,7 +466,7 @@ func (s *Server) startTunnel(w http.ResponseWriter, r *http.Request, id string) 
 	w.Write([]byte(html))
 }
 
-func (s *Server) stopTunnel(w http.ResponseWriter, r *http.Request, id string) {
+func (s *Server) stopTunnel(w http.ResponseWriter, id string) {
 	if err := s.manager.Stop(id); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -517,7 +517,7 @@ func (s *Server) renderSingleTunnel(t config.TunnelConfig) (string, error) {
 	return buf.String(), nil
 }
 
-func (s *Server) deleteTunnel(w http.ResponseWriter, r *http.Request, id string) {
+func (s *Server) deleteTunnel(w http.ResponseWriter, id string) {
 	s.manager.Stop(id)
 
 	for i, t := range s.config.Tunnels {
