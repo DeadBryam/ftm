@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	"foundry-tunnel/internal/config"
@@ -96,24 +97,45 @@ func (p *SSHProvider) Start(ctx context.Context, tunnel config.TunnelConfig, log
 	}, nil
 }
 
+var urlRegex = regexp.MustCompile(`https?://[a-zA-Z0-9][-a-zA-Z0-9]*[.][a-zA-Z0-9][-a-zA-Z0-9.]*[a-zA-Z0-9]`)
+
 func (p *SSHProvider) ParseURL(line string) string {
-	line = strings.ToLower(line)
-	if idx := strings.Index(line, "https://"); idx != -1 {
+	lineLower := strings.ToLower(line)
+	
+	if p.host == "localhost.run" {
+		if !strings.Contains(lineLower, "localhost.run") && !strings.Contains(lineLower, "lhr.life") {
+			return ""
+		}
+	} else if p.host == "serveo.net" {
+		if !strings.Contains(lineLower, "serveo.net") {
+			return ""
+		}
+	}
+	
+	matches := urlRegex.FindStringSubmatch(line)
+	if len(matches) > 0 {
+		return matches[0]
+	}
+	
+	if idx := strings.Index(lineLower, "https://"); idx != -1 {
 		rest := line[idx:]
 		if endIdx := strings.IndexAny(rest, " \t\n\r"); endIdx != -1 {
 			rest = rest[:endIdx]
 		}
-		if strings.Contains(rest, "localhost.run") || strings.Contains(rest, "lhr.life") || strings.Contains(rest, "serveo.net") {
-			return rest
-		}
+		return rest
 	}
+	
 	return ""
 }
 
 func (p *SSHProvider) IsReady(line string) bool {
-	line = strings.ToLower(line)
+	lineLower := strings.ToLower(line)
+	
 	if p.host == "localhost.run" {
-		return strings.Contains(line, "localhost.run") || strings.Contains(line, "lhr.life")
+		return strings.Contains(lineLower, "localhost.run") || 
+		       strings.Contains(lineLower, "lhr.life")
 	}
-	return strings.Contains(line, "serveo.net") || strings.Contains(line, "forwarding")
+	
+	return strings.Contains(lineLower, "serveo.net") || 
+	       strings.Contains(lineLower, "forwarding")
 }

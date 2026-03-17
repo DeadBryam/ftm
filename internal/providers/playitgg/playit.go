@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -104,17 +105,22 @@ func (p *PlayitggProvider) Start(ctx context.Context, tunnel config.TunnelConfig
 	}, nil
 }
 
+var playitURLRegex = regexp.MustCompile(`https?://[a-zA-Z0-9-]+\.playit\.gg`)
+
 func (p *PlayitggProvider) ParseURL(line string) string {
-	line = strings.ToLower(line)
+	matches := playitURLRegex.FindStringSubmatch(line)
+	if len(matches) > 0 {
+		return matches[0]
+	}
 	
-	if idx := strings.Index(line, "https://"); idx != -1 {
+	lineLower := strings.ToLower(line)
+	if idx := strings.Index(lineLower, "https://"); idx != -1 {
 		rest := line[idx:]
-		if endIdx := strings.IndexFunc(rest, func(r rune) bool {
-			return r == ' ' || r == '\t' || r == '\n' || r == '\r'
-		}); endIdx != -1 {
+		if endIdx := strings.IndexAny(rest, " \t\n\r"); endIdx != -1 {
 			rest = rest[:endIdx]
 		}
-		if strings.Contains(rest, "playit.gg") || strings.Contains(rest, "playit") {
+		lowerRest := strings.ToLower(rest)
+		if strings.Contains(lowerRest, "playit.gg") || strings.Contains(lowerRest, "playit") {
 			return rest
 		}
 	}
