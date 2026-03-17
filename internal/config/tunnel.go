@@ -6,6 +6,8 @@ const (
 	ProviderPlayitgg    Provider = "playitgg"
 	ProviderCloudflared Provider = "cloudflared"
 	ProviderTunnelmole  Provider = "tunnelmole"
+	ProviderLocalhostRun Provider = "localhostrun"
+	ProviderServeo      Provider = "serveo"
 )
 
 type TunnelConfig struct {
