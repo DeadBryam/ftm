@@ -7,6 +7,17 @@
   let logs = $state('');
   let loadingLogs = $state(false);
   let showDeleteModal = $state(false);
+  let justStarted = $state(false);
+  let prevStatus = $state(tunnel.status);
+  
+  // Trigger celebration animation when tunnel starts running
+  $effect(() => {
+    if (tunnel.status === 'running' && prevStatus !== 'running') {
+      justStarted = true;
+      setTimeout(() => justStarted = false, 600);
+    }
+    prevStatus = tunnel.status;
+  });
   
   const providerNames = {
     cloudflared: 'Cloudflared',
@@ -61,7 +72,7 @@
       <div class="connection-info">
         <div class="connection-name">{tunnel.name}</div>
         <div class="connection-meta">{providerNames[tunnel.provider] || tunnel.provider} — Port {tunnel.port}</div>
-        <div class="connection-status status-{getStatusClass()}">
+        <div class="connection-status status-{getStatusClass()}" class:just-started={justStarted}>
           <span class="status-dot"></span>
           <span class="status-text">{getStatusText()}</span>
         </div>
@@ -178,6 +189,16 @@
     background: #22c55e;
   }
 
+  .status-running.just-started {
+    animation: statusCelebrate 0.6s ease-out;
+  }
+
+  @keyframes statusCelebrate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
   .status-starting {
     background: #fef3c7;
     color: #92400e;
@@ -225,11 +246,18 @@
     background: white;
     color: #44403c;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, background 0.15s, border-color 0.15s;
   }
 
   .btn:hover {
     background: #f5f5f4;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  }
+
+  .btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   }
 
   .btn-start {
@@ -241,6 +269,11 @@
   .btn-start:hover {
     background: #15803d;
     border-color: #15803d;
+    box-shadow: 0 2px 4px rgba(22, 163, 74, 0.25);
+  }
+
+  .btn-start:active {
+    box-shadow: 0 1px 2px rgba(22, 163, 74, 0.15);
   }
 
   .btn-danger {
@@ -322,6 +355,20 @@
     line-height: 1.6;
     white-space: pre-wrap;
     word-break: break-all;
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .btn,
+    .btn:hover,
+    .btn:active {
+      transition: none;
+      transform: none;
+    }
+    
+    .status-running.just-started {
+      animation: none;
+    }
   }
 
   @media (max-width: 600px) {

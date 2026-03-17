@@ -34,7 +34,7 @@
 <svelte:head>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </svelte:head>
 
 <div class="app">
@@ -98,8 +98,8 @@
         {:else if store.tunnels.length === 0}
           <div class="empty-state">
             <div class="empty-state-icon">📡</div>
-            <h3>No connections yet</h3>
-            <p>Create your first connection to share your Foundry world with players.</p>
+            <h3>The air is quiet...</h3>
+            <p>No active portals to the realm. Forge your first tunnel to summon players to your table.</p>
           </div>
         {:else}
           <div class="connection-list">
@@ -126,7 +126,7 @@
   :global(body) {
     margin: 0;
     font-family: 'Inter', system-ui, sans-serif;
-    background: #fafaf9;
+    background: #fbf9f6;
     color: #44403c;
   }
 
@@ -140,8 +140,8 @@
   }
 
   .app-header {
-    margin-bottom: 32px;
-    padding-bottom: 24px;
+    margin-bottom: 48px;
+    padding-bottom: 32px;
     border-bottom: 1px solid #e7e5e4;
   }
 
@@ -160,16 +160,18 @@
 
   .brand-text h1 {
     font-family: 'Crimson Pro', Georgia, serif;
-    font-size: 28px;
-    font-weight: 600;
+    font-size: 40px;
+    font-weight: 700;
     color: #1c1917;
-    margin: 0 0 4px 0;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.01em;
   }
 
   .tagline {
-    font-size: 14px;
+    font-size: 16px;
     color: #78716c;
     margin: 0;
+    font-weight: 500;
   }
 
   .app-main {
@@ -193,6 +195,12 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .panel:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+    transform: translateY(-1px);
   }
 
   .panel-header {
@@ -213,12 +221,13 @@
   }
 
   .connection-count {
-    background: #92400e;
+    background: linear-gradient(135deg, #92400e 0%, #b45309 100%);
     color: white;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
-    padding: 2px 10px;
+    padding: 3px 12px;
     border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(146, 64, 14, 0.25);
   }
 
   .panel-body {
@@ -340,7 +349,7 @@
     border: 1px solid #d6d3d1;
     background: white;
     color: #44403c;
-    transition: all 0.15s;
+    transition: all 0.2s ease;
   }
 
   .btn:hover {
@@ -348,14 +357,17 @@
   }
 
   .btn-primary {
-    background: #92400e;
+    background: linear-gradient(135deg, #92400e 0%, #b45309 100%);
     color: white;
     border-color: #92400e;
+    box-shadow: 0 4px 12px rgba(146, 64, 14, 0.3), 0 2px 4px rgba(146, 64, 14, 0.2);
   }
 
   .btn-primary:hover {
-    background: #78350f;
+    background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
     border-color: #78350f;
+    box-shadow: 0 6px 16px rgba(146, 64, 14, 0.35), 0 3px 6px rgba(146, 64, 14, 0.25);
+    transform: translateY(-1px);
   }
 
   .btn-full {
