@@ -108,6 +108,15 @@ func (ni *NodeInstaller) Install(progress chan<- providers.DownloadProgress) err
 	}
 	defer os.Remove(archivePath)
 	
+	// Report extraction starting
+	if progress != nil {
+		progress <- providers.DownloadProgress{
+			Percent: 45,
+			Current: 0,
+			Total:   100,
+		}
+	}
+	
 	// Extract
 	if err := ni.extract(archivePath, ni.NodeDir()); err != nil {
 		return fmt.Errorf("failed to extract Node.js: %w", err)
@@ -285,13 +294,28 @@ func (ni *NodeInstaller) installTunnelmole(progress chan<- providers.DownloadPro
 	env = append(env, fmt.Sprintf("NPM_CONFIG_PREFIX=%s", nodeDir))
 	env = append(env, fmt.Sprintf("NPM_CONFIG_CACHE=%s", filepath.Join(ni.BaseDir, "npm-cache")))
 	
+	// Report extraction complete
+	if progress != nil {
+		progress <- providers.DownloadProgress{
+			Percent: 50,
+			Current: 0,
+			Total:   100,
+		}
+	}
+	
 	cmd := exec.Command(npm, "install", "-g", "tunnelmole")
 	cmd.Env = env
 	cmd.Dir = ni.BaseDir
 	
-	// Run npm install
-	if err := cmd.Run(); err != nil {
-		return err
+	// Capture output for debugging
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("npm install failed: %w\nOutput: %s", err, string(output))
+	}
+	
+	// Verify tunnelmole was installed
+	if _, err := os.Stat(ni.TunnelmoleBin()); err != nil {
+		return fmt.Errorf("tunnelmole binary not found after install: %w", err)
 	}
 	
 	if progress != nil {

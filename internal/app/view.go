@@ -203,23 +203,32 @@ func (m *Model) viewDownloading() string {
 	b.WriteString(title)
 	b.WriteString("\n\n")
 
-	b.WriteString(fmt.Sprintf("Setting up %s...\n\n", m.DownloadingProvider))
+	percent := m.DownloadProgress.Percent
+	
+	// Show current step
+	var step string
+	switch {
+	case percent < 45:
+		step = "Downloading Node.js..."
+	case percent < 50:
+		step = "Extracting..."
+	case percent < 100:
+		step = "Installing tunnelmole (this may take a minute)..."
+	default:
+		step = "Complete!"
+	}
+	
+	b.WriteString(fmt.Sprintf("%s\n\n", step))
 
-	if m.DownloadProgress.Total > 0 {
-		percent := int(m.DownloadProgress.Percent)
-		barWidth := 40
-		filled := int(float64(barWidth) * m.DownloadProgress.Percent / 100)
-
-		bar := strings.Repeat("█", filled) + strings.Repeat("░", barWidth-filled)
-
-		b.WriteString(fmt.Sprintf("[%s] %d%%\n", bar, percent))
+	barWidth := 40
+	filled := int(float64(barWidth) * percent / 100)
+	bar := strings.Repeat("█", filled) + strings.Repeat("░", barWidth-filled)
+	b.WriteString(fmt.Sprintf("[%s] %d%%\n", bar, int(percent)))
+	
+	if m.DownloadProgress.Total > 0 && percent < 50 {
 		b.WriteString(fmt.Sprintf("%.1f MB / %.1f MB\n",
 			float64(m.DownloadProgress.Current)/(1024*1024),
 			float64(m.DownloadProgress.Total)/(1024*1024)))
-	} else {
-		spinner := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
-		frame := spinner[(m.MessageTimer/3)%len(spinner)]
-		b.WriteString(fmt.Sprintf("%s Starting download...\n", frame))
 	}
 
 	b.WriteString("\n")
