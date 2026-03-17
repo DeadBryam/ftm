@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -13,8 +15,9 @@ import (
 )
 
 type SSHProvider struct {
-	host string
-	name string
+	host       string
+	name       string
+	sshKeyPath string
 }
 
 func NewLocalhostRun() providers.Provider {
@@ -54,6 +57,37 @@ func (p *SSHProvider) FindBinary() string {
 	return ""
 }
 
+func (p *SSHProvider) ensureSSHKey() (string, error) {
+	if p.sshKeyPath != "" {
+		return p.sshKeyPath, nil
+	}
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	keyPath := filepath.Join(home, ".ssh", "id_rsa")
+
+	if _, err := os.Stat(keyPath); err == nil {
+		p.sshKeyPath = keyPath
+		return keyPath, nil
+	}
+
+	sshDir := filepath.Join(home, ".ssh")
+	if err := os.MkdirAll(sshDir, 0700); err != nil {
+		return "", fmt.Errorf("failed to create .ssh directory: %w", err)
+	}
+
+	cmd := exec.Command("ssh-keygen", "-t", "rsa", "-b", "2048", "-f", keyPath, "-N", "", "-C", "foundry-tunnel")
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("failed to generate SSH key: %w", err)
+	}
+
+	p.sshKeyPath = keyPath
+	return keyPath, nil
+}
+
 func (p *SSHProvider) Start(ctx context.Context, tunnel config.TunnelConfig, logWriter io.Writer) (*providers.Process, error) {
 	binary := p.FindBinary()
 	if binary == "" {
@@ -65,7 +99,6 @@ func (p *SSHProvider) Start(ctx context.Context, tunnel config.TunnelConfig, log
 	baseArgs := []string{
 		"-o", "StrictHostKeyChecking=no",
 		"-o", "UserKnownHostsFile=/dev/null",
-		"-o", "BatchMode=yes",
 		"-o", "ServerAliveInterval=30",
 		"-o", "ServerAliveCountMax=3",
 		"-o", "ConnectTimeout=10",
@@ -75,11 +108,20 @@ func (p *SSHProvider) Start(ctx context.Context, tunnel config.TunnelConfig, log
 	var args []string
 	if p.host == "localhost.run" {
 		args = append(baseArgs,
+			"-o", "BatchMode=yes",
 			"-R", fmt.Sprintf("80:localhost:%d", tunnel.LocalPort),
 			"nokey@localhost.run",
 		)
 	} else if p.host == "serveo.net" {
+		keyPath, err := p.ensureSSHKey()
+		if err != nil {
+			cancel()
+			return nil, err
+		}
+
 		args = append(baseArgs,
+			"-i", keyPath,
+			"-o", "IdentitiesOnly=yes",
 			"-R", fmt.Sprintf("80:localhost:%d", tunnel.LocalPort),
 			"serveo.net",
 		)
