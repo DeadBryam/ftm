@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"foundry-tunnel/internal/config"
+	"foundry-tunnel/internal/providers"
 )
 
 type viewState int
@@ -21,6 +22,7 @@ const (
 	viewLogs
 	viewAddForm
 	viewConfirm
+	viewDownloading
 )
 
 type KeyMap struct {
@@ -142,6 +144,9 @@ type Model struct {
 	
 	Message   string
 	MessageTimer int
+	
+	DownloadProgress providers.DownloadProgress
+	DownloadingProvider string
 }
 
 type FormData struct {
@@ -221,6 +226,7 @@ func (m *Model) selectedItem() (TunnelItem, bool) {
 func (m *Model) Init() tea.Cmd {
 	return tea.Batch(
 		tickCmd(),
+		m.checkDownloadProgress(),
 	)
 }
 
@@ -229,6 +235,8 @@ func tickCmd() tea.Cmd {
 		return tickMsg{}
 	})
 }
+
+type downloadProgressMsg providers.DownloadProgress
 
 func (m *Model) showMessage(msg string) {
 	m.Message = msg
@@ -254,6 +262,11 @@ func (m *Model) startTunnel(item TunnelItem) tea.Cmd {
 		})
 		
 		if err != nil {
+			if err.Error() == "installing" {
+				m.DownloadingProvider = string(item.Tunnel.Provider)
+				m.State = viewDownloading
+				return nil
+			}
 			return statusUpdateMsg{
 				tunnelID: item.Tunnel.ID,
 				status:   config.TunnelStatus{Error: err.Error()},
@@ -267,6 +280,15 @@ func (m *Model) startTunnel(item TunnelItem) tea.Cmd {
 func (m *Model) stopTunnel(item TunnelItem) tea.Cmd {
 	return func() tea.Msg {
 		m.App.Manager.Stop(item.Tunnel.ID)
+		return nil
+	}
+}
+
+func (m *Model) checkDownloadProgress() tea.Cmd {
+	return func() tea.Msg {
+		for progress := range m.App.DownloadProgress {
+			return downloadProgressMsg(progress)
+		}
 		return nil
 	}
 }

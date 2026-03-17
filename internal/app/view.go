@@ -19,6 +19,8 @@ func (m *Model) View() string {
 		return m.viewLogs()
 	case viewAddForm:
 		return m.viewAddForm()
+	case viewDownloading:
+		return m.viewDownloading()
 	default:
 		return m.viewList()
 	}
@@ -199,6 +201,38 @@ func (m *Model) viewAddForm() string {
 	
 	b.WriteString("\n\n")
 	b.WriteString(HelpStyle.Render("tab: next • enter: submit • esc: cancel"))
+	
+	return b.String()
+}
+
+func (m *Model) viewDownloading() string {
+	var b strings.Builder
+	
+	title := TitleStyle.Render(" ⬇️ Downloading ")
+	b.WriteString(title)
+	b.WriteString("\n\n")
+	
+	b.WriteString(fmt.Sprintf("Downloading %s...\n\n", m.DownloadingProvider))
+	
+	if m.DownloadProgress.Total > 0 {
+		percent := int(m.DownloadProgress.Percent)
+		barWidth := 40
+		filled := int(float64(barWidth) * m.DownloadProgress.Percent / 100)
+		
+		bar := strings.Repeat("█", filled) + strings.Repeat("░", barWidth-filled)
+		
+		b.WriteString(fmt.Sprintf("[%s] %d%%\n", bar, percent))
+		b.WriteString(fmt.Sprintf("%.1f MB / %.1f MB\n",
+			float64(m.DownloadProgress.Current)/(1024*1024),
+			float64(m.DownloadProgress.Total)/(1024*1024)))
+	} else {
+		spinner := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+		frame := spinner[(m.MessageTimer/3)%len(spinner)]
+		b.WriteString(fmt.Sprintf("%s Starting download...\n", frame))
+	}
+	
+	b.WriteString("\n")
+	b.WriteString(HelpStyle.Render("esc: cancel"))
 	
 	return b.String()
 }

@@ -8,6 +8,7 @@ import (
 
 	"foundry-tunnel/internal/clipboard"
 	"foundry-tunnel/internal/config"
+	"foundry-tunnel/internal/providers"
 )
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -34,6 +35,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		return m, tickCmd()
+		
+	case downloadProgressMsg:
+		m.DownloadProgress = providers.DownloadProgress(msg)
+		if m.DownloadProgress.Done {
+			m.State = viewList
+			m.showMessage("Download complete!")
+		}
+		return m, m.checkDownloadProgress()
 		
 	case statusUpdateMsg:
 		m.refreshItems()
@@ -73,6 +82,11 @@ func (m *Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.handleLogsKey(msg)
 	case viewAddForm:
 		return m.handleFormKey(msg)
+	case viewDownloading:
+		if key.Matches(msg, m.Keys.Back) || key.Matches(msg, m.Keys.Quit) {
+			m.State = viewList
+			return m, nil
+		}
 	}
 	
 	return m, nil

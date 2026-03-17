@@ -8,6 +8,7 @@ import (
 
 	"foundry-tunnel/internal/config"
 	"foundry-tunnel/internal/process"
+	"foundry-tunnel/internal/providers"
 	"foundry-tunnel/internal/shortener"
 )
 
@@ -16,6 +17,8 @@ type App struct {
 	Manager     *process.Manager
 	Shortener   shortener.Provider
 	URLCache    *shortener.URLCache
+	
+	DownloadProgress chan providers.DownloadProgress
 }
 
 func New() (*App, error) {
@@ -29,12 +32,17 @@ func New() (*App, error) {
 		fmt.Fprintf(os.Stderr, "Warning: failed to load URL cache: %v\n", err)
 	}
 
-	return &App{
+	app := &App{
 		Config:    cfg,
 		Manager:   process.NewManager(),
 		Shortener: shortener.DefaultMulti(),
 		URLCache:  cache,
-	}, nil
+		DownloadProgress: make(chan providers.DownloadProgress, 10),
+	}
+	
+	app.Manager.SetProgressChannel(app.DownloadProgress)
+	
+	return app, nil
 }
 
 func (a *App) Run() error {
