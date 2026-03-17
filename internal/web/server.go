@@ -24,8 +24,7 @@ import (
 var tmpl = template.Must(template.New("tunnels").Parse(tunnelsTemplate))
 
 const tunnelsTemplate = `{{range .}}
-<div class="connection-item {{.StatusClass}}" id="tunnel-{{.ID}}" data-id="{{.ID}}"
-    {{if eq .StatusClass "installing"}}hx-get="/api/tunnels" hx-trigger="every 3s once" hx-target="#tunnels-container" hx-swap="innerHTML"{{end}}>
+<div class="connection-item {{.StatusClass}}" id="tunnel-{{.ID}}" data-id="{{.ID}}">
     <div class="drag-handle">⠿</div>
     <div class="connection-content">
         <div class="connection-main">
@@ -38,9 +37,7 @@ const tunnelsTemplate = `{{range .}}
                 </div>
             </div>
             <div class="connection-actions">
-                {{if eq .StatusClass "installing"}}
-                <button class="btn" disabled style="opacity: 0.6; cursor: not-allowed;">Installing...</button>
-                {{else if .Running}}
+                {{if .Running}}
                 <button class="btn" hx-post="/api/tunnels/{{.ID}}/stop" hx-target="#tunnel-{{.ID}}" hx-swap="outerHTML">Stop</button>
                 {{else}}
                 <button class="btn btn-start" hx-post="/api/tunnels/{{.ID}}/start" hx-target="#tunnel-{{.ID}}" hx-swap="outerHTML">Start</button>
@@ -454,10 +451,7 @@ func (s *Server) startTunnel(w http.ResponseWriter, id string) {
 
 	if needsInstall, canInstall := s.manager.CheckInstallation(tunnel.Provider); needsInstall && canInstall {
 		go s.manager.InstallProvider(tunnel.Provider)
-		html, _ := s.renderSingleTunnelInstalling(*tunnel)
-		w.Header().Set("Content-Type", "text/html")
-		w.WriteHeader(http.StatusAccepted)
-		w.Write([]byte(html))
+		http.Error(w, "INSTALLING PROVIDER", http.StatusAccepted)
 		return
 	}
 
@@ -505,9 +499,7 @@ func (s *Server) renderSingleTunnel(t config.TunnelConfig) (string, error) {
 
 	tv.StatusClass = "offline"
 	tv.StatusText = "Offline"
-	if tv.StatusClass == "installing" {
-		tv.StatusText = "Installing provider..."
-	} else if tv.Starting {
+	if tv.Starting {
 		tv.StatusClass = "starting"
 		tv.StatusText = "Connecting..."
 	} else if tv.Running {
@@ -517,24 +509,6 @@ func (s *Server) renderSingleTunnel(t config.TunnelConfig) (string, error) {
 		tv.StatusClass = "error"
 		tv.StatusText = "Error"
 	}
-
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, []TunnelView{tv}); err != nil {
-		return "", err
-	}
-	return buf.String(), nil
-}
-
-func (s *Server) renderSingleTunnelInstalling(t config.TunnelConfig) (string, error) {
-	tv := TunnelView{
-		ID:       t.ID,
-		Name:     t.Name,
-		Provider: string(t.Provider),
-		Port:     t.LocalPort,
-	}
-	tv.ProviderName = providerName(t.Provider)
-	tv.StatusClass = "installing"
-	tv.StatusText = "Installing provider..."
 
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, []TunnelView{tv}); err != nil {

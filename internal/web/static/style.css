@@ -217,16 +217,6 @@ body {
     background: var(--color-error);
 }
 
-.connection-item.installing {
-    background: var(--color-warning);
-    animation: pulse-installing 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse-installing {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 1; }
-}
-
 .connection-item:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
@@ -251,8 +241,7 @@ body {
 
 .connection-item.online .drag-handle,
 .connection-item.starting .drag-handle,
-.connection-item.error .drag-handle,
-.connection-item.installing .drag-handle {
+.connection-item.error .drag-handle {
     opacity: 0.5;
 }
 
@@ -305,12 +294,6 @@ body {
     color: var(--color-error-text);
 }
 
-.connection-item.installing .connection-name,
-.connection-item.installing .connection-meta,
-.connection-item.installing .connection-status {
-    color: var(--color-warning-text);
-}
-
 .connection-meta {
     font-size: 0.875rem;
     color: var(--color-text-secondary);
@@ -346,10 +329,6 @@ body {
 
 .connection-item.online .status-dot {
     animation: pulse 2s ease-in-out infinite;
-}
-
-.connection-item.installing .status-dot {
-    animation: pulse 1s ease-in-out infinite;
 }
 
 @keyframes pulse {
