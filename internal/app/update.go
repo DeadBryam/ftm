@@ -227,7 +227,8 @@ func (m *Model) handleFormInput(s string) {
 		}
 
 	case 1:
-		if s == "right" {
+		switch s {
+		case "right":
 			switch m.FormValues.Provider {
 			case string(config.ProviderPlayitgg):
 				m.FormValues.Provider = string(config.ProviderCloudflared)
@@ -244,7 +245,7 @@ func (m *Model) handleFormInput(s string) {
 			default:
 				m.FormValues.Provider = string(config.ProviderPlayitgg)
 			}
-		} else if s == "left" {
+		case "left":
 			switch m.FormValues.Provider {
 			case string(config.ProviderPlayitgg):
 				m.FormValues.Provider = string(config.ProviderPinggy)
