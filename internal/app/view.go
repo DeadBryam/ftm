@@ -391,7 +391,22 @@ func (m *Model) renderDetailPanel(width int) string {
 }
 
 func (m *Model) renderHelpBar() string {
-	return ""
+	helpStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(ColorTextDim)).
+		Background(lipgloss.Color(ColorBg))
+
+	shortcuts := []string{
+		"↑/↓ navigate",
+		"Enter toggle",
+		"a add",
+		"l logs",
+		"w web",
+		"q quit",
+	}
+
+	content := strings.Join(shortcuts, "  •  ")
+
+	return helpStyle.Render(content)
 }
 
 func (m *Model) viewLogs() string {
