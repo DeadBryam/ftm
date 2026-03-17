@@ -8,13 +8,12 @@
   let formData = $state({ name: '', provider: 'cloudflared', localPort: 30000 });
   
   const providers = [
-    { id: 'cloudflared', name: 'Cloudflare' },
+    { id: 'cloudflared', name: 'Cloudflared' },
     { id: 'playitgg', name: 'Playit.gg' },
-    { id: 'localhostrun', name: 'localhost.run' },
-    { id: 'pinggy', name: 'Pinggy' },
     { id: 'tunnelmole', name: 'Tunnelmole' },
-    { id: 'zrok', name: 'Zrok' },
-    { id: 'localtunnel', name: 'localtunnel' }
+    { id: 'localhostrun', name: 'localhost.run' },
+    { id: 'serveo', name: 'Serveo' },
+    { id: 'pinggy', name: 'Pinggy' }
   ];
   
   onMount(() => {

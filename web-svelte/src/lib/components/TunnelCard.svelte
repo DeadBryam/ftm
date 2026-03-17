@@ -4,13 +4,12 @@
   let showActions = $state(false);
   
   const providerNames = {
-    cloudflared: 'Cloudflare',
+    cloudflared: 'Cloudflared',
     playitgg: 'Playit.gg',
-    localhostrun: 'localhost.run',
-    pinggy: 'Pinggy',
     tunnelmole: 'Tunnelmole',
-    zrok: 'Zrok',
-    localtunnel: 'localtunnel'
+    localhostrun: 'localhost.run',
+    serveo: 'Serveo',
+    pinggy: 'Pinggy'
   };
   
   function getStatusClass() {
