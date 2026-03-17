@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -12,7 +14,9 @@ import (
 	"foundry-tunnel/internal/providers"
 )
 
-type PinggyProvider struct{}
+type PinggyProvider struct {
+	sshKeyPath string
+}
 
 func New() providers.Provider {
 	return &PinggyProvider{}
@@ -41,19 +45,50 @@ func (p *PinggyProvider) FindBinary() string {
 	return ""
 }
 
+func (p *PinggyProvider) ensureSSHKey() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	keyPath := filepath.Join(home, ".ssh", "id_rsa")
+
+	if _, err := os.Stat(keyPath); err == nil {
+		return keyPath, nil
+	}
+
+	sshDir := filepath.Join(home, ".ssh")
+	if err := os.MkdirAll(sshDir, 0700); err != nil {
+		return "", fmt.Errorf("failed to create .ssh directory: %w", err)
+	}
+
+	cmd := exec.Command("ssh-keygen", "-t", "rsa", "-b", "2048", "-f", keyPath, "-N", "", "-C", "foundry-tunnel")
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("failed to generate SSH key: %w", err)
+	}
+
+	return keyPath, nil
+}
+
 func (p *PinggyProvider) Start(ctx context.Context, tunnel config.TunnelConfig, logWriter io.Writer) (*providers.Process, error) {
 	binary := p.FindBinary()
 	if binary == "" {
 		return nil, fmt.Errorf("ssh not found. Install OpenSSH")
 	}
 
+	keyPath, err := p.ensureSSHKey()
+	if err != nil {
+		return nil, err
+	}
+
 	ctx, cancel := context.WithCancel(ctx)
 
 	args := []string{
 		"-p", "443",
+		"-i", keyPath,
 		"-o", "StrictHostKeyChecking=no",
 		"-o", "UserKnownHostsFile=/dev/null",
-		"-o", "BatchMode=yes",
+		"-o", "IdentitiesOnly=yes",
 		"-o", "ServerAliveInterval=30",
 		"-o", "ServerAliveCountMax=3",
 		"-o", "ConnectTimeout=10",
