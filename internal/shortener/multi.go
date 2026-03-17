@@ -15,6 +15,7 @@ func DefaultMulti() *MultiProvider {
 		NewISGD(),
 		NewCleanURI(),
 		NewDagd(),
+		NewTinyURL(),
 	)
 }
 
