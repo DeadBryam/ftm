@@ -98,20 +98,10 @@ body {
 .d20-badge {
     width: 56px;
     height: 56px;
-    background: linear-gradient(135deg, #b45309, var(--color-primary));
     border-radius: var(--radius-lg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     box-shadow: var(--shadow-md);
     flex-shrink: 0;
-}
-
-.d20-text {
-    font-family: var(--font-serif);
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: white;
+    object-fit: cover;
 }
 
 .brand-text h1 {
