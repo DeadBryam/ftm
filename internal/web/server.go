@@ -165,8 +165,10 @@ func (s *Server) URL() string {
 }
 
 func (s *Server) broadcastLoop() {
-	ticker := time.NewTicker(500 * time.Millisecond)
+	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
+
+	lastStates := make(map[string]string)
 
 	for range ticker.C {
 		s.clientsMu.RLock()
@@ -178,15 +180,22 @@ func (s *Server) broadcastLoop() {
 
 		for _, tunnel := range s.config.Tunnels {
 			if status, ok := s.manager.GetStatus(tunnel.ID); ok {
-				update := map[string]interface{}{
-					"id":        tunnel.ID,
-					"running":   status.Running,
-					"starting":  status.Starting,
-					"publicUrl": status.PublicURL,
-					"error":     status.Error,
+
+				stateKey := fmt.Sprintf("%s|%v|%v|%s", tunnel.ID, status.Running, status.Starting, status.PublicURL)
+
+				if lastStates[tunnel.ID] != stateKey {
+					lastStates[tunnel.ID] = stateKey
+
+					update := map[string]interface{}{
+						"id":        tunnel.ID,
+						"running":   status.Running,
+						"starting":  status.Starting,
+						"publicUrl": status.PublicURL,
+						"error":     status.Error,
+					}
+					data, _ := json.Marshal(update)
+					s.broadcast(string(data))
 				}
-				data, _ := json.Marshal(update)
-				s.broadcast(string(data))
 			}
 		}
 	}
