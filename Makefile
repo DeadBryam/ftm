@@ -1,6 +1,6 @@
 .PHONY: build run clean test install release build-web
 
-VERSION := 0.1.0
+VERSION := 0.3.0
 BINARY := ftm
 CMD := ./cmd/ftm
 
