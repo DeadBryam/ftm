@@ -144,8 +144,8 @@
 
 <style>
   .connection-item {
-    background: white;
-    border: 1px solid #e7e5e4;
+    background: var(--card-bg, #ffffff);
+    border: 1px solid var(--border-color, #e7e5e4);
     border-radius: 12px;
     overflow: hidden;
     transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
@@ -163,7 +163,7 @@
   }
 
   .connection-item:hover {
-    border-color: #d6d3d1;
+    border-color: var(--border-color, #d6d3d1);
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     transform: translateY(-2px);
   }
@@ -189,7 +189,7 @@
   .connection-name {
     font-weight: 600;
     font-size: 15px;
-    color: #1c1917;
+    color: var(--text-heading, #1c1917);
     margin-bottom: 4px;
     white-space: nowrap;
     overflow: hidden;
@@ -198,7 +198,7 @@
 
   .connection-meta {
     font-size: 13px;
-    color: #78716c;
+    color: var(--text-muted, #78716c);
     margin-bottom: 8px;
   }
 
@@ -230,31 +230,31 @@
   }
 
   .status-running {
-    background: #dcfce7;
-    color: #166534;
+    background: var(--status-running-bg, #dcfce7);
+    color: var(--status-running-text, #166534);
   }
 
   .status-running .status-dot {
-    background: #22c55e;
+    background: var(--status-running-dot, #22c55e);
   }
 
   .status-starting {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--status-starting-bg, #fef3c7);
+    color: var(--status-starting-text, #92400e);
   }
 
   .status-starting .status-dot {
-    background: #f59e0b;
+    background: var(--status-starting-dot, #f59e0b);
     animation: pulse 1.5s infinite;
   }
 
   .status-installing {
-    background: #dbeafe;
-    color: #1e40af;
+    background: var(--status-installing-bg, #dbeafe);
+    color: var(--status-installing-text, #1e40af);
   }
 
   .status-installing .status-dot {
-    background: #3b82f6;
+    background: var(--status-installing-dot, #3b82f6);
     animation: pulse 1.5s infinite;
   }
 
@@ -264,21 +264,21 @@
   }
 
   .status-error {
-    background: #fee2e2;
-    color: #991b1b;
+    background: var(--status-error-bg, #fee2e2);
+    color: var(--status-error-text, #991b1b);
   }
 
   .status-error .status-dot {
-    background: #ef4444;
+    background: var(--status-error-dot, #ef4444);
   }
 
   .status-stopped {
-    background: #f5f5f4;
-    color: #78716c;
+    background: var(--status-stopped-bg, #f5f5f4);
+    color: var(--status-stopped-text, #78716c);
   }
 
   .status-stopped .status-dot {
-    background: #a8a29e;
+    background: var(--status-stopped-dot, #a8a29e);
   }
 
   .install-percent {
@@ -289,7 +289,7 @@
   .install-bar {
     width: 100%;
     height: 4px;
-    background: #e5e7eb;
+    background: var(--border-color, #e5e7eb);
     border-radius: 2px;
     margin-top: 8px;
     overflow: hidden;
@@ -297,14 +297,14 @@
 
   .install-progress {
     height: 100%;
-    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    background: linear-gradient(90deg, var(--status-installing-dot, #3b82f6), #60a5fa);
     border-radius: 2px;
     transition: width 0.3s ease;
   }
 
   .install-step {
     font-size: 11px;
-    color: #6b7280;
+    color: var(--text-muted, #6b7280);
     margin-top: 4px;
     white-space: nowrap;
     overflow: hidden;
@@ -321,9 +321,9 @@
     padding: 8px 14px;
     font-size: 13px;
     border-radius: 6px;
-    border: 1px solid #d6d3d1;
-    background: white;
-    color: #44403c;
+    border: 1px solid var(--border-color, #d6d3d1);
+    background: var(--card-bg, #ffffff);
+    color: var(--text-color, #44403c);
     cursor: pointer;
     transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
     position: relative;
@@ -331,7 +331,7 @@
   }
 
   .btn:hover:not(:disabled) {
-    background: #f5f5f4;
+    background: var(--hover-bg, #f5f5f4);
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0,0,0,0.08);
   }
@@ -347,37 +347,37 @@
   }
 
   .btn-start {
-    background: #16a34a;
-    color: white;
-    border-color: #16a34a;
+    background: var(--btn-start-bg, #16a34a);
+    color: var(--btn-start-text, #ffffff);
+    border-color: var(--btn-start-bg, #16a34a);
   }
 
   .btn-start:hover:not(:disabled) {
-    background: #15803d;
-    border-color: #15803d;
+    background: var(--btn-start-hover-bg, #15803d);
+    border-color: var(--btn-start-hover-bg, #15803d);
     box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
   }
 
   .btn-stop {
-    background: #dc2626;
-    color: white;
-    border-color: #dc2626;
+    background: var(--btn-stop-bg, #dc2626);
+    color: var(--btn-stop-text, #ffffff);
+    border-color: var(--btn-stop-bg, #dc2626);
   }
 
   .btn-stop:hover:not(:disabled) {
-    background: #b91c1c;
-    border-color: #b91c1c;
+    background: var(--btn-stop-hover-bg, #b91c1c);
+    border-color: var(--btn-stop-hover-bg, #b91c1c);
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
   }
 
   .btn-danger {
-    color: #dc2626;
-    border-color: #fecaca;
-    background: #fef2f2;
+    color: var(--btn-danger-text, #dc2626);
+    border-color: var(--btn-danger-border, #fecaca);
+    background: var(--btn-danger-bg, #fef2f2);
   }
 
   .btn-danger:hover:not(:disabled) {
-    background: #fee2e2;
+    background: var(--btn-danger-hover-bg, #fee2e2);
     box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
   }
 
@@ -397,12 +397,12 @@
 
   .logs-panel {
     overflow: hidden;
-    background: #1c1917;
+    background: var(--logs-bg, #1c1917);
   }
 
   .logs-loading {
     padding: 24px;
-    color: #a8a29e;
+    color: var(--status-stopped-dot, #a8a29e);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -412,8 +412,8 @@
   .logs-spinner {
     width: 16px;
     height: 16px;
-    border: 2px solid #44403c;
-    border-top-color: #a8a29e;
+    border: 2px solid var(--text-color, #44403c);
+    border-top-color: var(--status-stopped-dot, #a8a29e);
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
@@ -425,7 +425,7 @@
   .logs-content {
     margin: 0;
     padding: 16px;
-    color: #d6d3d1;
+    color: var(--logs-text, #d6d3d1);
     font-family: ui-monospace, SFMono-Regular, monospace;
     font-size: 12px;
     line-height: 1.6;
@@ -440,8 +440,8 @@
     align-items: center;
     gap: 10px;
     padding: 10px 16px;
-    background: #fafaf9;
-    border-top: 1px solid #f5f5f4;
+    background: var(--url-bg, #fafaf9);
+    border-top: 1px solid var(--status-stopped-bg, #f5f5f4);
     cursor: pointer;
     transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
     border: none;
@@ -461,7 +461,7 @@
   }
 
   .connection-url-row:hover {
-    background: #f5f5f4;
+    background: var(--hover-bg, #f5f5f4);
   }
 
   .connection-url-row:hover::after {
@@ -477,14 +477,14 @@
   .copy-icon {
     width: 14px;
     height: 14px;
-    color: #78716c;
+    color: var(--text-muted, #78716c);
     flex-shrink: 0;
   }
 
   .url-text {
     flex: 1;
     font-size: 13px;
-    color: #92400e;
+    color: var(--url-text, var(--primary-color, #92400e));
     font-family: ui-monospace, SFMono-Regular, monospace;
     white-space: nowrap;
     overflow: hidden;
@@ -493,7 +493,7 @@
 
   .copy-hint {
     font-size: 11px;
-    color: #a8a29e;
+    color: var(--status-stopped-dot, #a8a29e);
     opacity: 0;
     transition: opacity 0.15s;
   }

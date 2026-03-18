@@ -3,18 +3,22 @@
   import { useTunnels } from '$lib/stores/tunnels.svelte';
   import { useToast } from '$lib/stores/toast.svelte';
   import { useProviders, detectPort } from '$lib/stores/providers.svelte';
+  import { useTheme } from '$lib/stores/theme.svelte';
   import TunnelCard from '$lib/components/TunnelCard.svelte';
   import DeleteModal from '$lib/components/DeleteModal.svelte';
   import Toasts from '$lib/components/Toasts.svelte';
+  import ThemeSwitcher from '$lib/components/ThemeSwitcher.svelte';
   
   const store = useTunnels();
   const toast = useToast();
   const providerStore = useProviders();
+  const theme = useTheme();
   
   let formData = $state({ name: '', provider: 'cloudflared', localPort: 30000 });
   let deleteTunnel = $state(null);
   
   onMount(async () => {
+    theme.init();
     store.connect();
     providerStore.fetch();
     const detectedPort = await detectPort();
@@ -66,6 +70,7 @@
         <p class="tagline">Share your world with players everywhere</p>
       </div>
     </div>
+    <ThemeSwitcher />
   </header>
 
   <main class="app-main">
@@ -155,11 +160,120 @@
 <Toasts />
 
 <style>
+  :root {
+    --bg-color: #fbf9f6;
+    --card-bg: #ffffff;
+    --text-color: #44403c;
+    --text-heading: #1c1917;
+    --text-muted: #78716c;
+    --border-color: #e7e5e4;
+    --border-light: #f5f5f4;
+    --primary-color: #92400e;
+    --primary-hover: #78350f;
+    --hover-bg: #f5f5f4;
+    --status-running-bg: #dcfce7;
+    --status-running-text: #166534;
+    --status-starting-bg: #fef3c7;
+    --status-starting-text: #92400e;
+    --status-installing-bg: #dbeafe;
+    --status-installing-text: #1e40af;
+    --status-error-bg: #fee2e2;
+    --status-error-text: #991b1b;
+    --status-stopped-bg: #f5f5f4;
+    --status-stopped-text: #78716c;
+    --logs-bg: #1c1917;
+    --logs-text: #d6d3d1;
+    --url-bg: #fafaf9;
+    --url-text: #92400e;
+  }
+
+  :root[data-theme="dark"] {
+    --bg-color: #0c0a09;
+    --card-bg: #1c1917;
+    --text-color: #d6d3d1;
+    --text-heading: #fafaf9;
+    --text-muted: #a8a29e;
+    --border-color: #292524;
+    --border-light: #1c1917;
+    --primary-color: #fbbf24;
+    --primary-hover: #f59e0b;
+    --hover-bg: #292524;
+    --status-running-bg: #14532d;
+    --status-running-text: #86efac;
+    --status-starting-bg: #713f12;
+    --status-starting-text: #fcd34d;
+    --status-installing-bg: #1e3a8a;
+    --status-installing-text: #93c5fd;
+    --status-error-bg: #7f1d1d;
+    --status-error-text: #fca5a5;
+    --status-stopped-bg: #292524;
+    --status-stopped-text: #a8a29e;
+    --logs-bg: #0c0a09;
+    --logs-text: #d6d3d1;
+    --url-bg: #292524;
+    --url-text: #fbbf24;
+  }
+
+  :root[data-theme="sepia"] {
+    --bg-color: #f4ecd8;
+    --card-bg: #fdf6e3;
+    --text-color: #433422;
+    --text-heading: #2d2416;
+    --text-muted: #8b7355;
+    --border-color: #d4c5a9;
+    --border-light: #e8dcc8;
+    --primary-color: #8b4513;
+    --primary-hover: #654321;
+    --hover-bg: #e8dcc8;
+    --status-running-bg: #d4edda;
+    --status-running-text: #155724;
+    --status-starting-bg: #fff3cd;
+    --status-starting-text: #856404;
+    --status-installing-bg: #cce5ff;
+    --status-installing-text: #004085;
+    --status-error-bg: #f8d7da;
+    --status-error-text: #721c24;
+    --status-stopped-bg: #e8dcc8;
+    --status-stopped-text: #8b7355;
+    --logs-bg: #2d2416;
+    --logs-text: #e8dcc8;
+    --url-bg: #e8dcc8;
+    --url-text: #8b4513;
+  }
+
+  :root[data-theme="contrast"] {
+    --bg-color: #000000;
+    --card-bg: #000000;
+    --text-color: #ffffff;
+    --text-heading: #ffffff;
+    --text-muted: #cccccc;
+    --border-color: #ffffff;
+    --border-light: #333333;
+    --primary-color: #ffff00;
+    --primary-hover: #ffff00;
+    --hover-bg: #333333;
+    --status-running-bg: #00ff00;
+    --status-running-text: #000000;
+    --status-starting-bg: #ffff00;
+    --status-starting-text: #000000;
+    --status-installing-bg: #00ffff;
+    --status-installing-text: #000000;
+    --status-error-bg: #ff0000;
+    --status-error-text: #ffffff;
+    --status-stopped-bg: #333333;
+    --status-stopped-text: #ffffff;
+    --logs-bg: #000000;
+    --logs-text: #00ff00;
+    --url-bg: #333333;
+    --url-text: #ffff00;
+  }
+
   :global(body) {
     margin: 0;
     font-family: 'Inter', system-ui, sans-serif;
-    background: #fbf9f6;
-    color: #44403c;
+    background: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
   }
 
   :global(html, body) {
@@ -178,7 +292,7 @@
   .app-header {
     margin-bottom: 24px;
     padding-bottom: 20px;
-    border-bottom: 1px solid #e7e5e4;
+    border-bottom: 1px solid var(--border-color);
     opacity: 0;
     transform: translateY(-20px);
     animation: headerIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -210,14 +324,14 @@
     font-size: 32px;
     line-height: normal;
     font-weight: 700;
-    color: #1c1917;
+    color: var(--text-heading);
     margin: 0 0 4px 0;
     letter-spacing: -0.01em;
   }
 
   .tagline {
     font-size: 14px;
-    color: #78716c;
+    color: var(--text-muted);
     margin: 0;
     font-weight: 500;
   }
@@ -286,10 +400,10 @@
   }
 
   .panel {
-    background: white;
+    background: var(--card-bg);
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    border: 1px solid #e7e5e4;
+    border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -325,8 +439,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 14px 18px;
-    border-bottom: 1px solid #f5f5f4;
-    background: #fafaf9;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--url-bg);
     flex-shrink: 0;
   }
 
@@ -334,12 +448,12 @@
     font-family: 'Crimson Pro', Georgia, serif;
     font-size: 17px;
     font-weight: 600;
-    color: #1c1917;
+    color: var(--text-heading);
     margin: 0;
   }
 
   .connection-count {
-    background: linear-gradient(135deg, #92400e 0%, #b45309 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
     color: white;
     font-size: 12px;
     font-weight: 600;
@@ -365,15 +479,15 @@
     align-items: center;
     justify-content: center;
     padding: 40px 20px;
-    color: #78716c;
+    color: var(--text-muted);
     gap: 12px;
   }
 
   .spinner {
     width: 28px;
     height: 28px;
-    border: 2px solid #e7e5e4;
-    border-top-color: #92400e;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--primary-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
@@ -385,7 +499,7 @@
   .empty-state {
     text-align: center;
     padding: 40px 16px;
-    color: #78716c;
+    color: var(--text-muted);
   }
 
   .empty-state-icon {
@@ -395,7 +509,7 @@
 
   .empty-state h3 {
     font-size: 16px;
-    color: #1c1917;
+    color: var(--text-heading);
     margin: 0 0 6px 0;
   }
 
@@ -438,11 +552,11 @@
   input, select {
     width: 100%;
     padding: 8px 10px;
-    border: 1px solid #d6d3d1;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 13px;
     font-family: inherit;
-    background: white;
+    background: var(--card-bg);
     box-sizing: border-box;
   }
 
@@ -467,7 +581,7 @@
     font-weight: 500;
     cursor: pointer;
     border: 1px solid #d6d3d1;
-    background: white;
+    background: var(--card-bg);
     color: #44403c;
     transition: all 0.2s ease;
   }
@@ -505,7 +619,7 @@
 
   .app-footer p {
     font-size: 12px;
-    color: #78716c;
+    color: var(--text-muted);
     margin: 0;
   }
 
