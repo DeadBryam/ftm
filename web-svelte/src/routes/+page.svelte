@@ -163,7 +163,6 @@
   .app {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 24px;
     display: flex;
     flex: 1;
     flex-direction: column;
