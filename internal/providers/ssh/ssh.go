@@ -157,8 +157,9 @@ var serveoRegex = regexp.MustCompile(`https?://[a-z0-9-]+\.serveousercontent\.co
 func (p *SSHProvider) ParseURL(line string) string {
 	clean := stripANSI(line)
 	cleanLower := strings.ToLower(clean)
-	
-	if p.host == "localhost.run" {
+
+	switch p.host {
+	case "localhost.run":
 		matches := localhostRunRegex.FindStringSubmatch(cleanLower)
 		if len(matches) > 0 {
 			return matches[0]
@@ -172,7 +173,7 @@ func (p *SSHProvider) ParseURL(line string) string {
 				return rest
 			}
 		}
-	} else if p.host == "serveo.net" {
+	case "serveo.net":
 		matches := serveoRegex.FindStringSubmatch(cleanLower)
 		if len(matches) > 0 {
 			return matches[0]
@@ -187,19 +188,19 @@ func (p *SSHProvider) ParseURL(line string) string {
 			}
 		}
 	}
-	
+
 	return ""
 }
 
 func (p *SSHProvider) IsReady(line string) bool {
 	clean := stripANSI(line)
 	cleanLower := strings.ToLower(clean)
-	
+
 	if p.host == "localhost.run" {
 		return strings.Contains(cleanLower, ".lhr.life") ||
-		       strings.Contains(cleanLower, "tunneled")
+			strings.Contains(cleanLower, "tunneled")
 	}
-	
-	return strings.Contains(cleanLower, "serveo") || 
-	       strings.Contains(cleanLower, "forwarding")
+
+	return strings.Contains(cleanLower, "serveo") ||
+		strings.Contains(cleanLower, "forwarding")
 }
