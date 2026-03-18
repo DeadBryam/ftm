@@ -55,6 +55,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
       
+      - name: Build web frontend
+        run: |
+          cd web-svelte && bun install && bun run build
+          rm -rf ../internal/web/static
+          cp -r dist ../internal/web/static
+          touch ../internal/web/static/.gitkeep
+      
       - name: Build Go backend
         shell: bash
         run: |
@@ -62,12 +69,7 @@ jobs:
           cd desktop/src-tauri
           CARGO_MANIFEST_DIR=$(pwd) go build -o bin/ftm ../../cmd/ftm
       
-      - name: Install JS dependencies with bun
-        run: |
-          cd desktop
-          bun install
-      
       - name: Build Tauri
         run: |
-          cd desktop
-          bun run build
+          cd desktop/src-tauri
+          cargo build
