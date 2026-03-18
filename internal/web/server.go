@@ -103,6 +103,10 @@ func (s *Server) Start() error {
 			s.handleReorder(w, r)
 		case r.URL.Path == "/api/status":
 			s.handleStatus(w)
+		case r.URL.Path == "/api/providers":
+			s.handleProviders(w)
+		case r.URL.Path == "/api/detect-port":
+			s.handleDetectPort(w)
 		case strings.HasPrefix(r.URL.Path, "/api/tunnels/"):
 			s.handleTunnelActions(w, r)
 		default:
@@ -610,6 +614,38 @@ func (s *Server) handleStatus(w http.ResponseWriter) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"port":    s.port,
 		"version": "0.2.0",
+	})
+}
+
+func (s *Server) handleProviders(w http.ResponseWriter) {
+	providers := []map[string]string{
+		{"id": "cloudflared", "name": "Cloudflared"},
+		{"id": "playitgg", "name": "Playit.gg"},
+		{"id": "tunnelmole", "name": "Tunnelmole"},
+		{"id": "localhostrun", "name": "localhost.run"},
+		{"id": "serveo", "name": "Serveo"},
+		{"id": "pinggy", "name": "Pinggy"},
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(providers)
+}
+
+func (s *Server) handleDetectPort(w http.ResponseWriter) {
+	commonPorts := []int{30000, 30001, 8080, 8081, 8082, 4200, 5173}
+	found := []int{}
+	
+	for _, port := range commonPorts {
+		if ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port)); err == nil {
+			ln.Close()
+		} else {
+			found = append(found, port)
+		}
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"ports": found,
+		"suggested": len(found) > 0 ? found[0] : 30000,
 	})
 }
 

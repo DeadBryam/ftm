@@ -2,27 +2,23 @@
   import { onMount, onDestroy } from 'svelte';
   import { useTunnels } from '$lib/stores/tunnels.svelte';
   import { useToast } from '$lib/stores/toast.svelte';
+  import { useProviders, detectPort } from '$lib/stores/providers.svelte';
   import TunnelCard from '$lib/components/TunnelCard.svelte';
   import DeleteModal from '$lib/components/DeleteModal.svelte';
   import Toasts from '$lib/components/Toasts.svelte';
   
   const store = useTunnels();
   const toast = useToast();
+  const providerStore = useProviders();
   
   let formData = $state({ name: '', provider: 'cloudflared', localPort: 30000 });
   let deleteTunnel = $state(null);
   
-  const providers = [
-    { id: 'cloudflared', name: 'Cloudflared' },
-    { id: 'playitgg', name: 'Playit.gg' },
-    { id: 'tunnelmole', name: 'Tunnelmole' },
-    { id: 'localhostrun', name: 'localhost.run' },
-    { id: 'serveo', name: 'Serveo' },
-    { id: 'pinggy', name: 'Pinggy' }
-  ];
-  
-  onMount(() => {
+  onMount(async () => {
     store.connect();
+    providerStore.fetch();
+    const detectedPort = await detectPort();
+    formData.localPort = detectedPort;
   });
   
   onDestroy(() => {
@@ -93,7 +89,7 @@
               <label for="provider">Provider</label>
               <div class="select-wrap">
                 <select id="provider" bind:value={formData.provider} required>
-                  {#each providers as p}
+                  {#each providerStore.providers as p}
                     <option value={p.id}>{p.name}</option>
                   {/each}
                 </select>
