@@ -32,7 +32,7 @@ ftm --web        # Web dashboard only
 ### Web Dashboard
 ![Web](docs/web.webp)
 
-Access at `http://localhost:8080`
+Access at `http://localhost:40500` 
 
 ### Desktop App (Tauri v2)
 

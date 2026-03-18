@@ -8,6 +8,8 @@ import (
 	"io/fs"
 	"net"
 	"net/http"
+	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -56,7 +58,7 @@ func (s *Server) findPort() int {
 			return s.config.WebPort
 		}
 	}
-	for port := 8080; port <= 8090; port++ {
+	for port := 40500; port <= 40550; port++ {
 		ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 		if err == nil {
 			ln.Close()
@@ -77,7 +79,13 @@ func (s *Server) Start() error {
 
 	mux := http.NewServeMux()
 
-	staticFS, _ := fs.Sub(staticFiles, "static")
+	webDist := filepath.Join("web-svelte", "dist")
+	var staticFS fs.FS
+	if _, err := os.Stat(webDist); err == nil {
+		staticFS, _ = fs.Sub(os.DirFS(webDist), ".")
+	} else {
+		staticFS, _ = fs.Sub(staticFiles, "static")
+	}
 	fileServer := http.FileServer(http.FS(staticFS))
 
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
@@ -652,7 +660,7 @@ func (s *Server) handleProviders(w http.ResponseWriter) {
 }
 
 func (s *Server) handleDetectPort(w http.ResponseWriter) {
-	commonPorts := []int{30000, 30001, 8080, 8081, 8082, 4200, 5173}
+	commonPorts := []int{30000, 30001, 30002, 30003, 30004, 30005, 30006, 30007, 30008, 30009}
 	found := []int{}
 
 	for _, port := range commonPorts {
