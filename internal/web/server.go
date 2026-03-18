@@ -195,12 +195,11 @@ func (s *Server) broadcastLoop() {
 func (s *Server) installProgressLoop() {
 	for progress := range s.manager.DownloadProgress {
 		update := map[string]interface{}{
-			"type":       "install",
-			"provider":   string(progress.Provider),
-			"step":       progress.Step,
-			"percent":    progress.Percent,
-			"downloaded": progress.Downloaded,
-			"total":      progress.Total,
+			"type":    "install",
+			"percent": progress.Percent,
+			"current": progress.Current,
+			"total":   progress.Total,
+			"done":    progress.Done,
 		}
 		data, _ := json.Marshal(update)
 		s.broadcast(string(data))
@@ -642,10 +641,15 @@ func (s *Server) handleDetectPort(w http.ResponseWriter) {
 		}
 	}
 	
+	suggested := 30000
+	if len(found) > 0 {
+		suggested = found[0]
+	}
+	
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"ports": found,
-		"suggested": len(found) > 0 ? found[0] : 30000,
+		"ports":     found,
+		"suggested": suggested,
 	})
 }
 
