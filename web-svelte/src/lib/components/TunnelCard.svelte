@@ -425,14 +425,45 @@
     opacity: 1;
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     .connection-main {
       flex-direction: column;
       align-items: stretch;
+      padding: 14px;
+      gap: 12px;
     }
 
     .connection-actions {
       justify-content: flex-start;
+      gap: 6px;
+    }
+    
+    .btn {
+      padding: 8px 12px;
+      font-size: 12px;
+      flex: 1;
+      max-width: 80px;
+    }
+    
+    .connection-name {
+      font-size: 14px;
+    }
+    
+    .connection-meta {
+      font-size: 12px;
+    }
+    
+    .connection-status {
+      font-size: 11px;
+      padding: 3px 8px;
+    }
+    
+    .url-text {
+      font-size: 12px;
+    }
+    
+    .copy-hint {
+      display: none;
     }
   }
 

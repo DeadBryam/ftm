@@ -162,6 +162,32 @@
     outline-offset: 2px;
   }
 
+  @media (max-width: 480px) {
+    .modal {
+      width: 95%;
+      border-radius: 12px;
+    }
+    
+    .modal-header {
+      padding: 20px 20px 0;
+    }
+    
+    .modal-body {
+      padding: 14px 20px;
+    }
+    
+    .modal-footer {
+      padding: 0 20px 20px;
+      flex-direction: column-reverse;
+      gap: 8px;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 12px;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .modal-overlay,
     .modal,

@@ -224,10 +224,22 @@
     min-height: 0;
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 1024px) and (min-width: 768px) {
+    .app-main {
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+    }
+    
+    .panel-body {
+      padding: 14px;
+    }
+  }
+
+  @media (max-width: 767px) {
     .app-main {
       grid-template-columns: 1fr;
       overflow-y: auto;
+      gap: 16px;
     }
     
     :global(html, body) {
@@ -237,6 +249,33 @@
     
     .app {
       height: auto;
+      padding: 16px;
+    }
+    
+    .brand-text h1 {
+      font-size: 24px;
+    }
+    
+    .tagline {
+      font-size: 13px;
+    }
+    
+    .d20-badge {
+      width: 40px;
+      height: 40px;
+    }
+    
+    .app-header {
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+    }
+    
+    .panel-header {
+      padding: 12px 16px;
+    }
+    
+    .panel-body {
+      padding: 16px;
     }
   }
 
