@@ -638,6 +638,10 @@
     margin-bottom: 14px;
   }
 
+  .field-group input {
+    height: 42px;
+  }
+
   .field-row {
     display: grid;
     grid-template-columns: 90px 1fr;
@@ -662,7 +666,7 @@
     width: 100%;
     padding: 8px 10px;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 8px !important;
     font-size: 13px;
     font-family: inherit;
     background: var(--card-bg);
@@ -677,6 +681,10 @@
 
   .select-wrap {
     position: relative;
+  }
+
+  .select-wrap select {
+    height: 42px;
   }
 
   .btn {

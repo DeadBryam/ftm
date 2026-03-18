@@ -64,6 +64,7 @@
 
   .theme-select select {
     padding: 8px 10px;
+    height: 36px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
     background: var(--card-bg);
@@ -77,7 +78,11 @@
   }
 
   .sound-button {
-    padding: 8px 10px;
+    height: 36px;
+    width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 8px;
     border: 1px solid var(--border-color);
     background: var(--card-bg);
