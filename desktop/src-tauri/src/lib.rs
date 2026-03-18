@@ -4,8 +4,10 @@ use std::env;
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
+use tauri::Manager;
 
 const PORT_RANGE_START: u16 = 40510;
 const PORT_RANGE_END: u16 = 40550;
@@ -64,7 +66,7 @@ pub fn find_or_build_binary() -> PathBuf {
     binary_path
 }
 
-pub fn start_ftm_server(binary_path: &PathBuf) -> u16 {
+pub fn start_ftm_server(binary_path: &PathBuf) -> (u16, std::process::Child) {
     let port = find_available_port();
 
     let project_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -96,7 +98,7 @@ pub fn start_ftm_server(binary_path: &PathBuf) -> u16 {
     }
 
     wait_for_server(port);
-    port
+    (port, child)
 }
 
 fn wait_for_server(port: u16) {
@@ -120,9 +122,26 @@ fn wait_for_server(port: u16) {
     }
 }
 
-pub fn setup_app(_app: &tauri::App) -> Result<u16, Box<dyn std::error::Error>> {
-    let port = start_ftm_server(&find_or_build_binary());
+pub fn setup_app(app: &tauri::App) -> Result<u16, Box<dyn std::error::Error>> {
+    let (port, child) = start_ftm_server(&find_or_build_binary());
     env::set_var(WEB_PORT_ENV, port.to_string());
     info!("FTM server running on port {}", port);
+
+    let child = Arc::new(Mutex::new(Some(child)));
+
+    if let Some(window) = app.get_webview_window("main") {
+        let child_clone = Arc::clone(&child);
+        let _ = window.on_window_event(move |event| {
+            if let tauri::WindowEvent::CloseRequested { .. } = event {
+                info!("Tauri closing, killing ftm server");
+                if let Ok(mut guard) = child_clone.lock() {
+                    if let Some(mut c) = guard.take() {
+                        let _ = c.kill();
+                    }
+                }
+            }
+        });
+    }
+
     Ok(port)
 }
