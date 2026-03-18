@@ -84,12 +84,12 @@ func (s *Server) Start() error {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		
+
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
-		
+
 		switch {
 		case r.URL.Path == "/api/tunnels" || r.URL.Path == "/api/tunnels/":
 			s.handleTunnels(w, r)
@@ -102,7 +102,7 @@ func (s *Server) Start() error {
 		case r.URL.Path == "/api/tunnels/reorder":
 			s.handleReorder(w, r)
 		case r.URL.Path == "/api/status":
-			s.handleStatus(w, r)
+			s.handleStatus(w)
 		case strings.HasPrefix(r.URL.Path, "/api/tunnels/"):
 			s.handleTunnelActions(w, r)
 		default:
@@ -114,12 +114,12 @@ func (s *Server) Start() error {
 		if strings.HasPrefix(r.URL.Path, "/api/") {
 			return
 		}
-		
+
 		path := r.URL.Path
 		if path != "/" && !strings.Contains(path, ".") {
 			r.URL.Path = "/"
 		}
-		
+
 		fileServer.ServeHTTP(w, r)
 	})
 
@@ -294,9 +294,9 @@ func (s *Server) createTunnel(w http.ResponseWriter, r *http.Request) {
 	contentType := r.Header.Get("Content-Type")
 	if strings.Contains(contentType, "application/json") {
 		var req struct {
-			Name       string `json:"name"`
-			Provider   string `json:"provider"`
-			LocalPort  int    `json:"localPort"`
+			Name      string `json:"name"`
+			Provider  string `json:"provider"`
+			LocalPort int    `json:"localPort"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -569,7 +569,7 @@ func (s *Server) handleReorder(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleStatus(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"port":    s.port,
