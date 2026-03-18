@@ -657,7 +657,7 @@
     display: block;
     font-size: 12px;
     font-weight: 500;
-    color: #57534e;
+    color: var(--text-muted);
     margin-bottom: 5px;
   }
 
@@ -674,8 +674,8 @@
 
   input:focus, select:focus {
     outline: none;
-    border-color: #92400e;
-    box-shadow: 0 0 0 3px rgba(146, 64, 14, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
   }
 
   .select-wrap {
