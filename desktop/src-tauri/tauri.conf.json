@@ -1,6 +1,6 @@
 {
   "productName": "Foundry Tunnel Manager",
-  "version": "0.0.1",
+  "version": "0.3.0",
   "identifier": "com.ftm.app",
   "build": {
     "beforeBuildCommand": "cd ../web-svelte && bun run build",
