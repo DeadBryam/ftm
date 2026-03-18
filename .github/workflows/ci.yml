@@ -58,9 +58,8 @@ jobs:
       - name: Build Go backend
         shell: bash
         run: |
-          cd desktop/go-api/cmd/server
-          go build -o go-backend .
-          cp go-backend ../../../src-tauri/go-backend
+          cd desktop/src-tauri
+          CARGO_MANIFEST_DIR=$(pwd) go build -o bin/ftm ../../cmd/ftm
       
       - name: Install JS dependencies with bun
         run: |
@@ -70,4 +69,4 @@ jobs:
       - name: Build Tauri
         run: |
           cd desktop
-          bun run tauri build
+          bun run build

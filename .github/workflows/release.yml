@@ -90,13 +90,11 @@ jobs:
       - name: Build Go backend
         shell: bash
         run: |
-          cd desktop/go-api/cmd/server
-          if [ "${{ matrix.platform }}" = "windows" ]; then
-            go build -ldflags "-s -w" -o go-backend.exe .
-            cp go-backend.exe ../../../src-tauri/go-backend.exe
+          cd desktop/src-tauri
+          if [ "${{ matrix.suffix }}" = "windows" ]; then
+            CARGO_MANIFEST_DIR=$(pwd) go build -ldflags "-s -w" -o bin/ftm.exe ../../cmd/ftm
           else
-            go build -ldflags "-s -w" -o go-backend .
-            cp go-backend ../../../src-tauri/go-backend
+            CARGO_MANIFEST_DIR=$(pwd) go build -ldflags "-s -w" -o bin/ftm ../../cmd/ftm
           fi
       
       - name: Install JS dependencies with bun
@@ -107,7 +105,7 @@ jobs:
       - name: Build Tauri
         run: |
           cd desktop
-          bun run tauri build
+          bun run build
       
       - name: Upload artifact (Linux)
         if: matrix.os == 'ubuntu-latest'
