@@ -149,7 +149,17 @@
     font-size: 13px;
     font-family: inherit;
     background: var(--card-bg);
+    color: var(--text-color);
     box-sizing: border-box;
+  }
+
+  input::placeholder {
+    color: var(--input-placeholder, var(--text-muted));
+  }
+
+  input:disabled, select:disabled {
+    background: var(--input-disabled, var(--hover-bg));
+    color: var(--text-muted);
   }
 
   input:focus, select:focus {
@@ -178,27 +188,27 @@
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    border: 1px solid #d6d3d1;
+    border: 1px solid var(--border-color);
     background: var(--card-bg);
-    color: #44403c;
+    color: var(--text-color);
     transition: all 0.2s ease;
   }
 
   .btn:hover {
-    background: #f5f5f4;
+    background: var(--hover-bg);
   }
 
   .btn-primary {
-    background: linear-gradient(135deg, #92400e 0%, #b45309 100%);
-    color: white;
-    border-color: #92400e;
-    box-shadow: 0 4px 12px rgba(146, 64, 14, 0.3), 0 2px 4px rgba(146, 64, 14, 0.2);
+    background: linear-gradient(135deg, var(--btn-primary-bg) 0%, var(--btn-primary-hover-bg) 100%);
+    color: var(--badge-text);
+    border-color: var(--btn-primary-bg);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--btn-primary-bg) 30%, transparent), 0 2px 4px color-mix(in srgb, var(--btn-primary-bg) 20%, transparent);
   }
 
   .btn-primary:hover {
-    background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
-    border-color: #78350f;
-    box-shadow: 0 6px 16px rgba(146, 64, 14, 0.35), 0 3px 6px rgba(146, 64, 14, 0.25);
+    background: linear-gradient(135deg, var(--btn-primary-hover-bg) 0%, var(--btn-primary-bg) 100%);
+    border-color: var(--btn-primary-hover-bg);
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--btn-primary-bg) 35%, transparent), 0 3px 6px color-mix(in srgb, var(--btn-primary-bg) 25%, transparent);
     transform: translateY(-1px);
   }
 

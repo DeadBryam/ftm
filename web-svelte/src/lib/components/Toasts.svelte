@@ -56,18 +56,21 @@
   }
 
   .toast-success {
-    background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--btn-start-bg) 0%, var(--btn-start-hover-bg) 100%);
+    border-color: var(--btn-start-bg);
+    color: var(--badge-text);
   }
 
   .toast-error {
-    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--btn-stop-bg) 0%, var(--btn-stop-hover-bg) 100%);
+    border-color: var(--btn-stop-bg);
+    color: var(--badge-text);
   }
 
   .toast-info {
-    background: linear-gradient(135deg, #92400e 0%, #b45309 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--btn-primary-bg) 0%, var(--btn-primary-hover-bg) 100%);
+    border-color: var(--btn-primary-bg);
+    color: var(--badge-text);
   }
 
   .toast-message {
@@ -77,9 +80,9 @@
   }
 
   .toast-close {
-    background: rgba(255, 255, 255, 0.2);
+    background: color-mix(in srgb, var(--badge-text) 20%, transparent);
     border: none;
-    color: white;
+    color: var(--badge-text);
     width: 28px;
     height: 28px;
     border-radius: 6px;
@@ -92,7 +95,7 @@
   }
 
   .toast-close:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: color-mix(in srgb, var(--badge-text) 30%, transparent);
   }
 
   @media (max-width: 640px) {

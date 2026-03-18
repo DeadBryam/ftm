@@ -65,7 +65,7 @@
   }
 
   .modal {
-    background: white;
+    background: var(--card-bg);
     border-radius: 16px;
     width: 90%;
     max-width: 400px;
@@ -92,7 +92,7 @@
   .modal-header h3 {
     font-size: 18px;
     font-weight: 600;
-    color: #1c1917;
+    color: var(--text-heading);
     margin: 0;
   }
 
@@ -100,7 +100,7 @@
     background: none;
     border: none;
     font-size: 24px;
-    color: #78716c;
+    color: var(--text-muted);
     cursor: pointer;
     padding: 0;
     width: 32px;
@@ -113,7 +113,7 @@
   }
 
   .close-btn:hover {
-    background: #f5f5f4;
+    background: var(--hover-bg);
     transform: rotate(90deg);
   }
 
@@ -123,12 +123,12 @@
 
   .modal-body p {
     margin: 0 0 8px;
-    color: #44403c;
+    color: var(--text-color);
   }
 
   .warning {
     font-size: 13px;
-    color: #78716c;
+    color: var(--text-muted);
   }
 
   .modal-footer {
@@ -144,16 +144,16 @@
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    border: 1px solid #d6d3d1;
-    background: white;
-    color: #44403c;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
     transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
     position: relative;
     overflow: hidden;
   }
 
   .btn:hover {
-    background: #f5f5f4;
+    background: var(--hover-bg);
     transform: translateY(-1px);
   }
 
@@ -162,24 +162,24 @@
   }
 
   .btn-secondary {
-    border-color: #d6d3d1;
+    border-color: var(--border-color);
   }
 
   .btn-danger {
-    background: #dc2626;
-    color: white;
-    border-color: #dc2626;
+    background: var(--btn-danger-bg);
+    color: var(--badge-text);
+    border-color: var(--btn-danger-bg);
   }
 
   .btn-danger:hover {
-    background: #b91c1c;
-    border-color: #b91c1c;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    background: var(--btn-danger-hover-bg);
+    border-color: var(--btn-danger-hover-bg);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--btn-danger-bg) 30%, transparent);
   }
 
   .btn-danger:focus-visible,
   .btn-secondary:focus-visible {
-    outline: 2px solid #92400e;
+    outline: 2px solid var(--primary-color);
     outline-offset: 2px;
   }
 

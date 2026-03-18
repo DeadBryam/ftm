@@ -321,9 +321,9 @@
     padding: 8px 14px;
     font-size: 13px;
     border-radius: 6px;
-    border: 1px solid var(--border-color, #d6d3d1);
-    background: var(--card-bg, #ffffff);
-    color: var(--text-color, #44403c);
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
     cursor: pointer;
     transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
     position: relative;
@@ -331,7 +331,7 @@
   }
 
   .btn:hover:not(:disabled) {
-    background: var(--hover-bg, #f5f5f4);
+    background: var(--hover-bg);
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0,0,0,0.08);
   }
@@ -347,38 +347,37 @@
   }
 
   .btn-start {
-    background: var(--btn-start-bg, #16a34a);
-    color: var(--btn-start-text, #ffffff);
-    border-color: var(--btn-start-bg, #16a34a);
+    background: var(--btn-start-bg);
+    color: var(--badge-text);
+    border-color: var(--btn-start-bg);
   }
 
   .btn-start:hover:not(:disabled) {
-    background: var(--btn-start-hover-bg, #15803d);
-    border-color: var(--btn-start-hover-bg, #15803d);
-    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+    background: var(--btn-start-hover-bg);
+    border-color: var(--btn-start-hover-bg);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--btn-start-bg) 30%, transparent);
   }
 
   .btn-stop {
-    background: var(--btn-stop-bg, #dc2626);
-    color: var(--btn-stop-text, #ffffff);
-    border-color: var(--btn-stop-bg, #dc2626);
+    background: var(--btn-stop-bg);
+    color: var(--badge-text);
+    border-color: var(--btn-stop-bg);
   }
 
   .btn-stop:hover:not(:disabled) {
-    background: var(--btn-stop-hover-bg, #b91c1c);
-    border-color: var(--btn-stop-hover-bg, #b91c1c);
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    background: var(--btn-stop-hover-bg);
+    border-color: var(--btn-stop-hover-bg);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--btn-stop-bg) 30%, transparent);
   }
 
   .btn-danger {
-    color: var(--btn-danger-text, #dc2626);
-    border-color: var(--btn-danger-border, #fecaca);
-    background: var(--btn-danger-bg, #fef2f2);
+    color: var(--btn-danger-bg);
+    border-color: var(--btn-danger-bg);
+    background: color-mix(in srgb, var(--btn-danger-bg) 10%, transparent);
   }
 
   .btn-danger:hover:not(:disabled) {
-    background: var(--btn-danger-hover-bg, #fee2e2);
-    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
+    background: color-mix(in srgb, var(--btn-danger-bg) 20%, transparent);
   }
 
   .logs-label {

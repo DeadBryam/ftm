@@ -6,7 +6,7 @@
   .app-footer {
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid #e7e5e4;
+    border-top: 1px solid var(--border-color);
     text-align: center;
     flex-shrink: 0;
   }
