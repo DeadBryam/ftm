@@ -1,10 +1,16 @@
-.PHONY: build run clean test install release
+.PHONY: build run clean test install release build-web
 
 VERSION := 0.1.0
 BINARY := ftm
 CMD := ./cmd/ftm
 
-build:
+build-web:
+	cd web-svelte && bun install && bun run build
+	rm -rf internal/web/static/*
+	cp -r web-svelte/dist/* internal/web/static/
+	touch internal/web/static/.gitkeep
+
+build: build-web
 	go build -ldflags "-X main.Version=$(VERSION)" -o $(BINARY) $(CMD)
 
 run:

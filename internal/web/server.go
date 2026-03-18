@@ -1,12 +1,10 @@
 package web
 
 import (
-	"bytes"
 	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"io/fs"
 	"net"
 	"net/http"
@@ -21,51 +19,6 @@ import (
 	"foundry-tunnel/internal/process"
 )
 
-var tmpl = template.Must(template.New("tunnels").Parse(tunnelsTemplate))
-
-const tunnelsTemplate = `{{range .}}
-<div class="connection-item {{.StatusClass}}" id="tunnel-{{.ID}}" data-id="{{.ID}}">
-    <div class="drag-handle">⠿</div>
-    <div class="connection-content">
-        <div class="connection-main">
-            <div class="connection-info">
-                <div class="connection-name" onclick="editName(this, '{{.ID}}')">{{.Name}}</div>
-                <div class="connection-meta">{{.ProviderName}} &mdash; Port <span onclick="editPort(this, '{{.ID}}')">{{.Port}}</span></div>
-                <div class="connection-status status-{{.StatusClass}}">
-                    <span class="status-dot"></span>
-                    <span class="status-text">{{.StatusText}}</span>
-                </div>
-            </div>
-            <div class="connection-actions">
-                {{if .Running}}
-                <button class="btn" hx-post="/api/tunnels/{{.ID}}/stop" hx-target="#tunnel-{{.ID}}" hx-swap="outerHTML">Stop</button>
-                {{else}}
-                <button class="btn btn-start" hx-post="/api/tunnels/{{.ID}}/start" hx-target="#tunnel-{{.ID}}" hx-swap="outerHTML">Start</button>
-                {{end}}
-                <button class="btn" onclick="showLogs('{{.ID}}')">Logs</button>
-                <button class="btn" hx-delete="/api/tunnels/{{.ID}}" hx-target="#tunnel-{{.ID}}" hx-swap="delete" hx-confirm="Delete this connection?">Delete</button>
-            </div>
-        </div>
-        {{if .PublicURL}}
-        <div class="connection-url-row" onclick="copyUrl('{{.PublicURL}}')">
-            <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-            <span class="url-text">{{.PublicURL}}</span>
-            <span class="copy-hint">Click to copy</span>
-        </div>
-        {{end}}
-    </div>
-</div>
-{{else}}
-<div class="empty-state" id="empty-state">
-    <div class="empty-state-icon">📡</div>
-    <h3>No connections yet</h3>
-    <p>Create your first connection to share your Foundry world with players.</p>
-</div>
-{{end}}`
-
 type TunnelView struct {
 	ID           string
 	Name         string
@@ -76,8 +29,6 @@ type TunnelView struct {
 	Starting     bool
 	PublicURL    string
 	Error        string
-	StatusClass  string
-	StatusText   string
 }
 
 type Server struct {
@@ -127,15 +78,54 @@ func (s *Server) Start() error {
 	mux := http.NewServeMux()
 
 	staticFS, _ := fs.Sub(staticFiles, "static")
-	mux.Handle("/", http.FileServer(http.FS(staticFS)))
+	fileServer := http.FileServer(http.FS(staticFS))
 
-	mux.HandleFunc("/api/tunnels", s.handleTunnels)
-	mux.HandleFunc("/api/tunnels/", s.handleTunnelActions)
-	mux.HandleFunc("/api/events", s.handleSSE)
-	mux.HandleFunc("/api/copy-url", s.handleCopyURL)
-	mux.HandleFunc("/api/logs/", s.handleLogs)
-	mux.HandleFunc("/api/tunnels/reorder", s.handleReorder)
-	mux.HandleFunc("/api/status", s.handleStatus)
+	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		switch {
+		case r.URL.Path == "/api/tunnels" || r.URL.Path == "/api/tunnels/":
+			s.handleTunnels(w, r)
+		case r.URL.Path == "/api/events":
+			s.handleSSE(w, r)
+		case r.URL.Path == "/api/copy-url":
+			s.handleCopyURL(w, r)
+		case strings.HasPrefix(r.URL.Path, "/api/logs/"):
+			s.handleLogs(w, r)
+		case r.URL.Path == "/api/tunnels/reorder":
+			s.handleReorder(w, r)
+		case r.URL.Path == "/api/status":
+			s.handleStatus(w)
+		case r.URL.Path == "/api/providers":
+			s.handleProviders(w)
+		case r.URL.Path == "/api/detect-port":
+			s.handleDetectPort(w)
+		case strings.HasPrefix(r.URL.Path, "/api/tunnels/"):
+			s.handleTunnelActions(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/api/") {
+			return
+		}
+
+		path := r.URL.Path
+		if path != "/" && !strings.Contains(path, ".") {
+			r.URL.Path = "/"
+		}
+
+		fileServer.ServeHTTP(w, r)
+	})
 
 	s.httpServer = &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
@@ -143,6 +133,7 @@ func (s *Server) Start() error {
 	}
 
 	go s.broadcastLoop()
+	go s.installProgressLoop()
 	go s.httpServer.ListenAndServe()
 	return nil
 }
@@ -198,6 +189,20 @@ func (s *Server) broadcastLoop() {
 				}
 			}
 		}
+	}
+}
+
+func (s *Server) installProgressLoop() {
+	for progress := range s.manager.DownloadProgress {
+		update := map[string]interface{}{
+			"type":    "install",
+			"percent": progress.Percent,
+			"current": progress.Current,
+			"total":   progress.Total,
+			"done":    progress.Done,
+		}
+		data, _ := json.Marshal(update)
+		s.broadcast(string(data))
 	}
 }
 
@@ -257,6 +262,7 @@ func (s *Server) handleTunnels(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		s.listTunnels(w)
+		return
 	case http.MethodPost:
 		s.createTunnel(w, r)
 	case http.MethodPut:
@@ -267,79 +273,78 @@ func (s *Server) handleTunnels(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) listTunnels(w http.ResponseWriter) {
-	html, err := s.renderTunnels()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "text/html")
-	w.Write([]byte(html))
-}
-
-func (s *Server) renderTunnels() (string, error) {
-
 	sortedTunnels := make([]config.TunnelConfig, len(s.config.Tunnels))
 	copy(sortedTunnels, s.config.Tunnels)
 	sort.Slice(sortedTunnels, func(i, j int) bool {
 		return sortedTunnels[i].Order < sortedTunnels[j].Order
 	})
 
-	var tunnels []TunnelView
+	var result []map[string]interface{}
 	for _, t := range sortedTunnels {
-		tv := TunnelView{
-			ID:       t.ID,
-			Name:     t.Name,
-			Provider: string(t.Provider),
-			Port:     t.LocalPort,
+		item := map[string]interface{}{
+			"id":       t.ID,
+			"name":     t.Name,
+			"provider": string(t.Provider),
+			"port":     t.LocalPort,
+			"status":   "stopped",
 		}
-		tv.ProviderName = providerName(t.Provider)
 
 		if status, ok := s.manager.GetStatus(t.ID); ok {
-			tv.Running = status.Running
-			tv.Starting = status.Starting
-			tv.PublicURL = status.PublicURL
-			tv.Error = status.Error
+			item["publicUrl"] = status.PublicURL
+			item["error"] = status.Error
+			if status.Starting {
+				item["status"] = "starting"
+			} else if status.Running {
+				item["status"] = "running"
+			}
 		}
 
-		tv.StatusClass = "offline"
-		tv.StatusText = "Offline"
-		if tv.Starting {
-			tv.StatusClass = "starting"
-			tv.StatusText = "Connecting..."
-		} else if tv.Running {
-			tv.StatusClass = "online"
-			tv.StatusText = "Online"
-		} else if tv.Error != "" {
-			tv.StatusClass = "error"
-			tv.StatusText = "Error"
+		if needsInstall, canInstall := s.manager.CheckInstallation(t.Provider); needsInstall && canInstall {
+			item["status"] = "installing"
+			item["installProgress"] = 0
 		}
 
-		tunnels = append(tunnels, tv)
+		result = append(result, item)
 	}
 
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, tunnels); err != nil {
-		return "", err
-	}
-	return buf.String(), nil
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
 }
 
 func (s *Server) createTunnel(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	var name, providerStr string
+	var port int
+
+	contentType := r.Header.Get("Content-Type")
+	if strings.Contains(contentType, "application/json") {
+		var req struct {
+			Name      string `json:"name"`
+			Provider  string `json:"provider"`
+			LocalPort int    `json:"localPort"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		name = req.Name
+		providerStr = req.Provider
+		port = req.LocalPort
+	} else {
+		if err := r.ParseForm(); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		name = r.FormValue("name")
+		providerStr = r.FormValue("provider")
+		portStr := r.FormValue("port")
+		port, _ = strconv.Atoi(portStr)
 	}
 
-	name := r.FormValue("name")
-	providerStr := r.FormValue("provider")
-	portStr := r.FormValue("port")
-
-	if name == "" || providerStr == "" || portStr == "" {
+	if name == "" || providerStr == "" || port < 1 {
 		http.Error(w, "missing fields", http.StatusBadRequest)
 		return
 	}
 
-	port, _ := strconv.Atoi(portStr)
 	if port < 1 || port > 65535 {
 		port = 30000
 	}
@@ -363,7 +368,14 @@ func (s *Server) createTunnel(w http.ResponseWriter, r *http.Request) {
 	s.config.Tunnels = append(s.config.Tunnels, tunnel)
 	s.config.Save()
 
-	s.listTunnels(w)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"id":       tunnel.ID,
+		"name":     tunnel.Name,
+		"provider": string(tunnel.Provider),
+		"port":     tunnel.LocalPort,
+		"status":   "stopped",
+	})
 }
 
 func (s *Server) updateTunnel(w http.ResponseWriter, r *http.Request) {
@@ -450,8 +462,46 @@ func (s *Server) startTunnel(w http.ResponseWriter, id string) {
 	}
 
 	if needsInstall, canInstall := s.manager.CheckInstallation(tunnel.Provider); needsInstall && canInstall {
-		go s.manager.InstallProvider(tunnel.Provider)
-		http.Error(w, "INSTALLING PROVIDER", http.StatusAccepted)
+		update := map[string]interface{}{
+			"id":       tunnel.ID,
+			"status":   "installing",
+			"provider": string(tunnel.Provider),
+		}
+		data, _ := json.Marshal(update)
+		s.broadcast(string(data))
+		
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"id":       tunnel.ID,
+			"name":     tunnel.Name,
+			"provider": string(tunnel.Provider),
+			"port":     tunnel.LocalPort,
+			"status":   "installing",
+		})
+		
+		go func() {
+			if err := s.manager.InstallProvider(tunnel.Provider); err != nil {
+				update := map[string]interface{}{
+					"id":    tunnel.ID,
+					"status": "error",
+					"error": "Installation failed: " + err.Error(),
+				}
+				data, _ := json.Marshal(update)
+				s.broadcast(string(data))
+				return
+			}
+			
+			if err := s.manager.Start(*tunnel, func(status config.TunnelStatus) {}); err != nil {
+				update := map[string]interface{}{
+					"id":    tunnel.ID,
+					"status": "error",
+					"error": err.Error(),
+				}
+				data, _ := json.Marshal(update)
+				s.broadcast(string(data))
+			}
+		}()
+		
 		return
 	}
 
@@ -461,9 +511,7 @@ func (s *Server) startTunnel(w http.ResponseWriter, id string) {
 		return
 	}
 
-	html, _ := s.renderSingleTunnel(*tunnel)
-	w.Header().Set("Content-Type", "text/html")
-	w.Write([]byte(html))
+	s.writeTunnelJSON(w, *tunnel)
 }
 
 func (s *Server) stopTunnel(w http.ResponseWriter, id string) {
@@ -473,48 +521,36 @@ func (s *Server) stopTunnel(w http.ResponseWriter, id string) {
 	}
 	for _, t := range s.config.Tunnels {
 		if t.ID == id {
-			html, _ := s.renderSingleTunnel(t)
-			w.Header().Set("Content-Type", "text/html")
-			w.Write([]byte(html))
+			s.writeTunnelJSON(w, t)
 			return
 		}
 	}
 }
 
-func (s *Server) renderSingleTunnel(t config.TunnelConfig) (string, error) {
-	tv := TunnelView{
-		ID:       t.ID,
-		Name:     t.Name,
-		Provider: string(t.Provider),
-		Port:     t.LocalPort,
-	}
-	tv.ProviderName = providerName(t.Provider)
+func (s *Server) writeTunnelJSON(w http.ResponseWriter, t config.TunnelConfig) {
+	status := "stopped"
+	var publicURL, errorMsg string
 
-	if status, ok := s.manager.GetStatus(t.ID); ok {
-		tv.Running = status.Running
-		tv.Starting = status.Starting
-		tv.PublicURL = status.PublicURL
-		tv.Error = status.Error
+	if tunnelStatus, ok := s.manager.GetStatus(t.ID); ok {
+		publicURL = tunnelStatus.PublicURL
+		errorMsg = tunnelStatus.Error
+		if tunnelStatus.Starting {
+			status = "starting"
+		} else if tunnelStatus.Running {
+			status = "running"
+		}
 	}
 
-	tv.StatusClass = "offline"
-	tv.StatusText = "Offline"
-	if tv.Starting {
-		tv.StatusClass = "starting"
-		tv.StatusText = "Connecting..."
-	} else if tv.Running {
-		tv.StatusClass = "online"
-		tv.StatusText = "Online"
-	} else if tv.Error != "" {
-		tv.StatusClass = "error"
-		tv.StatusText = "Error"
-	}
-
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, []TunnelView{tv}); err != nil {
-		return "", err
-	}
-	return buf.String(), nil
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"id":        t.ID,
+		"name":      t.Name,
+		"provider":  string(t.Provider),
+		"port":      t.LocalPort,
+		"status":    status,
+		"publicUrl": publicURL,
+		"error":     errorMsg,
+	})
 }
 
 func (s *Server) deleteTunnel(w http.ResponseWriter, id string) {
@@ -594,11 +630,48 @@ func (s *Server) handleReorder(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleStatus(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"port":    s.port,
 		"version": "0.2.0",
+	})
+}
+
+func (s *Server) handleProviders(w http.ResponseWriter) {
+	providers := []map[string]string{
+		{"id": "cloudflared", "name": "Cloudflared"},
+		{"id": "playitgg", "name": "Playit.gg"},
+		{"id": "tunnelmole", "name": "Tunnelmole"},
+		{"id": "localhostrun", "name": "localhost.run"},
+		{"id": "serveo", "name": "Serveo"},
+		{"id": "pinggy", "name": "Pinggy"},
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(providers)
+}
+
+func (s *Server) handleDetectPort(w http.ResponseWriter) {
+	commonPorts := []int{30000, 30001, 8080, 8081, 8082, 4200, 5173}
+	found := []int{}
+	
+	for _, port := range commonPorts {
+		if ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port)); err == nil {
+			ln.Close()
+		} else {
+			found = append(found, port)
+		}
+	}
+	
+	suggested := 30000
+	if len(found) > 0 {
+		suggested = found[0]
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"ports":     found,
+		"suggested": suggested,
 	})
 }
 
