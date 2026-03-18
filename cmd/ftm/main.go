@@ -13,7 +13,8 @@ var BuildVersion string
 
 func main() {
 	var (
-		webOnly     = flag.Bool("web", false, "Start web dashboard only (no TUI)")
+		webOnly     = flag.Bool("web", false, "Start web dashboard and open browser")
+		server      = flag.Bool("server", false, "Start web dashboard only (no browser)")
 		port        = flag.Int("port", 0, "Web server port (auto-detect if not specified)")
 		showVersion = flag.Bool("version", false, "Show version")
 	)
@@ -50,6 +51,9 @@ func main() {
 	if *webOnly {
 		fmt.Println("\nPress Ctrl+C to stop")
 		application.OpenDashboard()
+		select {}
+	} else if *server {
+		fmt.Println("\nPress Ctrl+C to stop")
 		select {}
 	}
 
