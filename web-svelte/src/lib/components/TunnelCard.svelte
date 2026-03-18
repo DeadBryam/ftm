@@ -1,7 +1,7 @@
 <script>
   import DeleteModal from './DeleteModal.svelte';
   
-  let { tunnel, onStart, onStop, onDelete } = $props();
+  let { tunnel, onStart, onStop, onDelete, index = 0 } = $props();
   
   let showLogs = $state(false);
   let logs = $state('');
@@ -9,6 +9,7 @@
   let showDeleteModal = $state(false);
   let justStarted = $state(false);
   let prevStatus = $state(tunnel.status);
+  let logsContainer = $state(null);
   
   // Trigger celebration animation when tunnel starts running
   $effect(() => {
@@ -66,7 +67,10 @@
   }
 </script>
 
-<div class="connection-item {getStatusClass()}">
+<div 
+  class="connection-item {getStatusClass()}" 
+  style="--stagger-delay: {index * 50}ms"
+>
   <div class="connection-content">
     <div class="connection-main">
       <div class="connection-info">
@@ -83,7 +87,9 @@
         {:else}
           <button class="btn btn-start" onclick={() => onStart(tunnel.id)}>Start</button>
         {/if}
-        <button class="btn" onclick={loadLogs}>{showLogs ? 'Hide' : 'Logs'}</button>
+        <button class="btn" onclick={loadLogs}>
+          <span class="logs-label">{showLogs ? 'Hide' : 'Logs'}</span>
+        </button>
         <button class="btn btn-danger" onclick={() => showDeleteModal = true}>Delete</button>
       </div>
     </div>
@@ -97,15 +103,18 @@
         <span class="copy-hint">Click to copy</span>
       </button>
     {/if}
-    {#if showLogs}
+    <div class="logs-wrapper" class:expanded={showLogs} bind:this={logsContainer}>
       <div class="logs-panel">
         {#if loadingLogs}
-          <div class="logs-loading">Loading...</div>
+          <div class="logs-loading">
+            <span class="logs-spinner"></span>
+            <span>Loading logs...</span>
+          </div>
         {:else}
           <pre class="logs-content">{logs || 'No logs available'}</pre>
         {/if}
       </div>
-    {/if}
+    </div>
   </div>
 </div>
 
@@ -120,14 +129,26 @@
   .connection-item {
     background: white;
     border: 1px solid #e7e5e4;
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: var(--stagger-delay, 0ms);
+  }
+
+  @keyframes slideIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .connection-item:hover {
     border-color: #d6d3d1;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
   }
 
   .connection-content {
@@ -172,6 +193,17 @@
     font-weight: 500;
     padding: 4px 10px;
     border-radius: 12px;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .connection-status.just-started {
+    animation: celebrate 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes celebrate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
   }
 
   .status-dot {
@@ -189,16 +221,6 @@
     background: #22c55e;
   }
 
-  .status-running.just-started {
-    animation: statusCelebrate 0.6s ease-out;
-  }
-
-  @keyframes statusCelebrate {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-  }
-
   .status-starting {
     background: #fef3c7;
     color: #92400e;
@@ -207,6 +229,11 @@
   .status-starting .status-dot {
     background: #f59e0b;
     animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
   }
 
   .status-error {
@@ -227,11 +254,6 @@
     background: #a8a29e;
   }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
   .connection-actions {
     display: flex;
     gap: 8px;
@@ -246,7 +268,9 @@
     background: white;
     color: #44403c;
     cursor: pointer;
-    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, background 0.15s, border-color 0.15s;
+    transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+    position: relative;
+    overflow: hidden;
   }
 
   .btn:hover {
@@ -257,7 +281,7 @@
 
   .btn:active {
     transform: translateY(1px);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
   }
 
   .btn-start {
@@ -269,11 +293,7 @@
   .btn-start:hover {
     background: #15803d;
     border-color: #15803d;
-    box-shadow: 0 2px 4px rgba(22, 163, 74, 0.25);
-  }
-
-  .btn-start:active {
-    box-shadow: 0 1px 2px rgba(22, 163, 74, 0.15);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
   }
 
   .btn-danger {
@@ -284,6 +304,61 @@
 
   .btn-danger:hover {
     background: #fee2e2;
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
+  }
+
+  .logs-label {
+    transition: all 0.15s;
+  }
+
+  .logs-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .logs-wrapper.expanded {
+    grid-template-rows: 1fr;
+  }
+
+  .logs-panel {
+    overflow: hidden;
+    background: #1c1917;
+  }
+
+  .logs-loading {
+    padding: 24px;
+    color: #a8a29e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .logs-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #44403c;
+    border-top-color: #a8a29e;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .logs-content {
+    margin: 0;
+    padding: 16px;
+    color: #d6d3d1;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 300px;
+    overflow: auto;
   }
 
   .connection-url-row {
@@ -294,15 +369,35 @@
     background: #fafaf9;
     border-top: 1px solid #f5f5f4;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
     border: none;
     width: 100%;
     font: inherit;
     text-align: left;
+    position: relative;
+  }
+
+  .connection-url-row::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(146, 64, 14, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
   }
 
   .connection-url-row:hover {
     background: #f5f5f4;
+  }
+
+  .connection-url-row:hover::after {
+    opacity: 1;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
   }
 
   .copy-icon {
@@ -333,44 +428,6 @@
     opacity: 1;
   }
 
-  .logs-panel {
-    border-top: 1px solid #f5f5f4;
-    background: #1c1917;
-    max-height: 300px;
-    overflow: auto;
-  }
-
-  .logs-loading {
-    padding: 20px;
-    color: #a8a29e;
-    text-align: center;
-  }
-
-  .logs-content {
-    margin: 0;
-    padding: 16px;
-    color: #d6d3d1;
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 12px;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    word-break: break-all;
-  }
-
-  /* Respect reduced motion preference */
-  @media (prefers-reduced-motion: reduce) {
-    .btn,
-    .btn:hover,
-    .btn:active {
-      transition: none;
-      transform: none;
-    }
-    
-    .status-running.just-started {
-      animation: none;
-    }
-  }
-
   @media (max-width: 600px) {
     .connection-main {
       flex-direction: column;
@@ -379,6 +436,27 @@
 
     .connection-actions {
       justify-content: flex-start;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .connection-item,
+    .btn,
+    .connection-status,
+    .connection-url-row,
+    .logs-wrapper {
+      animation: none;
+      transition: none;
+    }
+    .connection-item {
+      opacity: 1;
+      transform: none;
+    }
+    .logs-wrapper {
+      grid-template-rows: 1fr;
+    }
+    .logs-wrapper:not(.expanded) {
+      display: none;
     }
   }
 </style>

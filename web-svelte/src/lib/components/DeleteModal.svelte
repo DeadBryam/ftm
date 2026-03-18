@@ -25,38 +25,41 @@
   .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 100;
-    animation: fadeIn 0.15s ease;
+    animation: overlayIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  @keyframes overlayIn {
+    to { background: rgba(0, 0, 0, 0.5); }
   }
 
   .modal {
     background: white;
-    border-radius: 12px;
+    border-radius: 16px;
     width: 90%;
     max-width: 400px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    animation: slideIn 0.15s ease;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+    animation: modalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
 
-  @keyframes slideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+  @keyframes modalIn {
+    to {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
   }
 
   .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 20px 0;
+    padding: 24px 24px 0;
   }
 
   .modal-header h3 {
@@ -78,15 +81,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
+    border-radius: 8px;
+    transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
   }
 
   .close-btn:hover {
     background: #f5f5f4;
+    transform: rotate(90deg);
   }
 
   .modal-body {
-    padding: 16px 20px;
+    padding: 16px 24px;
   }
 
   .modal-body p {
@@ -102,24 +107,31 @@
   .modal-footer {
     display: flex;
     gap: 12px;
-    padding: 0 20px 20px;
+    padding: 0 24px 24px;
     justify-content: flex-end;
   }
 
   .btn {
-    padding: 10px 16px;
-    border-radius: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     border: 1px solid #d6d3d1;
     background: white;
     color: #44403c;
-    transition: all 0.15s;
+    transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+    position: relative;
+    overflow: hidden;
   }
 
   .btn:hover {
     background: #f5f5f4;
+    transform: translateY(-1px);
+  }
+
+  .btn:active {
+    transform: translateY(0) scale(0.98);
   }
 
   .btn-secondary {
@@ -135,5 +147,23 @@
   .btn-danger:hover {
     background: #b91c1c;
     border-color: #b91c1c;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .modal-overlay,
+    .modal,
+    .close-btn,
+    .btn {
+      animation: none;
+      transform: none;
+      transition: none;
+    }
+    .modal-overlay {
+      background: rgba(0, 0, 0, 0.5);
+    }
+    .modal {
+      opacity: 1;
+    }
   }
 </style>

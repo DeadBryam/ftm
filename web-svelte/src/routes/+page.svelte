@@ -103,9 +103,10 @@
           </div>
         {:else}
           <div class="connection-list">
-            {#each store.tunnels as tunnel (tunnel.id)}
+            {#each store.tunnels as tunnel, index (tunnel.id)}
               <TunnelCard 
                 {tunnel} 
+                {index}
                 onStart={store.start}
                 onStop={store.stop}
                 onDelete={store.delete}
@@ -143,6 +144,16 @@
     margin-bottom: 48px;
     padding-bottom: 32px;
     border-bottom: 1px solid #e7e5e4;
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: headerIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes headerIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .brand {
@@ -196,6 +207,24 @@
     flex-direction: column;
     overflow: hidden;
     transition: box-shadow 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: panelIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .create-panel {
+    animation-delay: 0.1s;
+  }
+
+  .connections-panel {
+    animation-delay: 0.2s;
+  }
+
+  @keyframes panelIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .panel:hover {
@@ -304,6 +333,15 @@
   @media (max-width: 500px) {
     .field-row {
       grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app-header,
+    .panel {
+      animation: none;
+      opacity: 1;
+      transform: none;
     }
   }
 
