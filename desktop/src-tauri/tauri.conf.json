@@ -1,21 +1,23 @@
 {
+  "$schema": "https://schema.tauri.app/config/2",
   "productName": "Foundry Tunnel Manager",
   "version": "0.3.0",
-  "identifier": "com.ftm.app",
+  "identifier": "com.foundry-tunnel.manager",
   "build": {
-    "beforeBuildCommand": "cd ../web-svelte && bun run build",
-    "beforeDevCommand": "cd ../web-svelte && bun run dev",
-    "devUrl": "http://localhost:5173",
-    "frontendDist": "../frontend-dist"
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "",
+    "frontendDist": "../../web-svelte/dist"
   },
   "app": {
+    "withGlobalTauri": false,
     "windows": [
       {
         "title": "Foundry Tunnel Manager",
-        "width": 1200,
-        "height": 800,
+        "width": 1024,
+        "height": 768,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "center": true
       }
     ],
     "security": {
@@ -24,7 +26,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["app", "dmg", "deb"],
+    "targets": "all",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -32,6 +34,10 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": []
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
+    }
   }
 }

@@ -1,8 +1,9 @@
-.PHONY: build run clean test install release build-web
+.PHONY: build run clean test install release build-web tauri tauri-dev
 
 VERSION := 0.3.0
 BINARY := ftm
 CMD := ./cmd/ftm
+TAURI_DIR := desktop/src-tauri
 
 build-web:
 	cd web-svelte && bun install && bun run build
@@ -13,11 +14,18 @@ build-web:
 build: build-web
 	go build -ldflags "-X main.Version=$(VERSION)" -o $(BINARY) $(CMD)
 
+tauri: build-web
+	cd $(TAURI_DIR) && cargo build --release
+
+tauri-dev: build-web
+	cd $(TAURI_DIR) && cargo run
+
 run:
 	go run $(CMD)
 
 clean:
 	rm -f $(BINARY) ftm-*
+	cd $(TAURI_DIR) && cargo clean
 
 test:
 	go test ./...
