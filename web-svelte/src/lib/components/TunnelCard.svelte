@@ -8,16 +8,16 @@
   let loadingLogs = $state(false);
   let showDeleteModal = $state(false);
   let justStarted = $state(false);
-  let prevStatus = $state(tunnel.status);
+  let prevStatus = $state('');
   let logsContainer = $state(null);
   
-  // Trigger celebration animation when tunnel starts running
   $effect(() => {
-    if (tunnel.status === 'running' && prevStatus !== 'running') {
+    const currentStatus = tunnel.status;
+    if (currentStatus === 'running' && prevStatus !== 'running' && prevStatus !== '') {
       justStarted = true;
       setTimeout(() => justStarted = false, 600);
     }
-    prevStatus = tunnel.status;
+    prevStatus = currentStatus;
   });
   
   const providerNames = {
