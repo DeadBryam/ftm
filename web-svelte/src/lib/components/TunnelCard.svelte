@@ -82,8 +82,8 @@
         </div>
       </div>
       <div class="connection-actions">
-        {#if tunnel.status === 'running'}
-          <button class="btn" onclick={() => onStop(tunnel.id)}>Stop</button>
+        {#if tunnel.status === 'running' || tunnel.status === 'starting'}
+          <button class="btn btn-stop" onclick={() => onStop(tunnel.id)}>Stop</button>
         {:else}
           <button class="btn btn-start" onclick={() => onStart(tunnel.id)}>Start</button>
         {/if}
@@ -294,6 +294,18 @@
     background: #15803d;
     border-color: #15803d;
     box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+  }
+
+  .btn-stop {
+    background: #dc2626;
+    color: white;
+    border-color: #dc2626;
+  }
+
+  .btn-stop:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
   }
 
   .btn-danger {
