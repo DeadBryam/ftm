@@ -12,6 +12,8 @@ jobs:
   test-go:
     name: Test Go
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
       
@@ -28,6 +30,8 @@ jobs:
   build-tauri:
     name: Build Tauri
     runs-on: ${{ matrix.os }}
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
