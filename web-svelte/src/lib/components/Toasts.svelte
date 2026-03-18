@@ -1,26 +1,15 @@
 <script>
-  import { useToast } from '$lib/stores/toast.svelte';
-  import { useSound } from '$lib/stores/sound.svelte';
+  import { useToast } from "$lib/stores/toast.svelte";
 
   const toastStore = useToast();
-  const soundStore = useSound();
-
-  function toggleSound() {
-    soundStore.toggle();
-    // mirror into toast store for UI reflect
-    toastStore.soundEnabled = soundStore.enabled;
-  }
 </script>
 
 <div class="toasts-container">
   {#each toastStore.toasts as toast (toast.id)}
-    <div 
-      class="toast toast-{toast.type}"
-      role="alert"
-    >
+    <div class="toast toast-{toast.type}" role="alert">
       <span class="toast-message">{toast.message}</span>
-      <button 
-        class="toast-close" 
+      <button
+        class="toast-close"
         onclick={() => toastStore.remove(toast.id)}
         aria-label="Close notification"
       >
@@ -28,7 +17,6 @@
       </button>
     </div>
   {/each}
-  
 </div>
 
 <style>
@@ -49,7 +37,7 @@
     gap: 12px;
     padding: 14px 18px;
     border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     pointer-events: auto;
     min-width: 280px;
@@ -89,7 +77,7 @@
   }
 
   .toast-close {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     border: none;
     color: white;
     width: 28px;
@@ -104,32 +92,7 @@
   }
 
   .toast-close:hover {
-    background: rgba(255,255,255,0.3);
-  }
-
-  .sound-toggle {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: none;
-    background: var(--card-bg);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    cursor: pointer;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: auto;
-    transition: transform 0.15s, box-shadow 0.15s;
-    color: var(--text-color);
-  }
-
-  .sound-toggle:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.14);
+    background: rgba(255, 255, 255, 0.3);
   }
 
   @media (max-width: 640px) {
@@ -143,11 +106,6 @@
       min-width: auto;
       max-width: none;
       width: 100%;
-    }
-
-    .sound-toggle {
-      bottom: 10px;
-      right: 10px;
     }
   }
 
