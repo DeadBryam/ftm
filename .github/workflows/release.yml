@@ -72,7 +72,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v3
         with:
-          bun-version: '1'
+          bun-version: '1.3'
       
       - uses: actions/setup-go@v5
         with:
@@ -90,6 +90,7 @@ jobs:
       - name: Build Go backend
         shell: bash
         run: |
+          mkdir -p desktop/src-tauri/bin
           cd desktop/src-tauri
           if [ "${{ matrix.suffix }}" = "windows" ]; then
             CARGO_MANIFEST_DIR=$(pwd) go build -ldflags "-s -w" -o bin/ftm.exe ../../cmd/ftm
