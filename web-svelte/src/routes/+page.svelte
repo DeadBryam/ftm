@@ -1,10 +1,13 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { useTunnels } from '$lib/stores/tunnels.svelte';
+  import { useToast } from '$lib/stores/toast.svelte';
   import TunnelCard from '$lib/components/TunnelCard.svelte';
   import DeleteModal from '$lib/components/DeleteModal.svelte';
+  import Toasts from '$lib/components/Toasts.svelte';
   
   const store = useTunnels();
+  const toast = useToast();
   
   let formData = $state({ name: '', provider: 'cloudflared', localPort: 30000 });
   let deleteTunnel = $state(null);
@@ -28,8 +31,10 @@
   
   async function handleSubmit(e) {
     e.preventDefault();
+    const name = formData.name;
     await store.create(formData);
     formData = { name: '', provider: 'cloudflared', localPort: 30000 };
+    toast.success(`Connection "${name}" created`);
   }
   
   function handleShowDelete(tunnel) {
@@ -38,7 +43,9 @@
   
   function handleConfirmDelete() {
     if (deleteTunnel) {
+      const name = deleteTunnel.name;
       store.delete(deleteTunnel.id);
+      toast.success(`Connection "${name}" deleted`);
       deleteTunnel = null;
     }
   }
@@ -128,6 +135,7 @@
                 onStop={store.stop}
                 onDelete={store.delete}
                 onShowDelete={handleShowDelete}
+                installProgress={store.installProgress[tunnel.provider]}
               />
             {/each}
           </div>
@@ -147,6 +155,8 @@
   onConfirm={handleConfirmDelete} 
   onCancel={handleCancelDelete}
 />
+
+<Toasts />
 
 <style>
   :global(body) {

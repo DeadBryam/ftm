@@ -1,18 +1,26 @@
 <script>
-  let { tunnel, onStart, onStop, onDelete, onShowDelete, index = 0 } = $props();
+  import DeleteModal from './DeleteModal.svelte';
+  import { useToast } from '$lib/stores/toast.svelte';
+  
+  let { tunnel, onStart, onStop, onDelete, onShowDelete, index = 0, installProgress = null } = $props();
+  
+  const toast = useToast();
   
   let showLogs = $state(false);
   let logs = $state('');
   let loadingLogs = $state(false);
   let justStarted = $state(false);
   let prevStatus = $state('');
-
   
   $effect(() => {
     const currentStatus = tunnel.status;
     if (currentStatus === 'running' && prevStatus !== 'running' && prevStatus !== '') {
       justStarted = true;
+      toast.success(`Tunnel "${tunnel.name}" is now running!`);
       setTimeout(() => justStarted = false, 600);
+    }
+    if (currentStatus === 'error' && prevStatus !== 'error') {
+      toast.error(`Tunnel "${tunnel.name}" failed to start`);
     }
     prevStatus = currentStatus;
   });
@@ -29,6 +37,7 @@
   function getStatusClass() {
     if (tunnel.status === 'running') return 'running';
     if (tunnel.status === 'starting') return 'starting';
+    if (tunnel.status === 'installing') return 'installing';
     if (tunnel.status === 'error') return 'error';
     return 'stopped';
   }
@@ -36,12 +45,14 @@
   function getStatusText() {
     if (tunnel.status === 'running') return 'Running';
     if (tunnel.status === 'starting') return 'Starting...';
+    if (tunnel.status === 'installing') return 'Installing...';
     if (tunnel.status === 'error') return 'Error';
     return 'Stopped';
   }
   
   function copyUrl(url) {
     navigator.clipboard.writeText(url);
+    toast.info('URL copied to clipboard');
   }
   
   async function loadLogs() {
@@ -57,6 +68,16 @@
     }
     loadingLogs = false;
   }
+  
+  function getInstallPercent() {
+    if (!installProgress) return 0;
+    return installProgress.percent || 0;
+  }
+  
+  function getInstallStep() {
+    if (!installProgress) return 'Installing...';
+    return installProgress.step || 'Installing...';
+  }
 </script>
 
 <div 
@@ -71,11 +92,22 @@
         <div class="connection-status status-{getStatusClass()}" class:just-started={justStarted}>
           <span class="status-dot"></span>
           <span class="status-text">{getStatusText()}</span>
+          {#if tunnel.status === 'installing' && installProgress}
+            <span class="install-percent">{getInstallPercent()}%</span>
+          {/if}
         </div>
+        {#if tunnel.status === 'installing' && installProgress}
+          <div class="install-bar">
+            <div class="install-progress" style="width: {getInstallPercent()}%"></div>
+          </div>
+          <div class="install-step">{getInstallStep()}</div>
+        {/if}
       </div>
       <div class="connection-actions">
-        {#if tunnel.status === 'running' || tunnel.status === 'starting'}
-          <button type="button" class="btn btn-stop" onclick={() => onStop(tunnel.id)}>Stop</button>
+        {#if tunnel.status === 'running' || tunnel.status === 'starting' || tunnel.status === 'installing'}
+          <button type="button" class="btn btn-stop" onclick={() => onStop(tunnel.id)} disabled={tunnel.status === 'installing'}>
+            {tunnel.status === 'installing' ? 'Wait...' : 'Stop'}
+          </button>
         {:else}
           <button type="button" class="btn btn-start" onclick={() => onStart(tunnel.id)}>Start</button>
         {/if}
@@ -216,6 +248,16 @@
     animation: pulse 1.5s infinite;
   }
 
+  .status-installing {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .status-installing .status-dot {
+    background: #3b82f6;
+    animation: pulse 1.5s infinite;
+  }
+
   @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.4; }
@@ -239,6 +281,36 @@
     background: #a8a29e;
   }
 
+  .install-percent {
+    font-weight: 600;
+    margin-left: 4px;
+  }
+
+  .install-bar {
+    width: 100%;
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+
+  .install-progress {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  .install-step {
+    font-size: 11px;
+    color: #6b7280;
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .connection-actions {
     display: flex;
     gap: 8px;
@@ -258,15 +330,20 @@
     overflow: hidden;
   }
 
-  .btn:hover {
+  .btn:hover:not(:disabled) {
     background: #f5f5f4;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0,0,0,0.08);
   }
 
-  .btn:active {
+  .btn:active:not(:disabled) {
     transform: translateY(1px);
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 
   .btn-start {
@@ -275,7 +352,7 @@
     border-color: #16a34a;
   }
 
-  .btn-start:hover {
+  .btn-start:hover:not(:disabled) {
     background: #15803d;
     border-color: #15803d;
     box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
@@ -287,7 +364,7 @@
     border-color: #dc2626;
   }
 
-  .btn-stop:hover {
+  .btn-stop:hover:not(:disabled) {
     background: #b91c1c;
     border-color: #b91c1c;
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
@@ -299,7 +376,7 @@
     background: #fef2f2;
   }
 
-  .btn-danger:hover {
+  .btn-danger:hover:not(:disabled) {
     background: #fee2e2;
     box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
   }

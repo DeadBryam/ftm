@@ -129,6 +129,7 @@ func (s *Server) Start() error {
 	}
 
 	go s.broadcastLoop()
+	go s.installProgressLoop()
 	go s.httpServer.ListenAndServe()
 	return nil
 }
@@ -184,6 +185,21 @@ func (s *Server) broadcastLoop() {
 				}
 			}
 		}
+	}
+}
+
+func (s *Server) installProgressLoop() {
+	for progress := range s.manager.DownloadProgress {
+		update := map[string]interface{}{
+			"type":       "install",
+			"provider":   string(progress.Provider),
+			"step":       progress.Step,
+			"percent":    progress.Percent,
+			"downloaded": progress.Downloaded,
+			"total":      progress.Total,
+		}
+		data, _ := json.Marshal(update)
+		s.broadcast(string(data))
 	}
 }
 
@@ -278,6 +294,11 @@ func (s *Server) listTunnels(w http.ResponseWriter) {
 			} else if status.Running {
 				item["status"] = "running"
 			}
+		}
+
+		if needsInstall, canInstall := s.manager.CheckInstallation(t.Provider); needsInstall && canInstall {
+			item["status"] = "installing"
+			item["installProgress"] = 0
 		}
 
 		result = append(result, item)
@@ -439,8 +460,23 @@ func (s *Server) startTunnel(w http.ResponseWriter, id string) {
 
 	if needsInstall, canInstall := s.manager.CheckInstallation(tunnel.Provider); needsInstall && canInstall {
 		go s.manager.InstallProvider(tunnel.Provider)
+		
+		update := map[string]interface{}{
+			"id":       tunnel.ID,
+			"status":   "installing",
+			"provider": string(tunnel.Provider),
+		}
+		data, _ := json.Marshal(update)
+		s.broadcast(string(data))
+		
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"status": "installing"})
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"id":       tunnel.ID,
+			"name":     tunnel.Name,
+			"provider": string(tunnel.Provider),
+			"port":     tunnel.LocalPort,
+			"status":   "installing",
+		})
 		return
 	}
 

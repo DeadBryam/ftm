@@ -2,12 +2,14 @@ let tunnels = $state([]);
 let loading = $state(true);
 let error = $state(null);
 let eventSource = $state(null);
+let installProgress = $state({});
 
 export function useTunnels() {
   return {
     get tunnels() { return tunnels; },
     get loading() { return loading; },
     get error() { return error; },
+    get installProgress() { return installProgress; },
     
     connect() {
       if (eventSource) return;
@@ -30,16 +32,29 @@ export function useTunnels() {
       eventSource.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
+          
+          if (msg.type === 'install') {
+            installProgress = {
+              ...installProgress,
+              [msg.provider]: {
+                step: msg.step,
+                percent: msg.percent,
+                downloaded: msg.downloaded,
+                total: msg.total
+              }
+            };
+            return;
+          }
+          
           if (!msg.id) return;
           
           const idx = tunnels.findIndex(t => t.id === msg.id);
           if (idx < 0) return;
           
           const current = tunnels[idx];
-          let newStatus = 'stopped';
-          if (msg.starting) newStatus = 'starting';
-          else if (msg.running) newStatus = 'running';
-          else if (msg.error) newStatus = 'error';
+          let newStatus = msg.status || 'stopped';
+          if (msg.running) newStatus = 'running';
+          else if (msg.starting) newStatus = 'starting';
           
           if (current.status !== newStatus || current.publicUrl !== msg.publicUrl || current.error !== msg.error) {
             tunnels = tunnels.map((t, i) => 
@@ -47,6 +62,11 @@ export function useTunnels() {
                 ? { ...t, status: newStatus, publicUrl: msg.publicUrl || t.publicUrl, error: msg.error }
                 : t
             );
+          }
+          
+          if (newStatus === 'running' && current.status !== 'running') {
+            installProgress = { ...installProgress };
+            delete installProgress[current.provider];
           }
         } catch (e) {}
       };
@@ -71,17 +91,21 @@ export function useTunnels() {
     
     async start(id) {
       const idx = tunnels.findIndex(t => t.id === id);
-      if (idx >= 0) {
-        tunnels = tunnels.map((t, i) => i === idx ? { ...t, status: 'starting' } : t);
-      }
+      if (idx < 0) return;
+      
+      const tunnel = tunnels[idx];
+      
+      tunnels = tunnels.map((t, i) => i === idx ? { ...t, status: 'starting' } : t);
       
       try {
         const res = await fetch(`/api/tunnels/${id}/start`, { method: 'POST' });
-        if (!res.ok) throw new Error('Failed to start');
-      } catch (e) {
-        if (idx >= 0) {
-          tunnels = tunnels.map((t, i) => i === idx ? { ...t, status: 'error', error: e.message } : t);
+        const data = await res.json();
+        
+        if (data.status === 'installing') {
+          tunnels = tunnels.map((t, i) => i === idx ? { ...t, status: 'installing' } : t);
         }
+      } catch (e) {
+        tunnels = tunnels.map((t, i) => i === idx ? { ...t, status: 'error', error: e.message } : t);
       }
     },
     
