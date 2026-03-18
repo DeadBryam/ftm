@@ -241,6 +241,87 @@
     --url-text: #8b4513;
   }
 
+  :root[data-theme="red"] {
+    --bg-color: #fff6f6;
+    --card-bg: #ffffff;
+    --text-color: #2b0b0b;
+    --text-heading: #1b0a09;
+    --text-muted: #6b2626;
+    --border-color: #f2dede;
+    --border-light: #fff6f6;
+    --primary-color: #dc2626;
+    --primary-hover: #b91c1c;
+    --hover-bg: #fff2f2;
+    --status-running-bg: #fee2e2;
+    --status-running-text: #7f1d1d;
+    --status-starting-bg: #fff2e6;
+    --status-starting-text: #b45309;
+    --status-installing-bg: #dbeafe;
+    --status-installing-text: #1e40af;
+    --status-error-bg: #fee2e2;
+    --status-error-text: #7f1d1d;
+    --status-stopped-bg: #fff6f6;
+    --status-stopped-text: #6b2626;
+    --logs-bg: #2b0b0b;
+    --logs-text: #f7eaea;
+    --url-bg: #fff6f6;
+    --url-text: #dc2626;
+  }
+
+  :root[data-theme="blue"] {
+    --bg-color: #f3f8ff;
+    --card-bg: #ffffff;
+    --text-color: #0b1220;
+    --text-heading: #071029;
+    --text-muted: #40577a;
+    --border-color: #e6f0ff;
+    --border-light: #f3f8ff;
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --hover-bg: #eef6ff;
+    --status-running-bg: #e6f8ef;
+    --status-running-text: #0b5132;
+    --status-starting-bg: #fff7e6;
+    --status-starting-text: #d97706;
+    --status-installing-bg: #e6f0ff;
+    --status-installing-text: #1e3a8a;
+    --status-error-bg: #ffeef0;
+    --status-error-text: #9b1b1b;
+    --status-stopped-bg: #f3f8ff;
+    --status-stopped-text: #40577a;
+    --logs-bg: #071029;
+    --logs-text: #eaf3ff;
+    --url-bg: #eef6ff;
+    --url-text: #2563eb;
+  }
+
+  :root[data-theme="dracula"] {
+    --bg-color: #282a36;
+    --card-bg: #44475a;
+    --text-color: #f8f8f2;
+    --text-heading: #f8f8f2;
+    --text-muted: #6272a4;
+    --border-color: #3a3f58;
+    --border-light: #2b2e3b;
+    --primary-color: #ff79c6;
+    --primary-hover: #ff6bb0;
+    --hover-bg: #333444;
+    --status-running-bg: #50fa7b;
+    --status-running-text: #0b2b12;
+    --status-starting-bg: #f1fa8c;
+    --status-starting-text: #2b2b0b;
+    --status-installing-bg: #8be9fd;
+    --status-installing-text: #062033;
+    --status-error-bg: #ff6b6b;
+    --status-error-text: #2b0b0b;
+    --status-stopped-bg: #3a3f58;
+    --status-stopped-text: #f8f8f2;
+    --logs-bg: #21222c;
+    --logs-text: #f8f8f2;
+    --url-bg: #333444;
+    --url-text: #8be9fd;
+  }
+
   :root[data-theme="contrast"] {
     --bg-color: #000000;
     --card-bg: #000000;
