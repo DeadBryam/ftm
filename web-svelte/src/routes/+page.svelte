@@ -297,15 +297,15 @@
 
   :root[data-theme="dracula"] {
     --bg-color: #282a36;
-    --card-bg: #313245;
+    --card-bg: #3b3a4a;
     --text-color: #f8f8f2;
     --text-heading: #f8f8f2;
-    --text-muted: #9aa0c7;
-    --border-color: #3b3f55;
-    --border-light: #2a2c35;
+    --text-muted: #b8bfd9;
+    --border-color: #454655;
+    --border-light: #2d2f39;
     --primary-color: #ff79c6;
     --primary-hover: #ff6bb0;
-    --hover-bg: #363746;
+    --hover-bg: #3e3f4b;
     --status-running-bg: #50fa7b;
     --status-running-text: #0b2b12;
     --status-starting-bg: #f1fa8c;
@@ -314,11 +314,11 @@
     --status-installing-text: #062033;
     --status-error-bg: #ff6b6b;
     --status-error-text: #2b0b0b;
-    --status-stopped-bg: #343648;
-    --status-stopped-text: #dfe1ea;
+    --status-stopped-bg: #3b3a4a;
+    --status-stopped-text: #e6e6f0;
     --logs-bg: #23232c;
     --logs-text: #e6e6e9;
-    --url-bg: #2b2e36;
+    --url-bg: #2f3139;
     --url-text: #8be9fd;
     --input-bg: #2b2d36;
     --input-text: #f8f8f2;
