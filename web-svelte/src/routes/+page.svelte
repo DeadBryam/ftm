@@ -380,6 +380,33 @@
     flex-shrink: 0;
   }
 
+  /* Inputs and form elements - ensure readable in dark themes */
+  .create-form input,
+  .create-form textarea,
+  .create-form select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
+    font-size: 14px;
+    outline: none;
+    transition: box-shadow 0.15s, border-color 0.15s;
+  }
+
+  .create-form input::placeholder,
+  .create-form textarea::placeholder {
+    color: var(--text-muted);
+  }
+
+  .create-form input:disabled,
+  .create-form textarea:disabled,
+  .create-form select:disabled {
+    background: var(--hover-bg);
+    color: var(--text-muted);
+  }
+
   @keyframes headerIn {
     to {
       opacity: 1;
