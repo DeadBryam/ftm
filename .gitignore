@@ -34,3 +34,9 @@ web-svelte/.svelte-kit/
 web-svelte/dist/
 internal/web/static/*
 !internal/web/static/.gitkeep
+
+# Logs
+.logs/
+
+# lazyload
+.lazyload/
