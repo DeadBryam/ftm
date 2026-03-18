@@ -1,12 +1,9 @@
 <script>
-  import DeleteModal from './DeleteModal.svelte';
-  
-  let { tunnel, onStart, onStop, onDelete, index = 0 } = $props();
+  let { tunnel, onStart, onStop, onDelete, onShowDelete, index = 0 } = $props();
   
   let showLogs = $state(false);
   let logs = $state('');
   let loadingLogs = $state(false);
-  let showDeleteModal = $state(false);
   let justStarted = $state(false);
   let prevStatus = $state('');
   let logsContainer = $state(null);
@@ -60,11 +57,6 @@
     }
     loadingLogs = false;
   }
-  
-  function handleDelete() {
-    showDeleteModal = false;
-    onDelete(tunnel.id);
-  }
 </script>
 
 <div 
@@ -90,7 +82,7 @@
         <button class="btn" onclick={loadLogs}>
           <span class="logs-label">{showLogs ? 'Hide' : 'Logs'}</span>
         </button>
-        <button class="btn btn-danger" onclick={() => showDeleteModal = true}>Delete</button>
+        <button class="btn btn-danger" onclick={() => onShowDelete(tunnel)}>Delete</button>
       </div>
     </div>
     {#if tunnel.publicUrl}
@@ -117,13 +109,6 @@
     </div>
   </div>
 </div>
-
-<DeleteModal 
-  show={showDeleteModal} 
-  name={tunnel.name} 
-  onConfirm={handleDelete} 
-  onCancel={() => showDeleteModal = false}
-/>
 
 <style>
   .connection-item {

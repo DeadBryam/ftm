@@ -2,10 +2,12 @@
   import { onMount, onDestroy } from 'svelte';
   import { useTunnels } from '$lib/stores/tunnels.svelte';
   import TunnelCard from '$lib/components/TunnelCard.svelte';
+  import DeleteModal from '$lib/components/DeleteModal.svelte';
   
   const store = useTunnels();
   
   let formData = $state({ name: '', provider: 'cloudflared', localPort: 30000 });
+  let deleteTunnel = $state(null);
   
   const providers = [
     { id: 'cloudflared', name: 'Cloudflared' },
@@ -28,6 +30,21 @@
     e.preventDefault();
     await store.create(formData);
     formData = { name: '', provider: 'cloudflared', localPort: 30000 };
+  }
+  
+  function handleShowDelete(tunnel) {
+    deleteTunnel = tunnel;
+  }
+  
+  function handleConfirmDelete() {
+    if (deleteTunnel) {
+      store.delete(deleteTunnel.id);
+      deleteTunnel = null;
+    }
+  }
+  
+  function handleCancelDelete() {
+    deleteTunnel = null;
   }
 </script>
 
@@ -110,6 +127,7 @@
                 onStart={store.start}
                 onStop={store.stop}
                 onDelete={store.delete}
+                onShowDelete={handleShowDelete}
               />
             {/each}
           </div>
@@ -123,6 +141,13 @@
   </footer>
 </div>
 
+<DeleteModal 
+  show={deleteTunnel !== null} 
+  name={deleteTunnel?.name || ''} 
+  onConfirm={handleConfirmDelete} 
+  onCancel={handleCancelDelete}
+/>
+
 <style>
   :global(body) {
     margin: 0;
@@ -131,22 +156,28 @@
     color: #44403c;
   }
 
+  :global(html, body) {
+    overflow: hidden;
+  }
+
   .app {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 32px 24px;
-    min-height: 100vh;
+    padding: 24px;
     display: flex;
+    flex: 1;
     flex-direction: column;
+    box-sizing: border-box;
   }
 
   .app-header {
-    margin-bottom: 48px;
-    padding-bottom: 32px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
     border-bottom: 1px solid #e7e5e4;
     opacity: 0;
     transform: translateY(-20px);
     animation: headerIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    flex-shrink: 0;
   }
 
   @keyframes headerIn {
@@ -163,23 +194,23 @@
   }
 
   .d20-badge {
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
     border-radius: 12px;
     object-fit: cover;
   }
 
   .brand-text h1 {
     font-family: 'Crimson Pro', Georgia, serif;
-    font-size: 40px;
+    font-size: 32px;
     font-weight: 700;
     color: #1c1917;
-    margin: 0 0 6px 0;
+    margin: 0 0 4px 0;
     letter-spacing: -0.01em;
   }
 
   .tagline {
-    font-size: 16px;
+    font-size: 14px;
     color: #78716c;
     margin: 0;
     font-weight: 500;
@@ -187,14 +218,25 @@
 
   .app-main {
     display: grid;
-    grid-template-columns: 380px 1fr;
-    gap: 24px;
+    grid-template-columns: 360px 1fr;
+    gap: 20px;
     flex: 1;
+    min-height: 0;
   }
 
   @media (max-width: 900px) {
     .app-main {
       grid-template-columns: 1fr;
+      overflow-y: auto;
+    }
+    
+    :global(html, body) {
+      height: auto;
+      overflow: auto;
+    }
+    
+    .app {
+      height: auto;
     }
   }
 
@@ -210,6 +252,7 @@
     opacity: 0;
     transform: translateY(30px);
     animation: panelIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    min-height: 0;
   }
 
   .create-panel {
@@ -236,14 +279,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 20px;
+    padding: 14px 18px;
     border-bottom: 1px solid #f5f5f4;
     background: #fafaf9;
+    flex-shrink: 0;
   }
 
   .panel-header h2 {
     font-family: 'Crimson Pro', Georgia, serif;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
     color: #1c1917;
     margin: 0;
@@ -252,21 +296,22 @@
   .connection-count {
     background: linear-gradient(135deg, #92400e 0%, #b45309 100%);
     color: white;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
-    padding: 3px 12px;
+    padding: 2px 10px;
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(146, 64, 14, 0.25);
   }
 
   .panel-body {
-    padding: 20px;
+    padding: 18px;
     flex: 1;
     overflow-y: auto;
+    min-height: 0;
   }
 
   .connections-scroll {
-    max-height: 600px;
+    overflow-y: auto;
   }
 
   .loading-state {
@@ -274,14 +319,14 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 60px 20px;
+    padding: 40px 20px;
     color: #78716c;
-    gap: 16px;
+    gap: 12px;
   }
 
   .spinner {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border: 2px solid #e7e5e4;
     border-top-color: #92400e;
     border-radius: 50%;
@@ -294,40 +339,41 @@
 
   .empty-state {
     text-align: center;
-    padding: 60px 20px;
+    padding: 40px 16px;
     color: #78716c;
   }
 
   .empty-state-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
+    font-size: 40px;
+    margin-bottom: 12px;
   }
 
   .empty-state h3 {
-    font-size: 18px;
+    font-size: 16px;
     color: #1c1917;
-    margin: 0 0 8px 0;
+    margin: 0 0 6px 0;
   }
 
   .empty-state p {
     margin: 0;
-    font-size: 14px;
+    font-size: 13px;
+    line-height: 1.5;
   }
 
   .connection-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
 
   .field-group {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
 
   .field-row {
     display: grid;
-    grid-template-columns: 100px 1fr;
-    gap: 12px;
+    grid-template-columns: 90px 1fr;
+    gap: 10px;
   }
 
   @media (max-width: 500px) {
@@ -336,29 +382,20 @@
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .app-header,
-    .panel {
-      animation: none;
-      opacity: 1;
-      transform: none;
-    }
-  }
-
   label {
     display: block;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     color: #57534e;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
   }
 
   input, select {
     width: 100%;
-    padding: 10px 12px;
+    padding: 8px 10px;
     border: 1px solid #d6d3d1;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 13px;
     font-family: inherit;
     background: white;
     box-sizing: border-box;
@@ -414,14 +451,15 @@
   }
 
   .app-footer {
-    margin-top: 32px;
-    padding-top: 24px;
+    margin-top: 16px;
+    padding-top: 16px;
     border-top: 1px solid #e7e5e4;
     text-align: center;
+    flex-shrink: 0;
   }
 
   .app-footer p {
-    font-size: 13px;
+    font-size: 12px;
     color: #78716c;
     margin: 0;
   }
@@ -432,6 +470,15 @@
     border-radius: 4px;
     padding: 2px 6px;
     font-family: inherit;
-    font-size: 12px;
+    font-size: 11px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app-header,
+    .panel {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
   }
 </style>
