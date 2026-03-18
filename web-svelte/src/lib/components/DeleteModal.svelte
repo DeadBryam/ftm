@@ -3,6 +3,7 @@
 </script>
 
 {#if show}
+  <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
   <div
     class="modal-overlay"
     onclick={onCancel}
@@ -18,6 +19,7 @@
         onCancel();
     }}
   >
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
     <div
       class="modal"
       onclick={(e) => e.stopPropagation()}
