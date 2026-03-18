@@ -8,8 +8,8 @@ use std::thread;
 use std::time::Duration;
 use tauri::Manager;
 
-const PORT_RANGE_START: u16 = 8080;
-const PORT_RANGE_END: u16 = 8090;
+const PORT_RANGE_START: u16 = 40500;
+const PORT_RANGE_END: u16 = 40550;
 const WEB_PORT_ENV: &str = "FOUNDRY_TUNNEL_WEB_PORT";
 
 pub fn find_or_build_binary() -> PathBuf {
@@ -20,7 +20,6 @@ pub fn find_or_build_binary() -> PathBuf {
         .unwrap()
         .to_path_buf();
 
-    // Check bin/ first, then project root
     let binary_paths = [
         project_root.join("bin").join("ftm"),
         project_root.join("ftm"),
