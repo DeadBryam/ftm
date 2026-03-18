@@ -743,8 +743,8 @@
   }
 
   kbd {
-    background: #f5f5f4;
-    border: 1px solid #d6d3d1;
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     padding: 2px 6px;
     font-family: inherit;
