@@ -11,21 +11,35 @@ VERSION_NO_V=$(echo $VERSION | sed 's/^v//')
 
 echo "Bumping version to $VERSION_NO_V..."
 
-# Update desktop/package.json
-if [ -f "desktop/package.json" ]; then
-    sed -i.bak "s/\"version\": \"[^\"]*\"/\"version\": \"$VERSION_NO_V\"/" desktop/package.json
-    rm -f desktop/package.json.bak
-    echo "✓ Updated desktop/package.json"
+# Update Makefile
+if [ -f "Makefile" ]; then
+    sed -i.bak "s/^VERSION := .*/VERSION := $VERSION_NO_V/" Makefile
+    rm -f Makefile.bak
+    echo "✓ Updated Makefile"
 fi
 
-# Update Cargo.toml
+# Update version.go
+if [ -f "internal/version/version.go" ]; then
+    sed -i.bak "s/const Version = .*/const Version = \"$VERSION_NO_V\"/" internal/version/version.go
+    rm -f internal/version/version.go.bak
+    echo "✓ Updated internal/version/version.go"
+fi
+
+# Update web-svelte/package.json
+if [ -f "web-svelte/package.json" ]; then
+    sed -i.bak "s/\"version\": \"[^\"]*\"/\"version\": \"$VERSION_NO_V\"/" web-svelte/package.json
+    rm -f web-svelte/package.json.bak
+    echo "✓ Updated web-svelte/package.json"
+fi
+
+# Update desktop/src-tauri/Cargo.toml
 if [ -f "desktop/src-tauri/Cargo.toml" ]; then
-    sed -i.bak "s/^version = \"[^\"]*\"/version = \"$VERSION_NO_V\"/" desktop/src-tauri/Cargo.toml
+    sed -i.bak "s/^version = .*/version = \"$VERSION_NO_V\"/" desktop/src-tauri/Cargo.toml
     rm -f desktop/src-tauri/Cargo.toml.bak
     echo "✓ Updated desktop/src-tauri/Cargo.toml"
 fi
 
-# Update tauri.conf.json
+# Update desktop/src-tauri/tauri.conf.json
 if [ -f "desktop/src-tauri/tauri.conf.json" ]; then
     sed -i.bak "s/\"version\": \"[^\"]*\"/\"version\": \"$VERSION_NO_V\"/" desktop/src-tauri/tauri.conf.json
     rm -f desktop/src-tauri/tauri.conf.json.bak
