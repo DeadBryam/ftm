@@ -6,9 +6,9 @@
   import { useTheme } from '$lib/stores/theme.svelte';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
-  import TunnelCard from '$lib/components/TunnelCard.svelte';
   import DeleteModal from '$lib/components/DeleteModal.svelte';
   import Toasts from '$lib/components/Toasts.svelte';
+  import ConnectionsPanel from '$lib/components/ConnectionsPanel.svelte';
   
   const store = useTunnels();
   const toast = useToast();
@@ -103,40 +103,7 @@
       </div>
     </section>
 
-    <section class="panel connections-panel">
-      <div class="panel-header">
-        <h2>Your Connections</h2>
-        <span class="connection-count">{store.tunnels.length}</span>
-      </div>
-      <div class="panel-body connections-scroll">
-        {#if store.loading}
-          <div class="loading-state">
-            <div class="spinner"></div>
-            <span>Loading connections...</span>
-          </div>
-        {:else if store.tunnels.length === 0}
-          <div class="empty-state">
-            <div class="empty-state-icon">📡</div>
-            <h3>No connections yet</h3>
-            <p>Create your first tunnel to share your Foundry VTT world with players.</p>
-          </div>
-        {:else}
-          <div class="connection-list">
-            {#each store.tunnels as tunnel, index (tunnel.id)}
-              <TunnelCard 
-                {tunnel} 
-                {index}
-                onStart={store.start}
-                onStop={store.stop}
-                onDelete={store.delete}
-                onShowDelete={handleShowDelete}
-                installProgress={store.installProgress[tunnel.provider]}
-              />
-            {/each}
-          </div>
-        {/if}
-      </div>
-    </section>
+    <ConnectionsPanel onShowDelete={handleShowDelete} />
   </main>
 
   <Footer />
@@ -268,10 +235,6 @@
     animation-delay: 0.1s;
   }
 
-  .connections-panel {
-    animation-delay: 0.2s;
-  }
-
   @keyframes panelIn {
     to {
       opacity: 1;
@@ -302,77 +265,11 @@
     margin: 0;
   }
 
-  .connection-count {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
-    color: var(--badge-text);
-    font-size: 12px;
-    font-weight: 600;
-    padding: 2px 10px;
-    border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(146, 64, 14, 0.25);
-  }
-
   .panel-body {
     padding: 18px;
     flex: 1;
     overflow-y: auto;
     min-height: 0;
-  }
-
-  .connections-scroll {
-    overflow-y: auto;
-  }
-
-  .loading-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-    color: var(--text-muted);
-    gap: 12px;
-  }
-
-  .spinner {
-    width: 28px;
-    height: 28px;
-    border: 2px solid var(--border-color);
-    border-top-color: var(--primary-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 40px 16px;
-    color: var(--text-muted);
-  }
-
-  .empty-state-icon {
-    font-size: 40px;
-    margin-bottom: 12px;
-  }
-
-  .empty-state h3 {
-    font-size: 16px;
-    color: var(--text-heading);
-    margin: 0 0 6px 0;
-  }
-
-  .empty-state p {
-    margin: 0;
-    font-size: 13px;
-    line-height: 1.5;
-  }
-
-  .connection-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
   }
 
   .field-group {
