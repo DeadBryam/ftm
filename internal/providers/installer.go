@@ -112,7 +112,7 @@ func (i *Installer) playitggURL() (string, error) {
 
 	switch os {
 	case "darwin":
-		return "", fmt.Errorf("playit.gg no tiene build para macOS. Usa Cloudflared o instala manualmente con: brew install playit")
+		return "", fmt.Errorf("playit.gg does not have a build for macOS. Use Cloudflared or install manually with: brew install playit")
 	case "linux":
 		if arch == "arm64" {
 			return "https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-linux-aarch64", nil
