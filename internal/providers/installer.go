@@ -42,7 +42,7 @@ func (i *Installer) EnsureInstalled(p Provider) (string, error) {
 
 	switch p.Name() {
 	case "Playit.gg":
-		return i.installPlayitgg()
+		return i.installPlayitgg(p)
 	case "Cloudflare Tunnel":
 		return i.installCloudflared(p)
 	case "Tunnelmole":
@@ -52,13 +52,13 @@ func (i *Installer) EnsureInstalled(p Provider) (string, error) {
 	}
 }
 
-func (i *Installer) installPlayitgg() (string, error) {
+func (i *Installer) installPlayitgg(p Provider) (string, error) {
 	url, err := i.playitggURL()
 	if err != nil {
 		return "", err
 	}
 
-	binPath := filepath.Join(i.binDir, "playit")
+	binPath := filepath.Join(i.binDir, p.BinaryName())
 
 	if err := i.downloadBinary(url, binPath); err != nil {
 		return "", fmt.Errorf("download failed: %w", err)
