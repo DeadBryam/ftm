@@ -94,17 +94,12 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install Tauri CLI
-        run: |
-          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall.sh | bash
-          cargo binstall tauri-cli@^2 -y
-
-      - name: Install dependencies (Linux)
+      - name: Install Linux deps
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-      
+
       - name: Build web frontend
         shell: bash
         run: |
@@ -123,12 +118,12 @@ jobs:
           else
             CARGO_MANIFEST_DIR=$(pwd) go build -ldflags "-s -w" -o bin/ftm ../../cmd/ftm
           fi
-      
+
       - name: Build Tauri
         run: |
           cd desktop/src-tauri
-          cargo tauri build
-      
+          bunx @tauri-apps/cli build
+          
       - name: Upload artifact (Linux)
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
