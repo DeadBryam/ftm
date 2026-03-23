@@ -8,14 +8,26 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"foundry-tunnel/internal/config"
 	"foundry-tunnel/internal/providers"
 )
 
+const errRosettaNeeded = "tunnelmole requires Rosetta 2 to run on Apple Silicon. Install it with: softwareupdate --install-rosetta"
+
+func RosettaInstalled() bool {
+	_, err := os.Stat("/Library/Apple/usr/libexec/oah")
+	return err == nil
+}
+
+func needsRosetta(err string) bool {
+	return strings.Contains(err, "bad CPU type") || strings.Contains(err, "executable")
+}
+
 type TunnelmoleProvider struct {
-	installer *BunInstaller
+	installer *Installer
 }
 
 func New() providers.Provider {
@@ -23,10 +35,10 @@ func New() providers.Provider {
 	if configDir == "" {
 		configDir = "."
 	}
-	baseDir := filepath.Join(configDir, ".config", "foundry-tunnel")
+	baseDir := filepath.Join(configDir, ".config", "foundry-tunnel", "bin")
 
 	return &TunnelmoleProvider{
-		installer: NewBunInstaller(baseDir),
+		installer: NewInstaller(baseDir),
 	}
 }
 
@@ -111,6 +123,18 @@ func (p *TunnelmoleProvider) Start(ctx context.Context, tunnel config.TunnelConf
 
 	if err := cmd.Start(); err != nil {
 		cancel()
+		if needsRosetta(err.Error()) && runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
+			if !RosettaInstalled() {
+				return nil, fmt.Errorf("%w: %s", fmt.Errorf("rosetta required"), errRosettaNeeded)
+			}
+			cmd = exec.CommandContext(ctx, "/Library/Apple/usr/libexec/oah", append([]string{"-r", binary}, args...)...)
+			cmd.Stdout = logWriter
+			cmd.Stderr = logWriter
+			if err := cmd.Start(); err != nil {
+				return nil, fmt.Errorf("failed to start tunnelmole: %w", err)
+			}
+			return &providers.Process{Cancel: cancel}, nil
+		}
 		return nil, fmt.Errorf("failed to start tunnelmole: %w", err)
 	}
 

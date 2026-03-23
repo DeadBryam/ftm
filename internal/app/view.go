@@ -615,12 +615,10 @@ func (m *Model) viewDownloading() string {
 
 	var step string
 	switch {
-	case percent < 45:
-		step = "Downloading Bun..."
-	case percent < 50:
-		step = "Extracting..."
+	case percent < 90:
+		step = "Downloading tunnelmole..."
 	case percent < 100:
-		step = "Installing tunnelmole via Bun..."
+		step = "Installing tunnelmole..."
 	default:
 		step = "Complete!"
 	}
