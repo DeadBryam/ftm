@@ -1,6 +1,6 @@
 {
   "name": "foundry-tunnel-web",
-  "version": "0.6.0a",
+  "version": "0.6.0b",
   "private": true,
   "type": "module",
   "scripts": {
