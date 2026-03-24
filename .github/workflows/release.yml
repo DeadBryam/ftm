@@ -78,9 +78,6 @@ jobs:
           - os: macos-latest
             suffix: darwin
             platform: darwin/arm64
-          - os: macos-13
-            suffix: darwin-amd64
-            platform: darwin/amd64
           - os: ubuntu-latest
             suffix: linux
             platform: linux/amd64
@@ -109,7 +106,7 @@ jobs:
 
       - name: Install Wails (Windows)
         if: matrix.os == 'windows-latest'
-        run: winget install Wails.Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
       - name: Install Linux deps
         if: matrix.os == 'ubuntu-latest'
