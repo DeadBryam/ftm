@@ -436,6 +436,7 @@ func (m *Model) renderHelpBar() string {
 		"a add",
 		"l logs",
 		"w web",
+		"o open config",
 		"q quit",
 	}
 

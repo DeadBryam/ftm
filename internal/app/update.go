@@ -138,6 +138,9 @@ func (m *Model) handleListKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case key.Matches(msg, m.Keys.Web):
 		m.openDashboard()
 
+	case key.Matches(msg, m.Keys.Config):
+		m.openConfigDir()
+
 	case key.Matches(msg, m.Keys.Add):
 		m.State = viewAddForm
 		m.FormFocus = 0
@@ -352,6 +355,14 @@ func (m *Model) openDashboard() {
 	m.showMessage("Dashboard opened in browser 🌐")
 }
 
+func (m *Model) openConfigDir() {
+	if err := m.App.OpenConfigDir(); err != nil {
+		m.showMessage("Error opening config folder: " + err.Error())
+		return
+	}
+	m.showMessage("Config folder opened 📁")
+}
+
 func (k KeyMap) ShortHelp() []key.Binding {
 	return []key.Binding{k.Help, k.Quit}
 }
@@ -360,7 +371,7 @@ func (k KeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.Up, k.Down, k.Enter},
 		{k.Toggle, k.Logs, k.Copy, k.Web},
-		{k.Add, k.Delete},
+		{k.Add, k.Delete, k.Config},
 		{k.Back, k.Help, k.Quit},
 	}
 }

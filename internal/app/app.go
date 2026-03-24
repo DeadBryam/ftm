@@ -80,6 +80,19 @@ func (a *App) OpenDashboard() error {
 	}
 }
 
+func (a *App) OpenConfigDir() error {
+	path := config.ConfigDir()
+
+	switch runtime.GOOS {
+	case "darwin":
+		return exec.Command("open", path).Start()
+	case "windows":
+		return exec.Command("explorer", path).Start()
+	default:
+		return exec.Command("xdg-open", path).Start()
+	}
+}
+
 func (a *App) createDefaultTunnels() {
 	a.Config.Tunnels = []config.TunnelConfig{
 		{

@@ -36,6 +36,7 @@ type KeyMap struct {
 	Web    key.Binding
 	Add    key.Binding
 	Delete key.Binding
+	Config key.Binding
 	Back   key.Binding
 	Quit   key.Binding
 	Help   key.Binding
@@ -77,6 +78,10 @@ var DefaultKeys = KeyMap{
 	Delete: key.NewBinding(
 		key.WithKeys("d"),
 		key.WithHelp("d", "delete"),
+	),
+	Config: key.NewBinding(
+		key.WithKeys("o"),
+		key.WithHelp("o", "open config"),
 	),
 	Back: key.NewBinding(
 		key.WithKeys("esc", "b"),
