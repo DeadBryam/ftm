@@ -125,7 +125,7 @@ jobs:
           cp desktop/icon.png desktop/build/appicon.png
 
       - name: Build Desktop
-        run: cd desktop && wails build -s -platform ${{ matrix.platform }}
+        run: cd desktop && wails build -s -platform ${{ matrix.platform }} -tags webkit2_41
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
