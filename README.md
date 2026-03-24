@@ -23,7 +23,10 @@ Share your Foundry VTT world with players anywhere. No port forwarding needed.
 
 Access at `http://localhost:40500` 
 
-> **Desktop App (Wails)**: Native desktop application with embedded web server. Runs the web dashboard as a native app.
+### Desktop App
+![Desktop](docs/desktop.webp)
+
+Native desktop application with embedded web server.
 
 ## Installation
 
