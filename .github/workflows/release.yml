@@ -105,11 +105,7 @@ jobs:
 
       - name: Install Wails (Linux)
         if: matrix.os == 'ubuntu-latest'
-        run: |
-          curl -sSL https://github.com/wailsapp/wails/releases/download/v2.11.0/wails-linux-amd64.tar.gz -o wails.tar.gz
-          tar -xzf wails.tar.gz
-          sudo mv wails-linux-amd64/wails /usr/local/bin/
-          rm -rf wails.tar.gz wails-linux-amd64
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
       - name: Install Wails (Windows)
         if: matrix.os == 'windows-latest'
