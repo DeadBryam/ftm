@@ -11,17 +11,6 @@ Share your Foundry VTT world with players anywhere. No port forwarding needed.
 - **Real-time updates**: Live status changes
 - **Theming**: Multiple themes for web dashboard
 
-## Quick Start
-
-```bash
-# Install
-go install github.com/deadbryam/ftm@latest
-
-# Run
-ftm              # TUI
-ftm --web        # Web dashboard only
-```
-
 **TUI shortcuts:** `↑/↓` navigate, `s` start/stop, `l` logs, `c` copy URL, `w` web, `o` open config, `a` add, `d` delete, `q` quit
 
 ## Interfaces
@@ -35,6 +24,51 @@ ftm --web        # Web dashboard only
 Access at `http://localhost:40500` 
 
 > **Desktop App (Tauri)**: Temporarily removed from build pipeline. Use the TUI or Web dashboard instead.
+
+## Installation
+
+### Option 1: Binary Download
+
+Download a prebuilt binary for your platform from [GitHub Releases](https://github.com/deadbryam/ftm/releases/latest).
+
+| Platform | Download |
+|----------|----------|
+| Windows | `ftm-windows-x64.exe` |
+| Linux x64 | `ftm-linux-x64` |
+| Linux ARM64 | `ftm-linux-arm64` |
+| macOS Intel | `ftm-macos-x64` |
+| macOS Apple Silicon | `ftm-macos-arm64` |
+
+Then run:
+
+```bash
+# Linux / macOS
+chmod +x ftm-*
+sudo mv ftm-* /usr/local/bin/ftm
+ftm
+
+# Windows
+.\ftm-windows-x64.exe
+```
+
+For macOS Apple Silicon, you may need to remove the quarantine attribute:
+```bash
+xattr -d com.apple.quarantine /usr/local/bin/ftm
+```
+
+### Option 2: Go
+
+```bash
+go install github.com/deadbryam/ftm@latest
+```
+
+### Run
+
+```bash
+ftm              # TUI
+ftm --web        # Web dashboard only
+```
+
 
 ## Build from Source
 
