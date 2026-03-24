@@ -23,7 +23,7 @@ Share your Foundry VTT world with players anywhere. No port forwarding needed.
 
 Access at `http://localhost:40500` 
 
-> **Desktop App (Tauri)**: Temporarily removed from build pipeline. Use the TUI or Web dashboard instead.
+> **Desktop App (Wails)**: Native desktop application with embedded web server. Runs the web dashboard as a native app.
 
 ## Installation
 
@@ -37,7 +37,9 @@ This automatically detects your OS and architecture, downloads the correct binar
 
 ### Option 2: Manual Download
 
-Download a prebuilt binary from [GitHub Releases](https://github.com/sthbryan/ftm/releases/latest).
+Download a prebuilt binary or app from [GitHub Releases](https://github.com/sthbryan/ftm/releases/latest).
+
+#### CLI
 
 | Platform | File |
 |----------|------|
@@ -59,6 +61,19 @@ For macOS Apple Silicon, you may need to remove the quarantine attribute:
 xattr -d com.apple.quarantine /usr/local/bin/ftm
 ```
 
+#### Desktop App
+
+| Platform | File |
+|----------|------|
+| Windows | `ftm-desktop-windows.exe` |
+| Linux | `ftm-desktop-linux` |
+| macOS | `ftm-desktop-macos.app.zip` (extract and run) |
+
+For macOS, you may need to remove the quarantine attribute before running:
+```bash
+xattr -d com.apple.quarantine ftm-desktop-macos.app
+```
+
 ### Option 3: Go
 
 ```bash
@@ -78,15 +93,30 @@ ftm --web        # Web dashboard only
 **Requirements:**
 - Go 1.21+
 - Bun 1.3+ (for building web frontend)
+- Wails (for desktop app)
+
+### CLI
 
 ```bash
-# Clone
 git clone https://github.com/sthbryan/ftm.git
 cd ftm
 
-# Build CLI & Web
+# Build CLI
 go build -o ftm ./cmd/ftm
 ```
+
+### Desktop App
+
+```bash
+# Install Wails
+go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+# Build desktop app
+cd desktop
+wails build -s
+```
+
+The built app will be in `desktop/build/bin/`.
 
 ## Contributing
 
