@@ -37,4 +37,4 @@ jobs:
         run: go build -v $(go list ./... | grep -v /desktop/)
       
       - name: Test
-        run: go test -v ./...
+        run: go test -v $(go list ./... | grep -v /desktop/)
