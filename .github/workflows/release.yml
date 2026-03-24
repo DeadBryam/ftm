@@ -127,11 +127,27 @@ jobs:
       - name: Build Desktop
         run: cd desktop && wails build -s -platform ${{ matrix.platform }} -tags webkit2_41
 
+      - name: Cleanup and standardize names
+        shell: bash
+        run: |
+          cd desktop/build/bin
+          # Remove unwanted files
+          rm -f iconfile.icns Info.plist
+          # Remove standalone binary if .app exists (macOS)
+          if [ -d "ftm.app" ]; then
+            rm -f "Foundry Tunnel Manager"
+            mv "ftm.app" "Foundry Tunnel Manager - macOS.app"
+          elif [ -f "Foundry Tunnel Manager.exe" ]; then
+            mv "Foundry Tunnel Manager.exe" "Foundry Tunnel Manager - Windows.exe"
+          elif [ -f "Foundry Tunnel Manager" ]; then
+            mv "Foundry Tunnel Manager" "Foundry Tunnel Manager - Linux"
+          fi
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ftm-desktop-${{ matrix.suffix }}
-          path: desktop/build/bin/*
+          path: desktop/build/bin
 
   release:
     name: Create Release

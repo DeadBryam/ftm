@@ -1,7 +1,7 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
   "name": "ftm",
-  "outputfilename": "Foundry Tunnel Manager",
+  "outputfilename": "ftm",
   "frontend": "../web-svelte",
   "frontend:install": "cd ../web-svelte && bun install",
   "frontend:build": "cd ../web-svelte && bun run build && cp -r ../web-svelte/dist/* ../desktop/frontend/dist/",
