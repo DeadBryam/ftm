@@ -53,6 +53,7 @@ func (i *Installer) Install(progress chan<- providers.DownloadProgress) error {
 			Percent: 10,
 			Current: 0,
 			Total:   100,
+			Name:    "tunnelmole",
 		}
 	}
 
@@ -76,6 +77,7 @@ func (i *Installer) Install(progress chan<- providers.DownloadProgress) error {
 		progress <- providers.DownloadProgress{
 			Percent: 100,
 			Done:    true,
+			Name:    "tunnelmole",
 		}
 	}
 
@@ -127,6 +129,7 @@ func (i *Installer) download(url, dest string, progress chan<- providers.Downloa
 					Percent: percent,
 					Current: downloaded,
 					Total:   total,
+					Name:    "tunnelmole",
 				}
 			}
 		}

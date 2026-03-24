@@ -150,11 +150,15 @@ func (i *Installer) cloudflaredURL() (string, error) {
 }
 
 func (i *Installer) downloadBinary(url, dest string) error {
-	return downloadWithProgress(url, dest, i.progress)
+	binName := filepath.Base(dest)
+	binName = strings.TrimSuffix(binName, filepath.Ext(binName))
+	return downloadWithProgress(url, dest, i.progress, binName)
 }
 
 func (i *Installer) downloadFile(url, dest string) error {
-	return downloadWithProgress(url, dest, i.progress)
+	binName := filepath.Base(dest)
+	binName = strings.TrimSuffix(binName, filepath.Ext(binName))
+	return downloadWithProgress(url, dest, i.progress, binName)
 }
 
 func (i *Installer) extractTgz(src, dest string) error {

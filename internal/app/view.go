@@ -647,13 +647,17 @@ func (m *Model) viewDownloading() string {
 	b.WriteString("\n\n")
 
 	percent := m.DownloadProgress.Percent
+	name := m.DownloadProgress.Name
+	if name == "" {
+		name = "binary"
+	}
 
 	var step string
 	switch {
 	case percent < 90:
-		step = "Downloading tunnelmole..."
+		step = fmt.Sprintf("Downloading %s...", name)
 	case percent < 100:
-		step = "Installing tunnelmole..."
+		step = fmt.Sprintf("Installing %s...", name)
 	default:
 		step = "Complete!"
 	}

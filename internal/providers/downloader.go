@@ -14,9 +14,10 @@ type DownloadProgress struct {
 	Percent float64
 	Done    bool
 	Error   error
+	Name    string
 }
 
-func downloadWithProgress(url, dest string, progress chan<- DownloadProgress) error {
+func downloadWithProgress(url, dest string, progress chan<- DownloadProgress, name string) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
@@ -56,6 +57,7 @@ func downloadWithProgress(url, dest string, progress chan<- DownloadProgress) er
 					Current: current,
 					Percent: float64(current) / float64(total) * 100,
 					Done:    false,
+					Name:    name,
 				}
 			}
 		}
