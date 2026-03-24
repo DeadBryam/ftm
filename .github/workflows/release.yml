@@ -131,16 +131,16 @@ jobs:
         shell: bash
         run: |
           cd desktop/build/bin
-          # Remove unwanted files
           rm -f iconfile.icns Info.plist
-          # Remove standalone binary if .app exists (macOS)
           if [ -d "ftm.app" ]; then
-            rm -f "Foundry Tunnel Manager"
-            mv "ftm.app" "Foundry Tunnel Manager - macOS.app"
-          elif [ -f "Foundry Tunnel Manager.exe" ]; then
-            mv "Foundry Tunnel Manager.exe" "Foundry Tunnel Manager - Windows.exe"
-          elif [ -f "Foundry Tunnel Manager" ]; then
-            mv "Foundry Tunnel Manager" "Foundry Tunnel Manager - Linux"
+            rm -f ftm-desktop
+            mv "ftm.app" "ftm-desktop-macos.app"
+            zip -r ftm-desktop-macos.app.zip ftm-desktop-macos.app
+            rm -rf ftm-desktop-macos.app
+          elif [ -f "ftm-desktop.exe" ]; then
+            mv "ftm-desktop.exe" "ftm-desktop-windows.exe"
+          elif [ -f "ftm-desktop" ]; then
+            mv "ftm-desktop" "ftm-desktop-linux"
           fi
 
       - name: Upload artifact
