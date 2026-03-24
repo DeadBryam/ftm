@@ -312,6 +312,18 @@ func (m *Manager) IsRunning(tunnelID string) bool {
 	return ok && (mp.Status.State == config.TunnelStateOnline || mp.Status.State == config.TunnelStateConnecting || mp.Status.State == config.TunnelStateStarting)
 }
 
+func (m *Manager) StopAll() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for tunnelID := range m.processes {
+		if mp, ok := m.processes[tunnelID]; ok && mp.Process != nil && mp.Process.Cancel != nil {
+			mp.Process.Cancel()
+		}
+	}
+	m.processes = make(map[string]*ManagedProcess)
+}
+
 type urlCaptureWriter struct {
 	provider providers.Provider
 	onURL    func(string)

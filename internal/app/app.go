@@ -109,3 +109,12 @@ func (a *App) createDefaultTunnels() {
 func (a *App) SaveConfig() error {
 	return a.Config.Save()
 }
+
+func (a *App) Shutdown() {
+	if a.WebServer != nil {
+		a.WebServer.Stop()
+	}
+	if a.Manager != nil {
+		a.Manager.StopAll()
+	}
+}
