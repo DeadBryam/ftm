@@ -42,14 +42,6 @@ func (p *SSHProvider) BinaryName() string {
 	return "ssh"
 }
 
-func (p *SSHProvider) InstallURL() string {
-	return ""
-}
-
-func (p *SSHProvider) RequiresAuth() bool {
-	return false
-}
-
 func (p *SSHProvider) FindBinary() string {
 	if path, err := exec.LookPath("ssh"); err == nil {
 		return path

@@ -36,14 +36,6 @@ func (p *PlayitggProvider) BinaryName() string {
 	return "playit"
 }
 
-func (p *PlayitggProvider) InstallURL() string {
-	return "https://playit.gg/download"
-}
-
-func (p *PlayitggProvider) RequiresAuth() bool {
-	return false
-}
-
 func (p *PlayitggProvider) FindBinary() string {
 	if path, err := exec.LookPath(p.BinaryName()); err == nil {
 		return path

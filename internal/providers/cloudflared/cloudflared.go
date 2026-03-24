@@ -42,14 +42,6 @@ func (p *CloudflaredProvider) BinaryName() string {
 	return "cloudflared"
 }
 
-func (p *CloudflaredProvider) InstallURL() string {
-	return "https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/"
-}
-
-func (p *CloudflaredProvider) RequiresAuth() bool {
-	return false
-}
-
 func (p *CloudflaredProvider) FindBinary() string {
 	if path, err := exec.LookPath(p.BinaryName()); err == nil {
 		return path

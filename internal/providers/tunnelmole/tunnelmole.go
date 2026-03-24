@@ -50,14 +50,6 @@ func (p *TunnelmoleProvider) BinaryName() string {
 	return "tunnelmole"
 }
 
-func (p *TunnelmoleProvider) InstallURL() string {
-	return "https://tunnelmole.com/downloads"
-}
-
-func (p *TunnelmoleProvider) RequiresAuth() bool {
-	return false
-}
-
 func (p *TunnelmoleProvider) IsInstalled() bool {
 
 	if _, err := exec.LookPath("tmole"); err == nil {

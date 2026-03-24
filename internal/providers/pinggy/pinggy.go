@@ -38,14 +38,6 @@ func (p *PinggyCliProvider) BinaryName() string {
 	return "pinggy"
 }
 
-func (p *PinggyCliProvider) InstallURL() string {
-	return "https://pinggy.io/cli/"
-}
-
-func (p *PinggyCliProvider) RequiresAuth() bool {
-	return false
-}
-
 func (p *PinggyCliProvider) IsInstalled() bool {
 	if _, err := exec.LookPath("pinggy"); err == nil {
 		return true
