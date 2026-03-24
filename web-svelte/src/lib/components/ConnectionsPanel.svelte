@@ -1,6 +1,7 @@
 <script>
   import { useTunnels } from '$lib/stores/tunnels.svelte';
   import TunnelCard from './TunnelCard.svelte';
+  import { Radio } from 'lucide-svelte';
 
   let { onShowDelete } = $props();
 
@@ -20,7 +21,7 @@
       </div>
     {:else if store.tunnels.length === 0}
       <div class="empty-state">
-        <div class="empty-state-icon">📡</div>
+        <Radio class="empty-state-icon" size={48} />
         <h3>No connections yet</h3>
         <p>Create your first tunnel to share your Foundry VTT world with players.</p>
       </div>
@@ -139,8 +140,8 @@
     color: var(--text-muted);
   }
 
-  .empty-state-icon {
-    font-size: 40px;
+  :global(.empty-state-icon) {
+    color: var(--text-muted);
     margin-bottom: 12px;
   }
 

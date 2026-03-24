@@ -1,5 +1,6 @@
 <script>
   import { useToast } from '$lib/stores/toast.svelte';
+  import { Copy, AlertCircle } from 'lucide-svelte';
   
   let { tunnel, onStart, onStop, onShowDelete, index = 0, installProgress = null } = $props();
   
@@ -123,21 +124,14 @@
     </div>
     {#if tunnel.publicUrl}
       <button type="button" class="connection-url-row" onclick={() => copyUrl(tunnel.publicUrl)}>
-        <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-        </svg>
+        <Copy class="copy-icon" size={16} />
         <span class="url-text">{tunnel.publicUrl}</span>
         <span class="copy-hint">Click to copy</span>
       </button>
     {/if}
     {#if tunnel.errorMessage}
       <div class="error-row">
-        <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
+        <AlertCircle class="error-icon" size={16} />
         <span class="error-text">{tunnel.errorMessage}</span>
       </div>
     {/if}
@@ -488,8 +482,6 @@
   }
 
   .copy-icon {
-    width: 14px;
-    height: 14px;
     color: var(--text-muted, #78716c);
     flex-shrink: 0;
   }
@@ -526,8 +518,6 @@
   }
 
   .error-icon {
-    width: 14px;
-    height: 14px;
     flex-shrink: 0;
   }
 
