@@ -16,12 +16,18 @@ import (
 )
 
 type CloudflaredProvider struct {
-	installer *providers.Installer
+	installer *Installer
 }
 
 func New() providers.Provider {
+	configDir, _ := os.UserHomeDir()
+	if configDir == "" {
+		configDir = "."
+	}
+	baseDir := filepath.Join(configDir, ".config", "foundry-tunnel", "bin")
+
 	return &CloudflaredProvider{
-		installer: providers.NewInstaller(),
+		installer: NewInstaller(baseDir),
 	}
 }
 
@@ -49,9 +55,12 @@ func (p *CloudflaredProvider) FindBinary() string {
 		return path
 	}
 
+	if p.installer.IsInstalled() {
+		return p.installer.CloudflaredBin()
+	}
+
 	home, _ := os.UserHomeDir()
 	candidates := []string{
-		filepath.Join(p.installer.BinDir(), p.BinaryName()),
 		filepath.Join(home, ".cloudflared", p.BinaryName()),
 		"/usr/local/bin/" + p.BinaryName(),
 		"/usr/bin/" + p.BinaryName(),
@@ -76,11 +85,10 @@ func (p *CloudflaredProvider) FindBinary() string {
 func (p *CloudflaredProvider) Start(ctx context.Context, tunnel config.TunnelConfig, logWriter io.Writer) (*providers.Process, error) {
 	binary := p.FindBinary()
 	if binary == "" {
-		var err error
-		binary, err = p.installer.EnsureInstalled(p)
-		if err != nil {
+		if err := p.installer.Install(nil); err != nil {
 			return nil, fmt.Errorf("failed to install cloudflared: %w", err)
 		}
+		binary = p.installer.CloudflaredBin()
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
