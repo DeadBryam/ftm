@@ -31,6 +31,26 @@ desktop: build-web
 desktop-package: build-web
 	cd $(DESKTOP_DIR) && wails build -s
 
+desktop-all: build-web
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform darwin/universal
+
+desktop-darwin-arm64: build-web
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform darwin/arm64
+
+desktop-darwin-amd64: build-web
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform darwin/amd64
+
+desktop-linux-amd64: build-web
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform linux/amd64
+
+desktop-windows-amd64: build-web
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform windows/amd64
+
+desktop-all-full: build-web
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform darwin/universal
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform linux/amd64
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform windows/amd64
+
 run:
 	go run $(CMD)
 
