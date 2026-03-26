@@ -65,9 +65,7 @@ install() {
     echo "Making executable..."
     chmod +x "$tmpfile"
 
-    if [ -d "$INSTALL_DIR" ]; then
-        mkdir -p "$INSTALL_DIR"
-    fi
+    mkdir -p "$INSTALL_DIR"
 
     echo "Installing to $INSTALL_DIR/$BINARY_NAME..."
     mv "$tmpfile" "$INSTALL_DIR/$BINARY_NAME"
