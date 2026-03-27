@@ -30,7 +30,6 @@
   
   const providerNames = {
     cloudflared: 'Cloudflared',
-    playitgg: 'Playit.gg',
     tunnelmole: 'Tunnelmole',
     localhostrun: 'localhost.run',
     serveo: 'Serveo',

@@ -41,8 +41,6 @@ func (i *Installer) EnsureInstalled(p Provider) (string, error) {
 	}
 
 	switch p.Name() {
-	case "Playit.gg":
-		return i.installPlayitgg(p)
 	case "Cloudflare Tunnel":
 		return i.installCloudflared(p)
 	case "Tunnelmole":
@@ -50,21 +48,6 @@ func (i *Installer) EnsureInstalled(p Provider) (string, error) {
 	default:
 		return "", fmt.Errorf("auto-install not supported for %s", p.Name())
 	}
-}
-
-func (i *Installer) installPlayitgg(p Provider) (string, error) {
-	url, err := i.playitggURL()
-	if err != nil {
-		return "", err
-	}
-
-	binPath := filepath.Join(i.binDir, p.BinaryName())
-
-	if err := i.downloadBinary(url, binPath); err != nil {
-		return "", fmt.Errorf("download failed: %w", err)
-	}
-
-	return binPath, nil
 }
 
 func (i *Installer) installCloudflared(p Provider) (string, error) {
@@ -104,25 +87,6 @@ func (i *Installer) installCloudflared(p Provider) (string, error) {
 
 func (i *Installer) installTunnelmole() (string, error) {
 	return "", fmt.Errorf("tunnelmole requires bun. Run: bun install -g tunnelmole")
-}
-
-func (i *Installer) playitggURL() (string, error) {
-	os := runtime.GOOS
-	arch := runtime.GOARCH
-
-	switch os {
-	case "darwin":
-		return "", fmt.Errorf("playit.gg does not have a build for macOS. Use Cloudflared or install manually with: brew install playit")
-	case "linux":
-		if arch == "arm64" {
-			return "https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-linux-aarch64", nil
-		}
-		return "https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-linux-amd64", nil
-	case "windows":
-		return "https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-windows-x86_64.exe", nil
-	default:
-		return "", fmt.Errorf("unsupported OS: %s", os)
-	}
 }
 
 func (i *Installer) cloudflaredURL() (string, error) {

@@ -3,7 +3,6 @@ package config
 type Provider string
 
 const (
-	ProviderPlayitgg     Provider = "playitgg"
 	ProviderCloudflared  Provider = "cloudflared"
 	ProviderTunnelmole   Provider = "tunnelmole"
 	ProviderLocalhostRun Provider = "localhostrun"

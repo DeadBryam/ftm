@@ -636,7 +636,6 @@ func (s *Server) handleStatus(w http.ResponseWriter) {
 func (s *Server) handleProviders(w http.ResponseWriter) {
 	providers := []map[string]string{
 		{"id": "cloudflared", "name": "Cloudflared"},
-		{"id": "playitgg", "name": "Playit.gg"},
 		{"id": "tunnelmole", "name": "Tunnelmole"},
 		{"id": "localhostrun", "name": "localhost.run"},
 		{"id": "serveo", "name": "Serveo"},
@@ -673,7 +672,6 @@ func (s *Server) handleDetectPort(w http.ResponseWriter) {
 func providerName(p config.Provider) string {
 	names := map[config.Provider]string{
 		config.ProviderCloudflared:  "Cloudflared",
-		config.ProviderPlayitgg:     "Playit.gg",
 		config.ProviderLocalhostRun: "localhost.run",
 		config.ProviderServeo:       "Serveo",
 		config.ProviderPinggy:       "Pinggy",

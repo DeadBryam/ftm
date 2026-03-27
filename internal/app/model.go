@@ -172,7 +172,7 @@ func NewModel(app *App) *Model {
 		Cursor:      0,
 		ProgressBar: p,
 		FormValues: FormData{
-			Provider: string(config.ProviderPlayitgg),
+			Provider: string(config.ProviderCloudflared),
 			Port:     "30000",
 		},
 	}

@@ -151,7 +151,7 @@ func (m *Model) handleListKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.State = viewAddForm
 		m.FormFocus = 0
 		m.FormValues = FormData{
-			Provider: string(config.ProviderPlayitgg),
+			Provider: string(config.ProviderCloudflared),
 			Port:     "30000",
 		}
 
@@ -239,8 +239,6 @@ func (m *Model) handleFormInput(s string) {
 		switch s {
 		case "right":
 			switch m.FormValues.Provider {
-			case string(config.ProviderPlayitgg):
-				m.FormValues.Provider = string(config.ProviderCloudflared)
 			case string(config.ProviderCloudflared):
 				m.FormValues.Provider = string(config.ProviderTunnelmole)
 			case string(config.ProviderTunnelmole):
@@ -250,13 +248,13 @@ func (m *Model) handleFormInput(s string) {
 			case string(config.ProviderServeo):
 				m.FormValues.Provider = string(config.ProviderPinggy)
 			case string(config.ProviderPinggy):
-				m.FormValues.Provider = string(config.ProviderPlayitgg)
+				m.FormValues.Provider = string(config.ProviderCloudflared)
 			default:
-				m.FormValues.Provider = string(config.ProviderPlayitgg)
+				m.FormValues.Provider = string(config.ProviderCloudflared)
 			}
 		case "left":
 			switch m.FormValues.Provider {
-			case string(config.ProviderPlayitgg):
+			case string(config.ProviderCloudflared):
 				m.FormValues.Provider = string(config.ProviderPinggy)
 			case string(config.ProviderPinggy):
 				m.FormValues.Provider = string(config.ProviderServeo)
@@ -266,10 +264,8 @@ func (m *Model) handleFormInput(s string) {
 				m.FormValues.Provider = string(config.ProviderTunnelmole)
 			case string(config.ProviderTunnelmole):
 				m.FormValues.Provider = string(config.ProviderCloudflared)
-			case string(config.ProviderCloudflared):
-				m.FormValues.Provider = string(config.ProviderPlayitgg)
 			default:
-				m.FormValues.Provider = string(config.ProviderPlayitgg)
+				m.FormValues.Provider = string(config.ProviderCloudflared)
 			}
 		}
 

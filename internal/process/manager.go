@@ -13,7 +13,6 @@ import (
 	"github.com/sthbryan/ftm/internal/providers"
 	"github.com/sthbryan/ftm/internal/providers/cloudflared"
 	"github.com/sthbryan/ftm/internal/providers/pinggy"
-	"github.com/sthbryan/ftm/internal/providers/playitgg"
 	"github.com/sthbryan/ftm/internal/providers/ssh"
 	"github.com/sthbryan/ftm/internal/providers/tunnelmole"
 )
@@ -91,7 +90,6 @@ func NewManager() *Manager {
 	return &Manager{
 		processes: make(map[string]*ManagedProcess),
 		providers: map[config.Provider]providers.Provider{
-			config.ProviderPlayitgg:     playitgg.New(),
 			config.ProviderCloudflared:  cloudflared.New(),
 			config.ProviderTunnelmole:   tunnelmole.New(),
 			config.ProviderLocalhostRun: ssh.NewLocalhostRun(),
