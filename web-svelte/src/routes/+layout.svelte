@@ -1,6 +1,6 @@
-<script>
-  import { onMount } from "svelte";
-</script>
+<svelte:head>
+  <link rel="stylesheet" href="/themes/themes.css" />
+</svelte:head>
 
 <div class="app">
   <slot />

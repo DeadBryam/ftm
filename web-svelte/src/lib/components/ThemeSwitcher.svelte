@@ -34,7 +34,7 @@
     <select
       id="theme-select"
       onchange={(e) => theme.set(e.target.value)}
-      bind:value={theme.current}
+      value={theme.current}
       aria-label="Select theme"
     >
       {#each theme.themes as t}
