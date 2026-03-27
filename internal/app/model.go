@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -115,6 +116,8 @@ type Model struct {
 	DownloadProgress    providers.DownloadProgress
 	DownloadingProvider string
 	PendingTunnel       *config.TunnelConfig
+
+	ProgressBar progress.Model
 }
 
 type FormData struct {
@@ -155,12 +158,19 @@ func NewModel(app *App) *Model {
 	h := help.New()
 	h.ShowAll = true
 
+	p := progress.New(
+		progress.WithGradient("#c9a227", "#8b7355"),
+		progress.WithWidth(40),
+		progress.WithoutPercentage(),
+	)
+
 	m := &Model{
-		App:    app,
-		Keys:   DefaultKeys,
-		Help:   h,
-		State:  viewList,
-		Cursor: 0,
+		App:         app,
+		Keys:        DefaultKeys,
+		Help:        h,
+		State:       viewList,
+		Cursor:      0,
+		ProgressBar: p,
 		FormValues: FormData{
 			Provider: string(config.ProviderPlayitgg),
 			Port:     "30000",
@@ -209,13 +219,6 @@ type downloadProgressMsg providers.DownloadProgress
 func (m *Model) showMessage(msg string) {
 	m.Message = msg
 	m.MessageTimer = 30
-}
-
-func truncate(s string, max int) string {
-	if len(s) <= max {
-		return s
-	}
-	return s[:max-3] + "..."
 }
 
 func (m *Model) startTunnel(item TunnelItem) tea.Cmd {

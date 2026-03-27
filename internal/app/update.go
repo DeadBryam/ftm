@@ -1,6 +1,8 @@
 package app
 
 import (
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -28,6 +30,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tickMsg:
 		m.refreshItems()
+
 		if m.MessageTimer > 0 {
 			m.MessageTimer--
 			if m.MessageTimer == 0 {
@@ -58,6 +61,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case statusUpdateMsg:
 		m.refreshItems()
 		if msg.status.ErrorMessage != "" {
+			m.playBeep()
 			m.showMessage("Error: " + msg.status.ErrorMessage)
 		}
 		return m, nil
@@ -118,8 +122,10 @@ func (m *Model) handleListKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case key.Matches(msg, m.Keys.Enter), key.Matches(msg, m.Keys.Toggle):
 		if item, ok := m.selectedItem(); ok {
 			if m.App.Manager.IsRunning(item.Tunnel.ID) {
+				m.playBeep()
 				return m, m.stopTunnel(item)
 			}
+			m.playBeep()
 			return m, m.startTunnel(item)
 		}
 
@@ -374,4 +380,8 @@ func (k KeyMap) FullHelp() [][]key.Binding {
 		{k.Add, k.Delete, k.Config},
 		{k.Back, k.Help, k.Quit},
 	}
+}
+
+func (m *Model) playBeep() {
+	fmt.Fprint(os.Stdout, Bell)
 }
