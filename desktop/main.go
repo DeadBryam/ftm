@@ -66,12 +66,11 @@ func main() {
 		},
 		OnShutdown: func(ctx context.Context) {
 			log.Println("App shutting down...")
-			application.Shutdown()
 		},
 		Bind:             []interface{}{},
 		BackgroundColour: options.NewRGB(255, 255, 255),
 		Debug: options.Debug{
-			OpenInspectorOnStartup: true,
+			OpenInspectorOnStartup: false,
 		},
 	})
 
