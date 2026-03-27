@@ -1,0 +1,39 @@
+/* ===========================================
+   PURPLE THEME
+   =========================================== */
+
+:root[data-theme="purple"] {
+  --bg-color: #12091a;
+  --card-bg: #1e1230;
+  --text-color: #e8e0f5;
+  --text-heading: #f4f0ff;
+  --text-muted: #9080b0;
+  --border-color: #352550;
+  --border-light: #1e1230;
+  --primary-color: #a855f7;
+  --primary-hover: #9333ea;
+  --hover-bg: #2a1a45;
+  --btn-primary-bg: #a855f7;
+  --btn-primary-hover-bg: #9333ea;
+  --btn-start-bg: #22c55e;
+  --btn-start-hover-bg: #1aad50;
+  --btn-stop-bg: #dc2626;
+  --btn-stop-hover-bg: #c42020;
+  --btn-danger-bg: #dc2626;
+  --btn-danger-hover-bg: #c42020;
+  --status-running-bg: #22c55e;
+  --status-running-text: #12091a;
+  --status-starting-bg: #fbbf24;
+  --status-starting-text: #12091a;
+  --status-installing-bg: #a855f7;
+  --status-installing-text: #f4f0ff;
+  --status-error-bg: #dc2626;
+  --status-error-text: #f4f0ff;
+  --status-stopped-bg: #352550;
+  --status-stopped-text: #e8e0f5;
+  --logs-bg: #080510;
+  --logs-text: #e8e0f5;
+  --url-bg: #2a1a45;
+  --url-text: #a855f7;
+  --badge-text: #12091a;
+}

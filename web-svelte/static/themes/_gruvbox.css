@@ -1,0 +1,44 @@
+/* ===========================================
+   GRUVBOX - Official Gruvbox Dark Palette
+   Based on github.com/morhetz/gruvbox
+   =========================================== */
+
+:root[data-theme="gruvbox"] {
+  --bg-color: #282828;
+  --card-bg: #3c3836;
+  --text-color: #ebdbb2;
+  --text-heading: #fbf1c7;
+  --text-muted: #928374;
+  --border-color: #504945;
+  --border-light: #3c3836;
+  --primary-color: #83a598;
+  --primary-hover: #72a089;
+  --hover-bg: #504945;
+  --btn-primary-bg: #83a598;
+  --btn-primary-hover-bg: #72a089;
+  --btn-start-bg: #b8bb26;
+  --btn-start-hover-bg: #a5a921;
+  --btn-stop-bg: #fb4934;
+  --btn-stop-hover-bg: #ea3a25;
+  --btn-danger-bg: #fb4934;
+  --btn-danger-hover-bg: #ea3a25;
+  --status-running-bg: #b8bb26;
+  --status-running-text: #282828;
+  --status-starting-bg: #fabd2f;
+  --status-starting-text: #282828;
+  --status-installing-bg: #83a598;
+  --status-installing-text: #282828;
+  --status-error-bg: #fb4934;
+  --status-error-text: #fbf1c7;
+  --status-stopped-bg: #504945;
+  --status-stopped-text: #ebdbb2;
+  --logs-bg: #1d2021;
+  --logs-text: #ebdbb2;
+  --url-bg: #504945;
+  --url-text: #83a598;
+  --input-bg: #3c3836;
+  --input-text: #ebdbb2;
+  --input-placeholder: #928374;
+  --input-disabled: #282828;
+  --badge-text: #282828;
+}

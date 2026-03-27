@@ -5,14 +5,24 @@
   const theme = useTheme();
 
   const themeLabels = {
-    light: "Light",
-    dark: "Dark",
-    sepia: "Sepia",
-    contrast: "High Contrast",
+    nord: "Nord",
+    "nord-light": "Nord Light",
+    "rose-pine": "Rose Pine",
+    "rose-pine-dawn": "Rose Pine Dawn",
+    "tokyo-night": "Tokyo Night",
+    "tokyo-night-storm": "Tokyo Night Storm",
+    "tokyo-night-light": "Tokyo Night Light",
+    "catppuccin-mocha": "Catppuccin Mocha",
+    "catppuccin-latte": "Catppuccin Latte",
+    "one-dark": "One Dark",
+    gruvbox: "Gruvbox",
+    "gruvbox-light": "Gruvbox Light",
+    "solarized-dark": "Solarized Dark",
+    "solarized-light": "Solarized Light",
+    dracula: "Dracula",
     red: "Red",
     blue: "Blue",
     purple: "Purple",
-    dracula: "Dracula",
   };
 
   const sound = useSound();

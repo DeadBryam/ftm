@@ -1,0 +1,43 @@
+/* ===========================================
+   TOKYO NIGHT STORM - Tokyo Night Storm Variant
+   =========================================== */
+
+:root[data-theme="tokyo-night-storm"] {
+  --bg-color: #24283b;
+  --card-bg: #292e42;
+  --text-color: #c0caf5;
+  --text-heading: #c0caf5;
+  --text-muted: #565f89;
+  --border-color: #414868;
+  --border-light: #3b4261;
+  --primary-color: #7aa2f7;
+  --primary-hover: #6891e8;
+  --hover-bg: #3b4261;
+  --btn-primary-bg: #7aa2f7;
+  --btn-primary-hover-bg: #6891e8;
+  --btn-start-bg: #9ece6a;
+  --btn-start-hover-bg: #8cbd5f;
+  --btn-stop-bg: #f7768e;
+  --btn-stop-hover-bg: #e5637a;
+  --btn-danger-bg: #f7768e;
+  --btn-danger-hover-bg: #e5637a;
+  --status-running-bg: #9ece6a;
+  --status-running-text: #24283b;
+  --status-starting-bg: #e0af68;
+  --status-starting-text: #24283b;
+  --status-installing-bg: #7aa2f7;
+  --status-installing-text: #24283b;
+  --status-error-bg: #f7768e;
+  --status-error-text: #24283b;
+  --status-stopped-bg: #414868;
+  --status-stopped-text: #c0caf5;
+  --logs-bg: #1f2335;
+  --logs-text: #c0caf5;
+  --url-bg: #3b4261;
+  --url-text: #7aa2f7;
+  --input-bg: #292e42;
+  --input-text: #c0caf5;
+  --input-placeholder: #565f89;
+  --input-disabled: #24283b;
+  --badge-text: #24283b;
+}

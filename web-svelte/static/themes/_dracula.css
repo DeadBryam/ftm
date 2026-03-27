@@ -1,0 +1,44 @@
+/* ===========================================
+   DRACULA - Official Dracula Theme
+   Based on draculatheme.com/spec
+   =========================================== */
+
+:root[data-theme="dracula"] {
+  --bg-color: #282a36;
+  --card-bg: #383a4a;
+  --text-color: #f8f8f2;
+  --text-heading: #f8f8f2;
+  --text-muted: #6272a4;
+  --border-color: #44475a;
+  --border-light: #383a4a;
+  --primary-color: #bd93f9;
+  --primary-hover: #a77ce6;
+  --hover-bg: #44475a;
+  --btn-primary-bg: #bd93f9;
+  --btn-primary-hover-bg: #a77ce6;
+  --btn-start-bg: #50fa7b;
+  --btn-start-hover-bg: #3de868;
+  --btn-stop-bg: #ff5555;
+  --btn-stop-hover-bg: #e63e3e;
+  --btn-danger-bg: #ff5555;
+  --btn-danger-hover-bg: #e63e3e;
+  --status-running-bg: #50fa7b;
+  --status-running-text: #282a36;
+  --status-starting-bg: #f1fa8c;
+  --status-starting-text: #282a36;
+  --status-installing-bg: #8be9fd;
+  --status-installing-text: #282a36;
+  --status-error-bg: #ff5555;
+  --status-error-text: #f8f8f2;
+  --status-stopped-bg: #44475a;
+  --status-stopped-text: #f8f8f2;
+  --logs-bg: #21222c;
+  --logs-text: #f8f8f2;
+  --url-bg: #44475a;
+  --url-text: #8be9fd;
+  --input-bg: #383a4a;
+  --input-text: #f8f8f2;
+  --input-placeholder: #6272a4;
+  --input-disabled: #282a36;
+  --badge-text: #282a36;
+}

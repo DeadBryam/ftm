@@ -1,0 +1,44 @@
+/* ===========================================
+   ROSE PINE - Official Rose Pine Theme
+   Based on rosepinetheme.com
+   =========================================== */
+
+:root[data-theme="rose-pine"] {
+  --bg-color: #191724;
+  --card-bg: #1f1d2e;
+  --text-color: #e0def4;
+  --text-heading: #e0def4;
+  --text-muted: #6e6a86;
+  --border-color: #403d52;
+  --border-light: #26233a;
+  --primary-color: #c4a7e7;
+  --primary-hover: #b8a5db;
+  --hover-bg: #26233a;
+  --btn-primary-bg: #c4a7e7;
+  --btn-primary-hover-bg: #b8a5db;
+  --btn-start-bg: #9ccfd8;
+  --btn-start-hover-bg: #8bbfc9;
+  --btn-stop-bg: #eb6f92;
+  --btn-stop-hover-bg: #e05d7e;
+  --btn-danger-bg: #eb6f92;
+  --btn-danger-hover-bg: #e05d7e;
+  --status-running-bg: #9ccfd8;
+  --status-running-text: #191724;
+  --status-starting-bg: #f6c177;
+  --status-starting-text: #191724;
+  --status-installing-bg: #c4a7e7;
+  --status-installing-text: #191724;
+  --status-error-bg: #eb6f92;
+  --status-error-text: #191724;
+  --status-stopped-bg: #403d52;
+  --status-stopped-text: #e0def4;
+  --logs-bg: #13111f;
+  --logs-text: #e0def4;
+  --url-bg: #26233a;
+  --url-text: #c4a7e7;
+  --input-bg: #1f1d2e;
+  --input-text: #e0def4;
+  --input-placeholder: #6e6a86;
+  --input-disabled: #26233a;
+  --badge-text: #191724;
+}

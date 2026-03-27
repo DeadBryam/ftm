@@ -52,7 +52,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </svelte:head>
 
-<link rel="stylesheet" href="/themes.css" />
+<link rel="stylesheet" href="/themes/themes.css" />
 
 <div class="app">
   <Header />

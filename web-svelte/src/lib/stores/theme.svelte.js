@@ -1,19 +1,34 @@
-const THEMES = ['light', 'dark', 'sepia', 'contrast', 'red', 'blue', 'purple', 'dracula'];
+const THEMES = [
+  'nord',
+  'nord-light',
+  'rose-pine',
+  'rose-pine-dawn',
+  'tokyo-night',
+  'tokyo-night-storm',
+  'tokyo-night-light',
+  'catppuccin-mocha',
+  'catppuccin-latte',
+  'one-dark',
+  'gruvbox',
+  'gruvbox-light',
+  'solarized-dark',
+  'solarized-light',
+  'dracula',
+  'red',
+  'blue',
+  'purple'
+];
 const STORAGE_KEY = 'ftm-theme';
 
-let currentTheme = $state('light');
+let currentTheme = $state('dracula');
 
 function getInitialTheme() {
-  if (typeof window === 'undefined') return 'light';
+  if (typeof window === 'undefined') return 'dracula';
   
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved && THEMES.includes(saved)) return saved;
   
-  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    return 'dark';
-  }
-  
-  return 'light';
+  return 'dracula';
 }
 
 export function useTheme() {

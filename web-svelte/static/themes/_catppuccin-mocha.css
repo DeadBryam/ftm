@@ -1,0 +1,44 @@
+/* ===========================================
+   CATPPUCCIN MOCHA - Official Catppuccin Palette
+   Based on catppuccin.com
+   =========================================== */
+
+:root[data-theme="catppuccin-mocha"] {
+  --bg-color: #1e1e2e;
+  --card-bg: #313244;
+  --text-color: #cdd6f4;
+  --text-heading: #cdd6f4;
+  --text-muted: #6c7086;
+  --border-color: #45475a;
+  --border-light: #313244;
+  --primary-color: #cba6f7;
+  --primary-hover: #b893f5;
+  --hover-bg: #45475a;
+  --btn-primary-bg: #cba6f7;
+  --btn-primary-hover-bg: #b893f5;
+  --btn-start-bg: #a6e3a1;
+  --btn-start-hover-bg: #94d290;
+  --btn-stop-bg: #f38ba8;
+  --btn-stop-hover-bg: #e17795;
+  --btn-danger-bg: #f38ba8;
+  --btn-danger-hover-bg: #e17795;
+  --status-running-bg: #a6e3a1;
+  --status-running-text: #1e1e2e;
+  --status-starting-bg: #fab387;
+  --status-starting-text: #1e1e2e;
+  --status-installing-bg: #89b4fa;
+  --status-installing-text: #1e1e2e;
+  --status-error-bg: #f38ba8;
+  --status-error-text: #1e1e2e;
+  --status-stopped-bg: #45475a;
+  --status-stopped-text: #cdd6f4;
+  --logs-bg: #181825;
+  --logs-text: #cdd6f4;
+  --url-bg: #45475a;
+  --url-text: #89b4fa;
+  --input-bg: #313244;
+  --input-text: #cdd6f4;
+  --input-placeholder: #6c7086;
+  --input-disabled: #1e1e2e;
+  --badge-text: #1e1e2e;
+}

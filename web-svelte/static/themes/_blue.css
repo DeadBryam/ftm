@@ -1,0 +1,39 @@
+/* ===========================================
+   BLUE THEME
+   =========================================== */
+
+:root[data-theme="blue"] {
+  --bg-color: #0a0f1a;
+  --card-bg: #151d2e;
+  --text-color: #e0e8f5;
+  --text-heading: #f0f4ff;
+  --text-muted: #8090b0;
+  --border-color: #253550;
+  --border-light: #151d2e;
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --hover-bg: #1e2a45;
+  --btn-primary-bg: #3b82f6;
+  --btn-primary-hover-bg: #2563eb;
+  --btn-start-bg: #22c55e;
+  --btn-start-hover-bg: #1aad50;
+  --btn-stop-bg: #dc2626;
+  --btn-stop-hover-bg: #c42020;
+  --btn-danger-bg: #dc2626;
+  --btn-danger-hover-bg: #c42020;
+  --status-running-bg: #22c55e;
+  --status-running-text: #0a0f1a;
+  --status-starting-bg: #fbbf24;
+  --status-starting-text: #0a0f1a;
+  --status-installing-bg: #3b82f6;
+  --status-installing-text: #f0f4ff;
+  --status-error-bg: #dc2626;
+  --status-error-text: #f0f4ff;
+  --status-stopped-bg: #253550;
+  --status-stopped-text: #e0e8f5;
+  --logs-bg: #050810;
+  --logs-text: #e0e8f5;
+  --url-bg: #1e2a45;
+  --url-text: #3b82f6;
+  --badge-text: #0a0f1a;
+}
