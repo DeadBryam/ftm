@@ -72,6 +72,11 @@ xattr -d com.apple.quarantine /usr/local/bin/ftm
 | Linux | `ftm-desktop-linux` |
 | macOS | `ftm-desktop-macos.app.zip` (extract and run) |
 
+For Linux, make the file executable:
+```bash
+chmod +x ftm-desktop-linux
+```
+
 For macOS, you may need to remove the quarantine attribute before running:
 ```bash
 xattr -d com.apple.quarantine ftm-desktop-macos.app
