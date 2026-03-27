@@ -1,4 +1,4 @@
-.PHONY: build run clean test install release build-web wails wails-dev desktop desktop-package
+.PHONY: build run clean test install release build-web wails wails-dev desktop desktop-package desktop-all desktop-all-full desktop-darwin-universal desktop-darwin-arm64 desktop-darwin-amd64 desktop-linux-amd64 desktop-windows-amd64 dev fmt vet
 
 VERSION := 0.6.0f
 BINARY := ftm
@@ -30,6 +30,26 @@ desktop: build-web
 
 desktop-package: build-web
 	cd $(DESKTOP_DIR) && wails build -s
+
+desktop-darwin-universal: build-web
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform darwin/universal
+
+desktop-darwin-arm64: build-web
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform darwin/arm64
+
+desktop-darwin-amd64: build-web
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform darwin/amd64
+
+desktop-linux-amd64: build-web
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform linux/amd64
+
+desktop-windows-amd64: build-web
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform windows/amd64
+
+desktop-all: build-web
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform darwin/universal
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform linux/amd64
+	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform windows/amd64
 
 run:
 	go run $(CMD)
