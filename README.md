@@ -4,8 +4,8 @@ Share your Foundry VTT world with players anywhere. No port forwarding needed.
 
 ## Features
 
-- **6 tunnel providers**: Cloudflared, Playit.gg, localhost.run, Serveo, Pinggy, Tunnelmole
-- **2 interfaces**: TUI, Web dashboard
+- **5 tunnel providers**: Cloudflared, localhost.run, Serveo, Pinggy, Tunnelmole
+- **3 interfaces**: TUI, Web dashboard, Native desktop app
 - **Auto-install**: Downloads providers automatically
 - **Drag & drop**: Reorder connections
 - **Real-time updates**: Live status changes
