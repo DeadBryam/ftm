@@ -38,15 +38,14 @@ func New() (*App, error) {
 
 	app.Manager.SetProgressChannel(app.DownloadProgress)
 	notifications.Init()
+	notifications.SetSoundEnabled(cfg.NotificationSound)
+	notifications.SetNotificationsEnabled(cfg.NotificationsStatus == config.NotificationGranted)
 
 	expConfig := notifications.ExpirationConfig{
 		Thresholds:                 cfg.ExpirationThresholds,
 		ProviderExpirationMinutes:  cfg.ProviderExpirationMinutes,
 	}
 	app.ExpirationMonitor = notifications.NewExpirationMonitor(expConfig, func(name string, mins int) {
-		if cfg.NotificationsStatus != config.NotificationGranted {
-			return
-		}
 		if mins == 0 {
 			notifications.NotifyTunnelExpired(name)
 		} else {
@@ -55,9 +54,6 @@ func New() (*App, error) {
 	})
 
 	app.Manager.SetNotificationHandler(func(status config.TunnelStatus) {
-		if cfg.NotificationsStatus != config.NotificationGranted {
-			return
-		}
 		switch status.State {
 		case config.TunnelStateOnline:
 			notifications.NotifyTunnelOnline(status.Name, status.PublicURL)
@@ -146,6 +142,8 @@ func (a *App) createDefaultTunnels() {
 }
 
 func (a *App) SaveConfig() error {
+	notifications.SetSoundEnabled(a.Config.NotificationSound)
+	notifications.SetNotificationsEnabled(a.Config.NotificationsStatus == config.NotificationGranted)
 	return a.Config.Save()
 }
 

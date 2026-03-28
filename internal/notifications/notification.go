@@ -3,6 +3,7 @@ package notifications
 import (
 	"fmt"
 	"log"
+	"sync"
 )
 
 type Notifier interface {
@@ -46,9 +47,12 @@ func (s SoundType) String() string {
 }
 
 var (
-	notifier    Notifier
-	soundPlayer SoundPlayer
-	available   bool
+	notifier      Notifier
+	soundPlayer   SoundPlayer
+	available     bool
+	soundEnabled  bool
+	notificationsEnabled bool
+	mu            sync.RWMutex
 )
 
 func Init() {
@@ -74,7 +78,27 @@ func Init() {
 	log.Printf("[notifications] Running in silent mode")
 }
 
+func SetSoundEnabled(enabled bool) {
+	mu.Lock()
+	soundEnabled = enabled
+	mu.Unlock()
+}
+
+func SetNotificationsEnabled(enabled bool) {
+	mu.Lock()
+	notificationsEnabled = enabled
+	mu.Unlock()
+}
+
 func Notify(title, body string) error {
+	mu.RLock()
+	enabled := notificationsEnabled
+	mu.RUnlock()
+	
+	if !enabled {
+		return nil
+	}
+	
 	if notifier == nil || !available {
 		log.Printf("[notification] %s: %s", title, body)
 		return nil
@@ -87,6 +111,14 @@ func Notifyf(title, format string, args ...interface{}) error {
 }
 
 func PlaySound(t SoundType) error {
+	mu.RLock()
+	enabled := soundEnabled
+	mu.RUnlock()
+	
+	if !enabled {
+		return nil
+	}
+	
 	if soundPlayer == nil || !available {
 		return nil
 	}
