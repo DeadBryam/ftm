@@ -182,6 +182,7 @@ export function useTunnels() {
     stop,
     delete: remove,
     create: add,
-    update
+    update,
+    getById: (id) => tunnelsById[id]
   };
 }
