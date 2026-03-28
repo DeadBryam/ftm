@@ -25,14 +25,17 @@ func (n *darwinNotifier) IsAvailable() bool { return true }
 
 func (n *darwinNotifier) Notify(title, body string) error {
 	if n.useAlerter {
-		return exec.Command("alerter",
-			"-title", title,
-			"-message", body,
-		).Run()
+		go func() {
+			exec.Command("alerter", "--title", title, "--message", body).Run()
+		}()
+		return nil
 	}
 
 	script := fmt.Sprintf(`display notification "%s" with title "%s"`, escapeAppleScript(body), escapeAppleScript(title))
-	return exec.Command("osascript", "-e", script).Run()
+	go func() {
+		exec.Command("osascript", "-e", script).Run()
+	}()
+	return nil
 }
 
 func escapeAppleScript(s string) string {
