@@ -10,6 +10,8 @@ Share your Foundry VTT world with players anywhere. No port forwarding needed.
 - **Drag & drop**: Reorder connections
 - **Real-time updates**: Live status changes
 - **Theming**: Multiple themes for web dashboard
+- **Notifications**: Desktop notifications for tunnel events (online, stopped, error, expiring)
+- **Sounds**: Configurable sound alerts for tunnel status changes
 
 **TUI shortcuts:** `↑/↓` navigate, `s` start/stop, `l` logs, `c` copy URL, `w` web, `o` open config, `a` add, `d` delete, `q` quit
 
@@ -102,6 +104,8 @@ ftm --web        # Web dashboard only
 - Go 1.21+
 - Bun 1.3+ (for building web frontend)
 - Wails (for desktop app)
+
+**macOS notifications:** Install `alerter` via Homebrew (`brew install alerter`) for TUI notifications. GUI notifications use built-in osascript.
 
 ### CLI
 
