@@ -46,6 +46,8 @@ func (h *Handlers) Route(w http.ResponseWriter, r *http.Request) {
 		h.handleReorder(w, r)
 	case r.URL.Path == "/api/status":
 		h.handleStatus(w)
+	case r.URL.Path == "/api/notifications":
+		h.handleNotifications(w, r)
 	case r.URL.Path == "/api/providers":
 		h.handleProviders(w)
 	case r.URL.Path == "/api/detect-port":
