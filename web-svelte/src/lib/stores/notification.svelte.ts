@@ -1,9 +1,10 @@
-import { useToast } from './toast.svelte';
-import type { ToastType } from '$lib/types';
+import { useToast, type ToastType } from './toast.svelte';
+import { updateNotificationsStatus } from '$lib/api';
 
-let permission = $state<NotificationPermission>('default');
+type NotificationStatus = 'pending' | 'granted' | 'rejected';
+
+let status = $state<NotificationStatus>('pending');
 let useOSNotifications = $state(false);
-let enabled = $state(false);
 let soundEnabled = $state(true);
 
 const toast = useToast();
@@ -77,9 +78,8 @@ async function playSound(type: string) {
 }
 
 const notificationStore = {
-  get permission() { return permission; },
-  get useOSNotifications() { return useOSNotifications; },
-  get enabled() { return enabled; },
+  get status() { return status; },
+  get enabled() { return status === 'granted'; },
   get soundEnabled() { return soundEnabled; },
   set soundEnabled(value: boolean) {
     soundEnabled = value;
@@ -90,45 +90,39 @@ const notificationStore = {
     }
   },
 
-  init() {
-    const saved = localStorage.getItem('ftm-notification-pref');
-    if (saved === 'granted') {
-      permission = 'granted';
-      useOSNotifications = true;
-    }
-    enabled = localStorage.getItem('ftm-notifications-enabled') === 'true';
-    soundEnabled = localStorage.getItem('ftm-sound-enabled') !== 'false';
+  setStatus(newStatus: NotificationStatus) {
+    status = newStatus;
   },
 
   async requestPermission(): Promise<boolean> {
     if (!('Notification' in window)) {
-      useOSNotifications = false;
       return false;
     }
 
-    if (permission === 'default') {
-      const result = await Notification.requestPermission();
-      permission = result;
-      useOSNotifications = result === 'granted';
+    const result = await Notification.requestPermission();
+    const granted = result === 'granted';
+
+    if (granted) {
+      status = 'granted';
+      useOSNotifications = true;
+    } else {
+      status = 'rejected';
     }
 
-    if (permission === 'granted') {
-      enabled = true;
-      localStorage.setItem('ftm-notification-pref', 'granted');
-      localStorage.setItem('ftm-notifications-enabled', 'true');
+    try {
+      await updateNotificationsStatus(granted ? 'granted' : 'rejected');
+    } catch {
+      console.error('Failed to update notification status on server');
     }
 
-    return permission === 'granted';
+    return granted;
   },
 
-  enable() {
-    enabled = true;
-    localStorage.setItem('ftm-notifications-enabled', 'true');
-  },
-
-  disable() {
-    enabled = false;
-    localStorage.setItem('ftm-notifications-enabled', 'false');
+  reject() {
+    status = 'rejected';
+    updateNotificationsStatus('rejected').catch(() => {
+      console.error('Failed to update notification status on server');
+    });
   },
 
   notify(title: string, body: string, type: ToastType = 'info') {
@@ -136,9 +130,9 @@ const notificationStore = {
       playSound(type);
     }
 
-    if (!enabled) return;
+    if (status !== 'granted') return;
 
-    if (useOSNotifications && permission === 'granted') {
+    if (useOSNotifications && 'Notification' in window && Notification.permission === 'granted') {
       new Notification(title, { body });
     } else {
       toast.show(body, type);
