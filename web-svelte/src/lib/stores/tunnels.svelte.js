@@ -12,68 +12,61 @@ const notifications = useNotifications();
 const expirationMonitor = useExpirationMonitor();
 
 function handleSSEEvent(msg) {
-  
   if (msg.type === 'install') {
-    installProgress = {
-      ...installProgress,
-      [msg.provider]: {
-        step: msg.step,
-        percent: msg.percent,
-        downloaded: msg.downloaded,
-        total: msg.total
-      }
-    };
+    installProgress = { ...installProgress, [msg.provider]: msg };
     return;
   }
   
-  
   if (!msg.id) return;
   
-  const oldTunnel = tunnels.find(t => t.id === msg.id);
+  const idx = tunnels.findIndex(t => t.id === msg.id);
+  if (idx === -1) return;
   
-  tunnels = tunnels.map(t => {
-    if (t.id !== msg.id) return t;
-    
-    const newState = msg.state || 'stopped';
-    return {
-      ...t,
-      name: msg.name ?? t.name,
-      provider: msg.provider ?? t.provider,
-      port: msg.port ?? t.port,
-      state: newState,
-      publicUrl: msg.publicUrl ?? t.publicUrl,
-      errorMessage: msg.errorMessage ?? t.errorMessage,
-      expiresAt: msg.expiresAt ?? t.expiresAt
-    };
-  });
+  const oldTunnel = tunnels[idx];
+  const newState = msg.state || 'stopped';
   
-  const tunnel = tunnels.find(t => t.id === msg.id);
-  
-  if (!notifications.enabled || !tunnel) return;
-  
-  if (msg.state === 'online' && (!oldTunnel || oldTunnel.state !== 'online')) {
-    notifications.notifyOnline(tunnel.name, msg.publicUrl);
-    if (msg.expiresAt) {
-      expirationMonitor.start(tunnel);
-    }
+  if (oldTunnel.state === newState && 
+      oldTunnel.publicUrl === (msg.publicUrl ?? oldTunnel.publicUrl) &&
+      oldTunnel.errorMessage === (msg.errorMessage ?? oldTunnel.errorMessage)) {
+    return;
   }
   
-  if (msg.state === 'error' && oldTunnel?.state !== 'error') {
-    notifications.notifyError(tunnel.name, msg.errorMessage);
+  const updated = [...tunnels];
+  updated[idx] = {
+    ...updated[idx],
+    name: msg.name ?? updated[idx].name,
+    provider: msg.provider ?? updated[idx].provider,
+    port: msg.port ?? updated[idx].port,
+    state: newState,
+    publicUrl: msg.publicUrl ?? updated[idx].publicUrl,
+    errorMessage: msg.errorMessage ?? updated[idx].errorMessage,
+    expiresAt: msg.expiresAt ?? updated[idx].expiresAt
+  };
+  tunnels = updated;
+  
+  if (!notifications.enabled) return;
+  
+  if (newState === 'online' && oldTunnel.state !== 'online') {
+    notifications.notifyOnline(updated[idx].name, msg.publicUrl);
+    if (msg.expiresAt) expirationMonitor.start(updated[idx]);
   }
   
-  if (msg.state === 'timeout' && oldTunnel?.state !== 'timeout') {
-    notifications.notify('Timeout', `${tunnel.name} could not connect`);
+  if (newState === 'error' && oldTunnel.state !== 'error') {
+    notifications.notifyError(updated[idx].name, msg.errorMessage);
   }
   
-  if (msg.state === 'stopped' && oldTunnel?.state === 'online') {
+  if (newState === 'timeout' && oldTunnel.state !== 'timeout') {
+    notifications.notify('Timeout', `${updated[idx].name} could not connect`);
+  }
+  
+  if (newState === 'stopped' && oldTunnel.state === 'online') {
     expirationMonitor.stop(msg.id);
   }
   
-  if (tunnel && tunnel.state === 'online') {
-    const updated = { ...installProgress };
-    delete updated[tunnel.provider];
-    installProgress = updated;
+  if (newState === 'online') {
+    const updatedProgress = { ...installProgress };
+    delete updatedProgress[updated[idx].provider];
+    installProgress = updatedProgress;
   }
 }
 
@@ -86,7 +79,7 @@ function connect() {
   tunnelsApi.getAll()
     .then(data => {
       tunnels = data;
-      tunnels.forEach(t => {
+      data.forEach(t => {
         if (t.state === 'online' && t.expiresAt) {
           expirationMonitor.start(t);
         }
@@ -102,8 +95,7 @@ function connect() {
   
   es.onmessage = (e) => {
     try {
-      const msg = JSON.parse(e.data);
-      handleSSEEvent(msg);
+      handleSSEEvent(JSON.parse(e.data));
     } catch {}
   };
   
@@ -130,16 +122,9 @@ function disconnect() {
 
 function start(id) {
   tunnels = tunnels.map(t => t.id === id ? { ...t, state: 'starting' } : t);
-  
-  tunnelsApi.start(id)
-    .then(data => {
-      if (data.status === 'installing') {
-        tunnels = tunnels.map(t => t.id === id ? { ...t, state: 'installing' } : t);
-      }
-    })
-    .catch(e => {
-      tunnels = tunnels.map(t => t.id === id ? { ...t, state: 'error', errorMessage: e.message } : t);
-    });
+  tunnelsApi.start(id).catch(e => {
+    tunnels = tunnels.map(t => t.id === id ? { ...t, state: 'error', errorMessage: e.message } : t);
+  });
 }
 
 function stop(id) {
@@ -167,24 +152,18 @@ function update(id, data) {
   });
 }
 
-function getById(id) {
-  return tunnels.find(t => t.id === id);
-}
-
 export function useTunnels() {
   return {
     get tunnels() { return tunnels; },
     get loading() { return loading; },
     get error() { return error; },
     get installProgress() { return installProgress; },
-    
     connect,
     disconnect,
     start,
     stop,
     delete: remove,
     create: add,
-    update,
-    getById
+    update
   };
 }
