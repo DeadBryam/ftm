@@ -104,9 +104,9 @@ func (d *DetailPanel) actions() string {
 		Padding(0, 2)
 
 	if isActive {
-		actions = append(actions, buttonStyle.Render("[s] Stop"))
+		actions = append(actions, buttonStyle.Render("[t] Stop"))
 	} else {
-		actions = append(actions, buttonStyle.Render("[s] Start"))
+		actions = append(actions, buttonStyle.Render("[t] Start"))
 	}
 
 	actions = append(actions, buttonStyle.Render("[l] Logs"))
