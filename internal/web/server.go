@@ -17,20 +17,22 @@ import (
 )
 
 type Server struct {
-	manager    *process.Manager
-	config     *config.Config
-	httpServer *http.Server
-	port       int
-	clients    map[chan string]bool
-	clientsMu  sync.RWMutex
-	handlers   *Handlers
+	manager       *process.Manager
+	config        *config.Config
+	httpServer    *http.Server
+	port          int
+	clients       map[chan string]bool
+	clientsMu     sync.RWMutex
+	handlers      *Handlers
+	StatusChannel chan config.TunnelStatus
 }
 
 func NewServer(manager *process.Manager, cfg *config.Config) *Server {
 	s := &Server{
-		manager:  manager,
-		config:   cfg,
-		clients:  make(map[chan string]bool),
+		manager:       manager,
+		config:        cfg,
+		clients:       make(map[chan string]bool),
+		StatusChannel: make(chan config.TunnelStatus, 10),
 	}
 	s.handlers = NewHandlers(manager, cfg, s)
 	return s
@@ -68,6 +70,7 @@ func (s *Server) Start() error {
 	}
 
 	go s.installProgressLoop()
+	go s.statusUpdateLoop()
 	go s.httpServer.ListenAndServe()
 	return nil
 }
@@ -128,6 +131,19 @@ func (s *Server) installProgressLoop() {
 			"current": progress.Current,
 			"total":   progress.Total,
 			"done":    progress.Done,
+		}
+		data, _ := MarshalJSON(update)
+		s.broadcast(string(data))
+	}
+}
+
+func (s *Server) statusUpdateLoop() {
+	for status := range s.StatusChannel {
+		update := map[string]interface{}{
+			"id":           status.ID,
+			"state":        string(status.State),
+			"publicUrl":    status.PublicURL,
+			"errorMessage": status.ErrorMessage,
 		}
 		data, _ := MarshalJSON(update)
 		s.broadcast(string(data))

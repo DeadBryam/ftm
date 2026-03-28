@@ -100,6 +100,7 @@ func (a *App) Run() error {
 
 func (a *App) StartWebServer() error {
 	a.WebServer = web.NewServer(a.Manager, a.Config)
+	a.Manager.SetStatusChannel(a.WebServer.StatusChannel)
 	return a.WebServer.Start()
 }
 

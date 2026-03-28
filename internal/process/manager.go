@@ -20,6 +20,7 @@ type Manager struct {
 	processes           map[string]*ManagedProcess
 	providers           map[config.Provider]providers.Provider
 	DownloadProgress    chan providers.DownloadProgress
+	StatusChannel      chan config.TunnelStatus
 	NotificationHandler func(status config.TunnelStatus)
 	ExpirationCallbacks struct {
 		OnStart func(tunnelID, name, provider string, startedAt time.Time)
@@ -45,6 +46,19 @@ func (m *Manager) SetNotificationHandler(handler func(config.TunnelStatus)) {
 func (m *Manager) callNotificationHandler(status config.TunnelStatus) {
 	if m.NotificationHandler != nil {
 		m.NotificationHandler(status)
+	}
+}
+
+func (m *Manager) SetStatusChannel(ch chan config.TunnelStatus) {
+	m.StatusChannel = ch
+}
+
+func (m *Manager) callStatusUpdate(status config.TunnelStatus) {
+	if m.StatusChannel != nil {
+		select {
+		case m.StatusChannel <- status:
+		default:
+		}
 	}
 }
 
@@ -191,6 +205,7 @@ func (m *Manager) startupTimeoutMonitor(tunnelID string) {
 			if mp.OnUpdate != nil {
 				mp.OnUpdate(mp.Status)
 			}
+			m.callStatusUpdate(mp.Status)
 		}
 	}
 	m.mu.Unlock()
@@ -212,6 +227,7 @@ func (m *Manager) startupTimeoutMonitor(tunnelID string) {
 			}
 
 			m.callNotificationHandler(mp.Status)
+			m.callStatusUpdate(mp.Status)
 		}
 	}
 }
@@ -241,6 +257,7 @@ func (m *Manager) Stop(tunnelID string) error {
 	}
 
 	m.callNotificationHandler(mp.Status)
+	m.callStatusUpdate(mp.Status)
 	m.callExpirationStop(tunnelID)
 	delete(m.processes, tunnelID)
 
@@ -280,10 +297,11 @@ func (m *Manager) updateURL(tunnelID, url string) {
 	mp.Status.State = config.TunnelStateOnline
 
 	if mp.OnUpdate != nil {
-
+		mp.OnUpdate(mp.Status)
 	}
 
 	m.callNotificationHandler(mp.Status)
+	m.callStatusUpdate(mp.Status)
 }
 
 func (m *Manager) GetLogs(tunnelID string) []string {
