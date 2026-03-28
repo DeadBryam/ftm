@@ -14,7 +14,7 @@
     class?: string;
     id?: string;
     children?: Snippet;
-  };
+  }
 
   const POSITION_MAP: Record<NonNullable<DropdownProps["align"]>, string> = {
     left: "left-auto right-0",
@@ -50,12 +50,13 @@
     isAnimating = true;
     requestAnimationFrame(() => {
       if (!menuEl) return;
-      // @ts-ignore
-      animate(menuEl, { opacity: 1, scale: 1, y: 0 }, spring()).finished.then(
-        () => {
-          isAnimating = false;
-        },
-      );
+      animate(
+        menuEl,
+        { opacity: 1, scale: 1, y: 0 },
+        { type: "spring" },
+      ).finished.then(() => {
+        isAnimating = false;
+      });
     });
   }
 
@@ -67,12 +68,13 @@
     }
     isOpen = false;
     isAnimating = true;
-    // @ts-ignore
-    animate(menuEl, { opacity: 0, scale: 1, y: -4 }, spring()).finished.then(
-      () => {
-        isAnimating = false;
-      },
-    );
+    animate(
+      menuEl,
+      { opacity: 0, scale: 1, y: -4 },
+      { type: "spring" },
+    ).finished.then(() => {
+      isAnimating = false;
+    });
   }
 
   function toggle() {

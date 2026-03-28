@@ -38,23 +38,21 @@
       if (sectionEl)
         animate(
           sectionEl,
-          // @ts-ignore
+
           { opacity: 1, y: 0 },
-          { duration: 0.4, easing: spring() },
+          { duration: 0.4, type: "spring" },
         );
       if (headerEl)
         animate(
           headerEl,
-          // @ts-ignore
           { opacity: 1, y: 0 },
-          { duration: 0.4, delay: 0.05, easing: spring() },
+          { duration: 0.4, delay: 0.05, type: "spring" },
         );
       if (contentEl)
         animate(
           contentEl,
-          // @ts-ignore
           { opacity: 1, y: 0 },
-          { duration: 0.4, delay: 0.1, easing: spring() },
+          { duration: 0.4, delay: 0.1, type: "spring" },
         );
     });
   });
