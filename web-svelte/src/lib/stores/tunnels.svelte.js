@@ -54,7 +54,7 @@ function handleMessage(msg) {
     return;
   }
   
-  if (newState === 'stopped' && oldTunnel.state === 'online') {
+  if ((newState === 'stopped' || newState === 'stopping') && (oldTunnel.state === 'online' || oldTunnel.state === 'stopping')) {
     expirationMonitor.stop(msg.id);
     notifications.notify('Tunnel Stopped', `${updatedTunnel.name} has been stopped`, 'info');
     return;
