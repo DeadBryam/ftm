@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -226,6 +225,29 @@ func (s *Server) broadcast(msg string) {
 	}
 }
 
+func (s *Server) BroadcastTunnelUpdate(t config.TunnelConfig) {
+	state := "stopped"
+	var publicURL, errorMessage string
+
+	if status, ok := s.manager.GetStatus(t.ID); ok {
+		state = string(status.State)
+		publicURL = status.PublicURL
+		errorMessage = status.ErrorMessage
+	}
+
+	update := map[string]interface{}{
+		"id":           t.ID,
+		"name":         t.Name,
+		"provider":     string(t.Provider),
+		"port":         t.LocalPort,
+		"state":        state,
+		"publicUrl":    publicURL,
+		"errorMessage": errorMessage,
+	}
+	data, _ := json.Marshal(update)
+	s.broadcast(string(data))
+}
+
 func (s *Server) handleSSE(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
@@ -273,8 +295,7 @@ func (s *Server) handleTunnels(w http.ResponseWriter, r *http.Request) {
 		return
 	case http.MethodPost:
 		s.createTunnel(w, r)
-	case http.MethodPut:
-		s.updateTunnel(w, r)
+		return
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -283,9 +304,6 @@ func (s *Server) handleTunnels(w http.ResponseWriter, r *http.Request) {
 func (s *Server) listTunnels(w http.ResponseWriter) {
 	sortedTunnels := make([]config.TunnelConfig, len(s.config.Tunnels))
 	copy(sortedTunnels, s.config.Tunnels)
-	sort.Slice(sortedTunnels, func(i, j int) bool {
-		return sortedTunnels[i].Order < sortedTunnels[j].Order
-	})
 
 	var result []map[string]interface{}
 	for _, t := range sortedTunnels {
@@ -294,7 +312,7 @@ func (s *Server) listTunnels(w http.ResponseWriter) {
 			"name":     t.Name,
 			"provider": string(t.Provider),
 			"port":     t.LocalPort,
-			"status":   "stopped",
+			"state":    "stopped",
 		}
 
 		if status, ok := s.manager.GetStatus(t.ID); ok {
@@ -304,7 +322,7 @@ func (s *Server) listTunnels(w http.ResponseWriter) {
 		}
 
 		if needsInstall, canInstall := s.manager.CheckInstallation(t.Provider); needsInstall && canInstall {
-			item["status"] = "installing"
+			item["state"] = "installing"
 			item["installProgress"] = 0
 		}
 
@@ -353,49 +371,56 @@ func (s *Server) createTunnel(w http.ResponseWriter, r *http.Request) {
 		port = 30000
 	}
 
-	maxOrder := -1
-	for _, t := range s.config.Tunnels {
-		if t.Order > maxOrder {
-			maxOrder = t.Order
-		}
-	}
-
 	tunnel := config.TunnelConfig{
 		ID:        fmt.Sprintf("tunnel-%d", time.Now().Unix()),
 		Name:      name,
 		Provider:  config.Provider(providerStr),
 		LocalPort: port,
-		AutoStart: false,
-		Order:     maxOrder + 1,
 	}
 
 	s.config.Tunnels = append(s.config.Tunnels, tunnel)
 	s.config.Save()
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	update := map[string]interface{}{
 		"id":       tunnel.ID,
 		"name":     tunnel.Name,
 		"provider": string(tunnel.Provider),
 		"port":     tunnel.LocalPort,
-		"status":   "stopped",
-	})
+		"state":    "stopped",
+	}
+	data, _ := json.Marshal(update)
+	s.broadcast(string(data))
+
+	s.writeTunnelJSON(w, tunnel)
 }
 
-func (s *Server) updateTunnel(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+func (s *Server) updateTunnel(w http.ResponseWriter, r *http.Request, id string) {
+	var name, providerStr string
+	var port int
 
-	id := r.FormValue("id")
-	name := r.FormValue("name")
-	providerStr := r.FormValue("provider")
-	portStr := r.FormValue("port")
-
-	if id == "" {
-		http.Error(w, "missing id", http.StatusBadRequest)
-		return
+	contentType := r.Header.Get("Content-Type")
+	if strings.Contains(contentType, "application/json") {
+		var req struct {
+			Name      string `json:"name"`
+			Provider  string `json:"provider"`
+			LocalPort int    `json:"localPort"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		name = req.Name
+		providerStr = req.Provider
+		port = req.LocalPort
+	} else {
+		if err := r.ParseForm(); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		name = r.FormValue("name")
+		providerStr = r.FormValue("provider")
+		portStr := r.FormValue("port")
+		port, _ = strconv.Atoi(portStr)
 	}
 
 	for i := range s.config.Tunnels {
@@ -406,18 +431,39 @@ func (s *Server) updateTunnel(w http.ResponseWriter, r *http.Request) {
 			if providerStr != "" {
 				s.config.Tunnels[i].Provider = config.Provider(providerStr)
 			}
-			if portStr != "" {
-				port, _ := strconv.Atoi(portStr)
-				if port >= 1 && port <= 65535 {
-					s.config.Tunnels[i].LocalPort = port
-				}
+			if port >= 1 && port <= 65535 {
+				s.config.Tunnels[i].LocalPort = port
 			}
 			s.config.Save()
-			s.listTunnels(w)
+
+			update := map[string]interface{}{
+				"id":       s.config.Tunnels[i].ID,
+				"name":     s.config.Tunnels[i].Name,
+				"provider": string(s.config.Tunnels[i].Provider),
+				"port":     s.config.Tunnels[i].LocalPort,
+			}
+			if status, ok := s.manager.GetStatus(id); ok {
+				update["state"] = string(status.State)
+				update["publicUrl"] = status.PublicURL
+			}
+			data, _ := json.Marshal(update)
+			s.broadcast(string(data))
+
+			s.writeTunnelJSON(w, s.config.Tunnels[i])
 			return
 		}
 	}
 
+	http.Error(w, "tunnel not found", http.StatusNotFound)
+}
+
+func (s *Server) getTunnel(w http.ResponseWriter, id string) {
+	for _, t := range s.config.Tunnels {
+		if t.ID == id {
+			s.writeTunnelJSON(w, t)
+			return
+		}
+	}
 	http.Error(w, "tunnel not found", http.StatusNotFound)
 }
 
@@ -436,6 +482,18 @@ func (s *Server) handleTunnelActions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch r.Method {
+	case http.MethodGet:
+		if action == "" {
+			s.getTunnel(w, id)
+		} else {
+			http.Error(w, "unknown action", http.StatusBadRequest)
+		}
+	case http.MethodPut:
+		if action == "" {
+			s.updateTunnel(w, r, id)
+		} else {
+			http.Error(w, "unknown action", http.StatusBadRequest)
+		}
 	case http.MethodPost:
 		switch action {
 		case "start":
@@ -468,7 +526,7 @@ func (s *Server) startTunnel(w http.ResponseWriter, id string) {
 	if needsInstall, canInstall := s.manager.CheckInstallation(tunnel.Provider); needsInstall && canInstall {
 		update := map[string]interface{}{
 			"id":       tunnel.ID,
-			"status":   "installing",
+			"state":    "installing",
 			"provider": string(tunnel.Provider),
 		}
 		data, _ := json.Marshal(update)
@@ -480,15 +538,15 @@ func (s *Server) startTunnel(w http.ResponseWriter, id string) {
 			"name":     tunnel.Name,
 			"provider": string(tunnel.Provider),
 			"port":     tunnel.LocalPort,
-			"status":   "installing",
+			"state":    "installing",
 		})
 
 		go func() {
 			if err := s.manager.InstallProvider(tunnel.Provider); err != nil {
 				update := map[string]interface{}{
-					"id":     tunnel.ID,
-					"status": "error",
-					"error":  "Installation failed: " + err.Error(),
+					"id":           tunnel.ID,
+					"state":        "error",
+					"errorMessage": "Installation failed: " + err.Error(),
 				}
 				data, _ := json.Marshal(update)
 				s.broadcast(string(data))
@@ -497,9 +555,9 @@ func (s *Server) startTunnel(w http.ResponseWriter, id string) {
 
 			if err := s.manager.Start(*tunnel, func(status config.TunnelStatus) {}); err != nil {
 				update := map[string]interface{}{
-					"id":     tunnel.ID,
-					"status": "error",
-					"error":  err.Error(),
+					"id":           tunnel.ID,
+					"state":        "error",
+					"errorMessage": err.Error(),
 				}
 				data, _ := json.Marshal(update)
 				s.broadcast(string(data))
@@ -541,24 +599,24 @@ func (s *Server) stopTunnel(w http.ResponseWriter, id string) {
 }
 
 func (s *Server) writeTunnelJSON(w http.ResponseWriter, t config.TunnelConfig) {
-	status := "stopped"
-	var publicURL, errorMsg string
+	state := "stopped"
+	var publicURL, errorMessage string
 
 	if tunnelStatus, ok := s.manager.GetStatus(t.ID); ok {
 		publicURL = tunnelStatus.PublicURL
-		errorMsg = tunnelStatus.ErrorMessage
-		status = string(tunnelStatus.State)
+		errorMessage = tunnelStatus.ErrorMessage
+		state = string(tunnelStatus.State)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"id":        t.ID,
-		"name":      t.Name,
-		"provider":  string(t.Provider),
-		"port":      t.LocalPort,
-		"status":    status,
-		"publicUrl": publicURL,
-		"error":     errorMsg,
+		"id":           t.ID,
+		"name":         t.Name,
+		"provider":     string(t.Provider),
+		"port":         t.LocalPort,
+		"state":        state,
+		"publicUrl":    publicURL,
+		"errorMessage": errorMessage,
 	})
 }
 
@@ -663,23 +721,34 @@ func (s *Server) handleReorder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req struct {
-		Order []string `json:"order"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	var newOrder []string
+	if err := json.NewDecoder(r.Body).Decode(&newOrder); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	for i, id := range req.Order {
-		for j := range s.config.Tunnels {
-			if s.config.Tunnels[j].ID == id {
-				s.config.Tunnels[j].Order = i
-				break
-			}
+	existing := s.config.Tunnels
+	tunnelByID := make(map[string]config.TunnelConfig, len(existing))
+	for i := range existing {
+		tunnelByID[existing[i].ID] = existing[i]
+	}
+
+	reordered := make([]config.TunnelConfig, 0, len(existing))
+	seen := make(map[string]bool, len(existing))
+	for _, id := range newOrder {
+		if t, ok := tunnelByID[id]; ok && !seen[id] {
+			reordered = append(reordered, t)
+			seen[id] = true
 		}
 	}
 
+	for i := range existing {
+		if !seen[existing[i].ID] {
+			reordered = append(reordered, existing[i])
+		}
+	}
+
+	s.config.Tunnels = reordered
 	s.config.Save()
 	w.WriteHeader(http.StatusOK)
 }
@@ -726,20 +795,6 @@ func (s *Server) handleDetectPort(w http.ResponseWriter) {
 		"ports":     found,
 		"suggested": suggested,
 	})
-}
-
-func providerName(p config.Provider) string {
-	names := map[config.Provider]string{
-		config.ProviderCloudflared:  "Cloudflared",
-		config.ProviderLocalhostRun: "localhost.run",
-		config.ProviderServeo:       "Serveo",
-		config.ProviderPinggy:       "Pinggy",
-		config.ProviderTunnelmole:   "Tunnelmole",
-	}
-	if n, ok := names[p]; ok {
-		return n
-	}
-	return strings.Title(string(p))
 }
 
 //go:embed static/*
