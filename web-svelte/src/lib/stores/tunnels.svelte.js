@@ -48,25 +48,30 @@ function handleMessage(msg) {
   
   const updatedTunnel = tunnelsById[msg.id];
   
-  if (newState === 'online' && oldTunnel.state !== 'online') {
+  if (newState === 'online') {
     notifications.notifyOnline(updatedTunnel.name, updatedTunnel.publicUrl);
     if (updatedTunnel.expiresAt) expirationMonitor.start(updatedTunnel);
     return;
   }
   
-  if ((newState === 'stopped' || newState === 'stopping') && (oldTunnel.state === 'online' || oldTunnel.state === 'stopping')) {
+  if ((newState === 'stopped')) {
     expirationMonitor.stop(msg.id);
     notifications.notify('Tunnel Stopped', `${updatedTunnel.name} has been stopped`, 'info');
     return;
   }
   
-  if (newState === 'error' && oldTunnel.state !== 'error') {
+  if (newState === 'error') {
     notifications.notifyError(updatedTunnel.name, updatedTunnel.errorMessage);
     return;
   }
   
-  if (newState === 'timeout' && oldTunnel.state !== 'timeout') {
+  if (newState === 'timeout' ) {
     notifications.notify('Timeout', `${updatedTunnel.name} could not connect`, 'error');
+    return;
+  }
+
+  if (newState === 'installing') {
+    notifications.notify('Installing', `Installing tunnel for ${updatedTunnel.provider}...`, 'info');
     return;
   }
   
@@ -104,6 +109,7 @@ function connect() {
   
   ws.onopen = () => {
     console.log('[WS] Connected');
+    notifications.notify('Connected', 'Welcome back!', 'success');
   };
   
   ws.onmessage = (e) => {
@@ -116,8 +122,8 @@ function connect() {
   
   ws.onclose = () => {
     console.log('[WS] Disconnected');
+    notifications.notify('Disconnected', 'Catch you later!', 'warning');
     socket = null;
-    setTimeout(connect, 3000);
   };
   
   ws.onerror = (e) => {
