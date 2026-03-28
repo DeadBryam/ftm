@@ -1,93 +1,87 @@
-<script>
-    import { useNotifications } from '$lib/stores/notification.svelte.js';
-    
-    const notifications = useNotifications();
-    
-    let show = $derived(notifications.permission === 'default');
-    
-    async function request() {
-        await notifications.requestPermission();
+<script lang="ts">
+  import { useNotifications } from '$lib/stores/notification.svelte.js';
+  import { cn } from '$lib/utils/cn';
+  import { animate } from 'motion';
+
+  const notifications = useNotifications();
+
+  let show = $derived(notifications.permission === 'default');
+  let cardRef: HTMLDivElement | undefined = $state();
+  let isAnimatingOut = $state(false);
+
+  $effect(() => {
+    if (show && cardRef) {
+      cardRef.style.opacity = '0';
+      cardRef.style.transform = 'translateY(16px) scale(0.96)';
+      requestAnimationFrame(() => {
+        animate(
+          cardRef!,
+          { opacity: 1, y: 0, scale: 1 },
+          { type: 'spring', stiffness: 300, damping: 26 }
+        );
+      });
     }
-    
-    function later() {
-        notifications.disable();
-    }
+  });
+
+  function animateOut(): Promise<void> {
+    if (!cardRef) return Promise.resolve();
+    return animate(
+      cardRef,
+      { opacity: 0, y: 16, scale: 0.96 },
+      { type: 'spring', stiffness: 500, damping: 35 }
+    ).finished.then(() => {});
+  }
+
+  async function request() {
+    if (isAnimatingOut) return;
+    isAnimatingOut = true;
+    await animateOut();
+    await notifications.requestPermission();
+    isAnimatingOut = false;
+  }
+
+  async function later() {
+    if (isAnimatingOut) return;
+    isAnimatingOut = true;
+    await animateOut();
+    notifications.disable();
+    isAnimatingOut = false;
+  }
 </script>
 
-{#if show}
-<div class="notification-prompt">
-    <div class="content">
-        <h3>Enable Notifications</h3>
-        <p>Get notified when tunnels go online, offline, or are about to expire.</p>
-        <div class="actions">
-            <button class="btn btn-primary" onclick={request}>Enable</button>
-            <button class="btn btn-secondary" onclick={later}>Not Now</button>
-        </div>
+{#if show || isAnimatingOut}
+  <div
+    bind:this={cardRef}
+    class={cn(
+      'fixed bottom-4 right-4 max-w-[320px] rounded-xl p-5 z-50',
+      'bg-card border border-border shadow-lg'
+    )}
+  >
+    <div class="flex flex-col gap-2">
+      <h3 class="m-0 text-[1.1rem] font-semibold text-text-heading">Enable Notifications</h3>
+      <p class="m-0 text-sm leading-relaxed text-text-muted">Get notified when tunnels go online, offline, or are about to expire.</p>
+      <div class="flex gap-2 mt-1">
+        <button
+          onclick={request}
+          class={cn(
+            'inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium flex-1 cursor-pointer',
+            'transition-all duration-150 hover:-translate-y-px',
+            'bg-primary text-heading border-none'
+          )}
+        >
+          Enable
+        </button>
+        <button
+          onclick={later}
+          class={cn(
+            'inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium flex-1 cursor-pointer',
+            'transition-all duration-150 hover:-translate-y-px',
+            'bg-secondary-btn text-secondary-btn-text border border-border'
+          )}
+        >
+          Not Now
+        </button>
+      </div>
     </div>
-</div>
+  </div>
 {/if}
-
-<style>
-    .notification-prompt {
-        position: fixed;
-        bottom: 1rem;
-        right: 1rem;
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 1.25rem;
-        max-width: 320px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        z-index: 100;
-        animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .content {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    h3 {
-        margin: 0;
-        font-family: 'Crimson Pro', Georgia, serif;
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--text-heading);
-    }
-    
-    p {
-        margin: 0;
-        font-size: 0.875rem;
-        color: var(--text-muted);
-        line-height: 1.4;
-    }
-    
-    .actions {
-        display: flex;
-        gap: 0.5rem;
-        margin-top: 0.25rem;
-    }
-    
-    .actions :global(.btn) {
-        flex: 1;
-        padding: 8px 12px;
-    }
-    
-    @media (prefers-reduced-motion: reduce) {
-        .notification-prompt {
-            animation: none;
-        }
-    }
-</style>
