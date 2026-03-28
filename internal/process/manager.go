@@ -16,11 +16,15 @@ import (
 )
 
 type Manager struct {
-	mu        sync.RWMutex
-	processes map[string]*ManagedProcess
-	providers map[config.Provider]providers.Provider
-
-	DownloadProgress chan providers.DownloadProgress
+	mu                  sync.RWMutex
+	processes           map[string]*ManagedProcess
+	providers           map[config.Provider]providers.Provider
+	DownloadProgress    chan providers.DownloadProgress
+	NotificationHandler func(status config.TunnelStatus)
+	ExpirationCallbacks struct {
+		OnStart func(tunnelID, name, provider string, startedAt time.Time)
+		OnStop  func(tunnelID string)
+	}
 }
 
 func (m *Manager) SetProgressChannel(ch chan providers.DownloadProgress) {
@@ -34,6 +38,33 @@ func (m *Manager) SetProgressChannel(ch chan providers.DownloadProgress) {
 	}
 }
 
+func (m *Manager) SetNotificationHandler(handler func(config.TunnelStatus)) {
+	m.NotificationHandler = handler
+}
+
+func (m *Manager) callNotificationHandler(status config.TunnelStatus) {
+	if m.NotificationHandler != nil {
+		m.NotificationHandler(status)
+	}
+}
+
+func (m *Manager) SetExpirationCallbacks(start func(string, string, string, time.Time), stop func(string)) {
+	m.ExpirationCallbacks.OnStart = start
+	m.ExpirationCallbacks.OnStop = stop
+}
+
+func (m *Manager) callExpirationStart(tunnelID, name, provider string, startedAt time.Time) {
+	if m.ExpirationCallbacks.OnStart != nil {
+		m.ExpirationCallbacks.OnStart(tunnelID, name, provider, startedAt)
+	}
+}
+
+func (m *Manager) callExpirationStop(tunnelID string) {
+	if m.ExpirationCallbacks.OnStop != nil {
+		m.ExpirationCallbacks.OnStop(tunnelID)
+	}
+}
+
 func NewManager() *Manager {
 	return &Manager{
 		processes: make(map[string]*ManagedProcess),
@@ -42,7 +73,7 @@ func NewManager() *Manager {
 			config.ProviderTunnelmole:   tunnelmole.New(),
 			config.ProviderLocalhostRun: ssh.NewLocalhostRun(),
 			config.ProviderServeo:       ssh.NewServeo(),
-			config.ProviderPinggy:        pinggy.New(),
+			config.ProviderPinggy:       pinggy.New(),
 		},
 	}
 }
@@ -146,6 +177,7 @@ func (m *Manager) Start(tunnel config.TunnelConfig, onUpdate func(config.TunnelS
 	}
 
 	go m.startupTimeoutMonitor(tunnel.ID)
+	m.callExpirationStart(tunnel.ID, tunnel.Name, string(tunnel.Provider), time.Now())
 
 	return nil
 }
@@ -178,6 +210,8 @@ func (m *Manager) startupTimeoutMonitor(tunnelID string) {
 			if mp.OnUpdate != nil {
 				mp.OnUpdate(mp.Status)
 			}
+
+			m.callNotificationHandler(mp.Status)
 		}
 	}
 }
@@ -198,8 +232,6 @@ func (m *Manager) Stop(tunnelID string) error {
 	mp.Status.State = config.TunnelStateStopping
 	mp.Status.PublicURL = ""
 
-	delete(m.processes, tunnelID)
-
 	if mp.LogStream != nil {
 		close(mp.LogStream)
 	}
@@ -207,6 +239,10 @@ func (m *Manager) Stop(tunnelID string) error {
 	if mp.OnUpdate != nil {
 		mp.OnUpdate(mp.Status)
 	}
+
+	m.callNotificationHandler(mp.Status)
+	m.callExpirationStop(tunnelID)
+	delete(m.processes, tunnelID)
 
 	return nil
 }
@@ -244,8 +280,10 @@ func (m *Manager) updateURL(tunnelID, url string) {
 	mp.Status.State = config.TunnelStateOnline
 
 	if mp.OnUpdate != nil {
-		mp.OnUpdate(mp.Status)
+
 	}
+
+	m.callNotificationHandler(mp.Status)
 }
 
 func (m *Manager) GetLogs(tunnelID string) []string {
