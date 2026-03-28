@@ -722,11 +722,38 @@ func (s *Server) handleReorder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&r); err != nil {
+	// Expect request body to contain a JSON array of tunnel IDs in desired order
+	var newOrder []string
+	if err := json.NewDecoder(r.Body).Decode(&newOrder); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	// Build lookup of existing tunnels by ID
+	existing := s.config.Tunnels
+	tunnelByID := make(map[string]config.TunnelConfig, len(existing))
+	for i := range existing {
+		tunnelByID[existing[i].ID] = existing[i]
+	}
+
+	// Rebuild tunnel slice in requested order
+	reordered := make([]config.TunnelConfig, 0, len(existing))
+	seen := make(map[string]bool, len(existing))
+	for _, id := range newOrder {
+		if t, ok := tunnelByID[id]; ok && !seen[id] {
+			reordered = append(reordered, t)
+			seen[id] = true
+		}
+	}
+
+	// Append any tunnels not explicitly ordered, preserving relative order
+	for i := range existing {
+		if !seen[existing[i].ID] {
+			reordered = append(reordered, existing[i])
+		}
+	}
+
+	s.config.Tunnels = reordered
 	s.config.Save()
 	w.WriteHeader(http.StatusOK)
 }
