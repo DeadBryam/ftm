@@ -1,0 +1,49 @@
+/* ===========================================
+   ROSE PINE DAWN - Rose Pine Light Variant
+   =========================================== */
+
+:root[data-theme="rose-pine-dawn"] {
+  --color-bg: #faf4ed;
+  --color-card: #fffaf3;
+  --color-text: #575279;
+  --color-heading: #2d283a;
+  --color-muted: #9893a5;
+  --color-border: #dfdad9;
+  --color-border-light: #f4ede8;
+  --color-primary: #907aa9;
+  --color-primary-hover: #7d6a96;
+  --color-hover: #f4ede8;
+  --color-btn-primary: #907aa9;
+  --color-btn-primary-hover: #7d6a96;
+  --color-btn-start: #56949f;
+  --color-btn-start-hover: #47828b;
+  --color-btn-stop: #b4637a;
+  --color-btn-stop-hover: #a2556b;
+  --color-btn-danger: #b4637a;
+  --color-btn-danger-hover: #a2556b;
+  --color-status-running-bg: #56949f;
+  --color-status-running-text: #faf4ed;
+  --color-status-running-dot: #66a2ad;
+  --color-status-starting-bg: #ea9d34;
+  --color-status-starting-dot: #eead4c;
+  --color-status-installing-bg: #907aa9;
+  --color-status-installing-text: #faf4ed;
+  --color-status-installing-dot: #a28ab7;
+  --color-status-error-bg: #b4637a;
+  --color-status-error-text: #faf4ed;
+  --color-status-error-dot: #c2798c;
+  --color-status-stopped-bg: #dfdad9;
+  --color-status-stopped-text: #575279;
+  --color-status-stopped-dot: #e8e4e2;
+  --color-logs-bg: #f4ede8;
+  --color-logs-text: #2d283a;
+  --color-url-bg: #f4ede8;
+  --color-url-text: #907aa9;
+  --color-input-bg: #fffaf3;
+  --color-input-text: #575279;
+  --color-input-placeholder: #9893a5;
+  --color-input-disabled: #f4ede8;
+  --color-badge-text: #faf4ed;
+  --color-secondary-btn: #dfdad9;
+  --color-secondary-btn-text: #575279;
+}

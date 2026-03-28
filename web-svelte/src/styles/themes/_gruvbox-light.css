@@ -1,0 +1,49 @@
+/* ===========================================
+   GRUVBOX LIGHT - Gruvbox Light Variant
+   =========================================== */
+
+:root[data-theme="gruvbox-light"] {
+  --color-bg: #fbf1c7;
+  --color-card: #ebdbb2;
+  --color-text: #3c3836;
+  --color-heading: #282828;
+  --color-muted: #665c54;
+  --color-border: #d5c4a1;
+  --color-border-light: #ebdbb2;
+  --color-primary: #427b58;
+  --color-primary-hover: #356b4b;
+  --color-hover: #d5c4a1;
+  --color-btn-primary: #427b58;
+  --color-btn-primary-hover: #356b4b;
+  --color-btn-start: #98971a;
+  --color-btn-start-hover: #868617;
+  --color-btn-stop: #cc241d;
+  --color-btn-stop-hover: #b81f1a;
+  --color-btn-danger: #cc241d;
+  --color-btn-danger-hover: #b81f1a;
+  --color-status-running: #98971a;
+  --color-status-running-text: #fbf1c7;
+  --color-status-running-dot: #aba828;
+  --color-status-starting: #d79921;
+  --color-status-starting-dot: #e0a730;
+  --color-status-installing: #427b58;
+  --color-status-installing-text: #fbf1c7;
+  --color-status-installing-dot: #538a67;
+  --color-status-error: #cc241d;
+  --color-status-error-text: #fbf1c7;
+  --color-status-error-dot: #d9392c;
+  --color-status-stopped: #d5c4a1;
+  --color-status-stopped-text: #3c3836;
+  --color-status-stopped-dot: #ddd0b3;
+  --color-logs-bg: #ebdbb2;
+  --color-logs-text: #282828;
+  --color-url-bg: #d5c4a1;
+  --color-url-text: #427b58;
+  --color-input-bg: #ebdbb2;
+  --color-input-text: #3c3836;
+  --color-input-placeholder: #665c54;
+  --color-input-disabled: #fbf1c7;
+  --color-badge-text: #fbf1c7;
+  --color-secondary-btn: #d5c4a1;
+  --color-secondary-btn-text: #3c3836;
+}

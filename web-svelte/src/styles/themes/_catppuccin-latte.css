@@ -1,0 +1,49 @@
+/* ===========================================
+   CATPPUCCIN LATTE - Catppuccin Light Variant
+   =========================================== */
+
+:root[data-theme="catppuccin-latte"] {
+  --color-bg: #eff1f5;
+  --color-card: #e6e9ef;
+  --color-text: #4c4f69;
+  --color-heading: #1e1e2e;
+  --color-muted: #9ca0b0;
+  --color-border: #ccd0da;
+  --color-border-light: #e6e9ef;
+  --color-primary: #8839ef;
+  --color-primary-hover: #7429df;
+  --color-hover: #dce0e8;
+  --color-btn-primary: #8839ef;
+  --color-btn-primary-hover: #7429df;
+  --color-btn-start: #40a02b;
+  --color-btn-start-hover: #359026;
+  --color-btn-stop: #d20f39;
+  --color-btn-stop-hover: #be0d33;
+  --color-btn-danger: #d20f39;
+  --color-btn-danger-hover: #be0d33;
+  --color-status-running: #40a02b;
+  --color-status-running-text: #eff1f5;
+  --color-status-running-dot: #54ad3a;
+  --color-status-starting: #fe640b;
+  --color-status-starting-dot: #fe7a28;
+  --color-status-installing: #1e66f5;
+  --color-status-installing-text: #eff1f5;
+  --color-status-installing-dot: #3378f6;
+  --color-status-error: #d20f39;
+  --color-status-error-text: #eff1f5;
+  --color-status-error-dot: #db2448;
+  --color-status-stopped: #ccd0da;
+  --color-status-stopped-text: #4c4f69;
+  --color-status-stopped-dot: #d9dce4;
+  --color-logs-bg: #e6e9ef;
+  --color-logs-text: #1e1e2e;
+  --color-url-bg: #dce0e8;
+  --color-url-text: #1e66f5;
+  --color-input-bg: #e6e9ef;
+  --color-input-text: #4c4f69;
+  --color-input-placeholder: #9ca0b0;
+  --color-input-disabled: #eff1f5;
+  --color-badge-text: #eff1f5;
+  --color-secondary-btn: #ccd0da;
+  --color-secondary-btn-text: #4c4f69;
+}

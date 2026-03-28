@@ -1,0 +1,50 @@
+/* ===========================================
+   TOKYO NIGHT - Official Tokyo Night Theme
+   Based on folke/tokyonight.nvim
+   =========================================== */
+
+:root[data-theme="tokyo-night"] {
+  --color-bg: #1f2335;
+  --color-card: #24283b;
+  --color-text: #c0caf5;
+  --color-heading: #c0caf5;
+  --color-muted: #565f89;
+  --color-border: #3b4261;
+  --color-border-light: #292e42;
+  --color-primary: #7aa2f7;
+  --color-primary-hover: #6891e8;
+  --color-hover: #292e42;
+  --color-btn-primary: #7aa2f7;
+  --color-btn-primary-hover: #6891e8;
+  --color-btn-start: #9ece6a;
+  --color-btn-start-hover: #8cbd5f;
+  --color-btn-stop: #f7768e;
+  --color-btn-stop-hover: #e5637a;
+  --color-btn-danger: #f7768e;
+  --color-btn-danger-hover: #e5637a;
+  --color-status-running: #9ece6a;
+  --color-status-running-text: #1f2335;
+  --color-status-running-dot: #b0db82;
+  --color-status-starting: #e0af68;
+  --color-status-starting-dot: #e6c07d;
+  --color-status-installing: #7aa2f7;
+  --color-status-installing-text: #1f2335;
+  --color-status-installing-dot: #91b0f9;
+  --color-status-error: #f7768e;
+  --color-status-error-text: #1f2335;
+  --color-status-error-dot: #f98da5;
+  --color-status-stopped: #3b4261;
+  --color-status-stopped-text: #c0caf5;
+  --color-status-stopped-dot: #4c5478;
+  --color-logs-bg: #16161e;
+  --color-logs-text: #c0caf5;
+  --color-url-bg: #292e42;
+  --color-url-text: #7aa2f7;
+  --color-input-bg: #24283b;
+  --color-input-text: #c0caf5;
+  --color-input-placeholder: #565f89;
+  --color-input-disabled: #1f2335;
+  --color-badge-text: #1f2335;
+  --color-secondary-btn: #3b4261;
+  --color-secondary-btn-text: #c0caf5;
+}

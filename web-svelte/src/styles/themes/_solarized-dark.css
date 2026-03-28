@@ -1,0 +1,50 @@
+/* ===========================================
+   SOLARIZED DARK - Official Solarized Theme
+   Based on ethanschoonover.com/solarized
+   =========================================== */
+
+:root[data-theme="solarized-dark"] {
+  --color-bg: #002b36;
+  --color-card: #073642;
+  --color-text: #839496;
+  --color-heading: #93a1a1;
+  --color-muted: #586e75;
+  --color-border: #0d4250;
+  --color-border-light: #073642;
+  --color-primary: #268bd2;
+  --color-primary-hover: #2178c0;
+  --color-hover: #094454;
+  --color-btn-primary: #268bd2;
+  --color-btn-primary-hover: #2178c0;
+  --color-btn-start: #859900;
+  --color-btn-start-hover: #748800;
+  --color-btn-stop: #dc322f;
+  --color-btn-stop-hover: #cb2c27;
+  --color-btn-danger: #dc322f;
+  --color-btn-danger-hover: #cb2c27;
+  --color-status-running: #859900;
+  --color-status-running-text: #002b36;
+  --color-status-running-dot: #96ab1a;
+  --color-status-starting: #b58900;
+  --color-status-starting-dot: #c69a1a;
+  --color-status-installing: #268bd2;
+  --color-status-installing-text: #002b36;
+  --color-status-installing-dot: #3a9de4;
+  --color-status-error: #dc322f;
+  --color-status-error-text: #fdf6e3;
+  --color-status-error-dot: #e64443;
+  --color-status-stopped: #0d4250;
+  --color-status-stopped-text: #839496;
+  --color-status-stopped-dot: #1a5060;
+  --color-logs-bg: #002b36;
+  --color-logs-text: #839496;
+  --color-url-bg: #094454;
+  --color-url-text: #268bd2;
+  --color-input-bg: #073642;
+  --color-input-text: #839496;
+  --color-input-placeholder: #586e75;
+  --color-input-disabled: #002b36;
+  --color-badge-text: #002b36;
+  --color-secondary-btn: #0d4250;
+  --color-secondary-btn-text: #839496;
+}

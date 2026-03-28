@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@import "./themes.css";
+
+body {
+  font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.3s, color 0.3s;
+  margin: 0;
+}
+
+html, body {
+  overflow: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}

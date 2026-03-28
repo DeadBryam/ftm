@@ -1,0 +1,49 @@
+/* ===========================================
+   TOKYO NIGHT LIGHT - Tokyo Night Light Variant
+   =========================================== */
+
+:root[data-theme="tokyo-night-light"] {
+  --color-bg: #faf5f7;
+  --color-card: #ffffff;
+  --color-text: #343b58;
+  --color-heading: #1f2335;
+  --color-muted: #637777;
+  --color-border: #d0d5e8;
+  --color-border-light: #e8ecf4;
+  --color-primary: #5e7ce2;
+  --color-primary-hover: #4c6bd1;
+  --color-hover: #eef0f5;
+  --color-btn-primary: #5e7ce2;
+  --color-btn-primary-hover: #4c6bd1;
+  --color-btn-start: #3584e4;
+  --color-btn-start-hover: #2a6bc7;
+  --color-btn-stop: #d21f3c;
+  --color-btn-stop-hover: #be1b36;
+  --color-btn-danger: #d21f3c;
+  --color-btn-danger-hover: #be1b36;
+  --color-status-running: #3584e4;
+  --color-status-running-text: #ffffff;
+  --color-status-running-dot: #4899e8;
+  --color-status-starting: #df8e1d;
+  --color-status-starting-dot: #e6a23d;
+  --color-status-installing: #5e7ce2;
+  --color-status-installing-text: #ffffff;
+  --color-status-installing-dot: #7592e8;
+  --color-status-error: #d21f3c;
+  --color-status-error-text: #ffffff;
+  --color-status-error-dot: #db3550;
+  --color-status-stopped: #d0d5e8;
+  --color-status-stopped-text: #343b58;
+  --color-status-stopped-dot: #dce1f0;
+  --color-logs-bg: #343b58;
+  --color-logs-text: #faf5f7;
+  --color-url-bg: #eef0f5;
+  --color-url-text: #5e7ce2;
+  --color-input-bg: #ffffff;
+  --color-input-text: #343b58;
+  --color-input-placeholder: #637777;
+  --color-input-disabled: #e8ecf4;
+  --color-badge-text: #faf5f7;
+  --color-secondary-btn: #d0d5e8;
+  --color-secondary-btn-text: #343b58;
+}

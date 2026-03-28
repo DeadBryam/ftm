@@ -1,0 +1,49 @@
+/* ===========================================
+   ONE DARK - Based on Atom's One Dark
+   =========================================== */
+
+:root[data-theme="one-dark"] {
+  --color-bg: #282c34;
+  --color-card: #21252b;
+  --color-text: #abb2bf;
+  --color-heading: #e6e6e6;
+  --color-muted: #5c6370;
+  --color-border: #3e4451;
+  --color-border-light: #2c313a;
+  --color-primary: #61afef;
+  --color-primary-hover: #4d9fe5;
+  --color-hover: #2c313a;
+  --color-btn-primary: #61afef;
+  --color-btn-primary-hover: #4d9fe5;
+  --color-btn-start: #98c379;
+  --color-btn-start-hover: #87b46a;
+  --color-btn-stop: #e06c75;
+  --color-btn-stop-hover: #d55862;
+  --color-btn-danger: #e06c75;
+  --color-btn-danger-hover: #d55862;
+  --color-status-running: #98c379;
+  --color-status-running-text: #282c34;
+  --color-status-running-dot: #a8d08c;
+  --color-status-starting: #e5c07b;
+  --color-status-starting-dot: #e8ce8e;
+  --color-status-installing: #61afef;
+  --color-status-installing-text: #282c34;
+  --color-status-installing-dot: #79bdf1;
+  --color-status-error: #e06c75;
+  --color-status-error-text: #282c34;
+  --color-status-error-dot: #e6838c;
+  --color-status-stopped: #3e4451;
+  --color-status-stopped-text: #abb2bf;
+  --color-status-stopped-dot: #505766;
+  --color-logs-bg: #1e2127;
+  --color-logs-text: #abb2bf;
+  --color-url-bg: #2c313a;
+  --color-url-text: #61afef;
+  --color-input-bg: #21252b;
+  --color-input-text: #abb2bf;
+  --color-input-placeholder: #5c6370;
+  --color-input-disabled: #282c34;
+  --color-badge-text: #282c34;
+  --color-secondary-btn: #3e4451;
+  --color-secondary-btn-text: #abb2bf;
+}

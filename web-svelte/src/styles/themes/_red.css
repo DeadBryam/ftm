@@ -1,0 +1,49 @@
+/* ===========================================
+   RED THEME
+   =========================================== */
+
+:root[data-theme="red"] {
+  --color-bg: #1a0a0a;
+  --color-card: #2b1515;
+  --color-text: #f5e0e0;
+  --color-heading: #f8f0f0;
+  --color-muted: #a08080;
+  --color-border: #4a2525;
+  --color-border-light: #2b1515;
+  --color-primary: #dc2626;
+  --color-primary-hover: #c42020;
+  --color-hover: #3d1f1f;
+  --color-btn-primary: #dc2626;
+  --color-btn-primary-hover: #c42020;
+  --color-btn-start: #22c55e;
+  --color-btn-start-hover: #1aad50;
+  --color-btn-stop: #dc2626;
+  --color-btn-stop-hover: #c42020;
+  --color-btn-danger: #dc2626;
+  --color-btn-danger-hover: #c42020;
+  --color-status-running: #22c55e;
+  --color-status-running-text: #1a0a0a;
+  --color-status-running-dot: #30d06d;
+  --color-status-starting: #fbbf24;
+  --color-status-starting-dot: #fbc94a;
+  --color-status-installing: #dc2626;
+  --color-status-installing-text: #f8f0f0;
+  --color-status-installing-dot: #e63838;
+  --color-status-error: #dc2626;
+  --color-status-error-text: #f8f0f0;
+  --color-status-error-dot: #e63838;
+  --color-status-stopped: #4a2525;
+  --color-status-stopped-text: #f5e0e0;
+  --color-status-stopped-dot: #5c3030;
+  --color-logs-bg: #0f0505;
+  --color-logs-text: #f5e0e0;
+  --color-url-bg: #3d1f1f;
+  --color-url-text: #dc2626;
+  --color-input-bg: #2b1515;
+  --color-input-text: #f5e0e0;
+  --color-input-placeholder: #a08080;
+  --color-input-disabled: #1a0a0a;
+  --color-badge-text: #1a0a0a;
+  --color-secondary-btn: #4a2525;
+  --color-secondary-btn-text: #f5e0e0;
+}
