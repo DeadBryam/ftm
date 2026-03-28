@@ -152,9 +152,28 @@ func (s *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		return nil
 	})
 
+	pingTicker := time.NewTicker(30 * time.Second)
+	defer pingTicker.Stop()
+
+	done := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-pingTicker.C:
+				conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+				if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+					return
+				}
+			case <-done:
+				return
+			}
+		}
+	}()
+
 	for {
 		_, _, err := conn.ReadMessage()
 		if err != nil {
+			close(done)
 			break
 		}
 	}
