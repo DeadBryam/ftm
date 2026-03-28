@@ -9,7 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/viewport"
 
-	"github.com/sthbryan/ftm/internal/app/ui"
+	"github.com/sthbryan/ftm/internal/app/ui/views"
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/providers"
 )
@@ -66,8 +66,8 @@ var DefaultKeys = KeyMap{
 		key.WithHelp("enter", "toggle"),
 	),
 	Toggle: key.NewBinding(
-		key.WithKeys("s"),
-		key.WithHelp("s", "start/stop"),
+		key.WithKeys("t"),
+		key.WithHelp("t", "start/stop"),
 	),
 	Logs: key.NewBinding(
 		key.WithKeys("l"),
@@ -135,7 +135,7 @@ type Model struct {
 	DownloadingProvider string
 	PendingTunnel       *config.TunnelConfig
 	ProgressBar         progress.Model
-	SettingsView        *ui.SettingsView
+	SettingsView        *views.SettingsView
 }
 
 type FormData struct {

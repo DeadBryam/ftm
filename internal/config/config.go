@@ -22,7 +22,8 @@ type Config struct {
 	WebPort int            `yaml:"web_port,omitempty"`
 
 	NotificationsStatus string `yaml:"notifications_status"`
-	NotificationSound  bool   `yaml:"notification_sound"`
+	NotificationSound   bool   `yaml:"notification_sound"`
+	Theme               string `yaml:"theme"`
 
 	ExpirationThresholds      []int          `yaml:"expiration_thresholds"`
 	ProviderExpirationMinutes map[string]int `yaml:"provider_expiration_minutes"`
@@ -34,6 +35,7 @@ func DefaultConfig() *Config {
 		Tunnels:               []TunnelConfig{},
 		NotificationsStatus:   NotificationPending,
 		NotificationSound:     true,
+		Theme:                 "system",
 		ExpirationThresholds:  []int{30, 15, 10, 5, 1},
 		ProviderExpirationMinutes: map[string]int{
 			"pinggy":       60,

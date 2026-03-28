@@ -9,11 +9,7 @@ let settings = $state<Settings>({
 let loaded = $state(false);
 
 async function load() {
-  try {
-    settings = await getSettings();
-  } catch {
-    // Use defaults
-  }
+  settings = await getSettings();
   loaded = true;
 }
 

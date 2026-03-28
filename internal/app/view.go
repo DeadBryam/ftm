@@ -162,3 +162,15 @@ func (m *Model) viewDownloading() string {
 
 	return view.Render(progressView)
 }
+
+func (m *Model) viewSettings() string {
+	view := views.NewSettingsView()
+	view.Width = m.Width
+	if m.SettingsView != nil {
+		view.NotificationsEnabled = m.SettingsView.NotificationsEnabled
+		view.NotificationSound = m.SettingsView.NotificationSound
+		view.Theme = m.SettingsView.Theme
+		view.Focused = m.SettingsView.Focused
+	}
+	return view.Render()
+}

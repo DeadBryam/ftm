@@ -31,10 +31,6 @@ func (s *SettingsView) Render() string {
 		Bold(true).
 		Render("⚙️  Settings")
 
-	subheader := lipgloss.NewStyle().
-		Foreground(t.TextDim).
-		Render("Configure your preferences")
-
 	b.WriteString(header)
 	b.WriteString("\n")
 	b.WriteString(strings.Repeat("─", 30))
