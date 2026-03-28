@@ -14,7 +14,7 @@
   import type { Tunnel } from '$lib/types';
 
   import '../styles/app.css';
-  
+
   const store = useTunnels();
   const toast = useToast();
   const providerStore = useProviders();
