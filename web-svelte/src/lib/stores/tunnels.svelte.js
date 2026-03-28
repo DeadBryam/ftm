@@ -20,6 +20,26 @@ function handleMessage(msg) {
   if (!msg.id) return;
   
   const idx = tunnels.findIndex(t => t.id === msg.id);
+  
+  if (msg.name !== undefined || msg.provider !== undefined || msg.port !== undefined) {
+    tunnels = tunnels.map(t => {
+      if (t.id === msg.id) {
+        return {
+          ...t,
+          name: msg.name ?? t.name,
+          provider: msg.provider ?? t.provider,
+          port: msg.port ?? t.port,
+          state: msg.state ?? t.state,
+          publicUrl: msg.publicUrl ?? t.publicUrl,
+          errorMessage: msg.errorMessage ?? t.errorMessage,
+          expiresAt: msg.expiresAt ?? t.expiresAt
+        };
+      }
+      return t;
+    });
+    return;
+  }
+  
   if (idx === -1) return;
   
   const oldTunnel = tunnels[idx];
@@ -31,32 +51,33 @@ function handleMessage(msg) {
     return;
   }
   
-  const updated = [...tunnels];
-  updated[idx] = {
-    ...updated[idx],
-    name: msg.name ?? updated[idx].name,
-    provider: msg.provider ?? updated[idx].provider,
-    port: msg.port ?? updated[idx].port,
-    state: newState,
-    publicUrl: msg.publicUrl ?? updated[idx].publicUrl,
-    errorMessage: msg.errorMessage ?? updated[idx].errorMessage,
-    expiresAt: msg.expiresAt ?? updated[idx].expiresAt
-  };
-  tunnels = updated;
+  tunnels = tunnels.map(t => {
+    if (t.id === msg.id) {
+      return {
+        ...t,
+        state: newState,
+        publicUrl: msg.publicUrl ?? t.publicUrl,
+        errorMessage: msg.errorMessage ?? t.errorMessage,
+        expiresAt: msg.expiresAt ?? t.expiresAt
+      };
+    }
+    return t;
+  });
   
-  if (!notifications.enabled) return;
+  const updatedTunnel = tunnels.find(t => t.id === msg.id);
+  if (!updatedTunnel || !notifications.enabled) return;
   
   if (newState === 'online' && oldTunnel.state !== 'online') {
-    notifications.notifyOnline(updated[idx].name, msg.publicUrl);
-    if (msg.expiresAt) expirationMonitor.start(updated[idx]);
+    notifications.notifyOnline(updatedTunnel.name, msg.publicUrl);
+    if (msg.expiresAt) expirationMonitor.start(updatedTunnel);
   }
   
   if (newState === 'error' && oldTunnel.state !== 'error') {
-    notifications.notifyError(updated[idx].name, msg.errorMessage);
+    notifications.notifyError(updatedTunnel.name, msg.errorMessage);
   }
   
   if (newState === 'timeout' && oldTunnel.state !== 'timeout') {
-    notifications.notify('Timeout', `${updated[idx].name} could not connect`);
+    notifications.notify('Timeout', `${updatedTunnel.name} could not connect`);
   }
   
   if (newState === 'stopped' && oldTunnel.state === 'online') {
@@ -65,13 +86,13 @@ function handleMessage(msg) {
   
   if (newState === 'online') {
     const updatedProgress = { ...installProgress };
-    delete updatedProgress[updated[idx].provider];
+    delete updatedProgress[updatedTunnel.provider];
     installProgress = updatedProgress;
   }
 }
 
 function connect() {
-  if (socket) return;
+  if (socket && socket.readyState === WebSocket.OPEN) return;
   
   loading = true;
   notifications.init();
@@ -93,19 +114,26 @@ function connect() {
   
   const ws = new WebSocket(`ws://${window.location.host}/ws/events`);
   
+  ws.onopen = () => {
+    console.log('[WS] Connected');
+  };
+  
   ws.onmessage = (e) => {
     try {
       handleMessage(JSON.parse(e.data));
-    } catch {}
+    } catch (err) {
+      console.error('[WS] Parse error:', err);
+    }
   };
   
   ws.onclose = () => {
-    error = 'Connection closed. Reconnecting...';
+    console.log('[WS] Disconnected');
     socket = null;
     setTimeout(connect, 3000);
   };
   
-  ws.onerror = () => {
+  ws.onerror = (e) => {
+    console.error('[WS] Error:', e);
     error = 'Connection error';
   };
   

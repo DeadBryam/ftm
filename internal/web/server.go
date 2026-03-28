@@ -183,7 +183,7 @@ func (s *Server) statusUpdateLoop() {
 	for status := range s.StatusChannel {
 		update := map[string]interface{}{
 			"id":           status.ID,
-			"state":       string(status.State),
+			"state":        string(status.State),
 			"publicUrl":    status.PublicURL,
 			"errorMessage": status.ErrorMessage,
 		}
@@ -194,13 +194,19 @@ func (s *Server) statusUpdateLoop() {
 
 func (s *Server) broadcast(msg string) {
 	s.clientsMu.RLock()
-	defer s.clientsMu.RUnlock()
-
+	clients := make([]*websocket.Conn, 0, len(s.clients))
 	for conn := range s.clients {
+		clients = append(clients, conn)
+	}
+	s.clientsMu.RUnlock()
+
+	for _, conn := range clients {
 		err := conn.WriteMessage(websocket.TextMessage, []byte(msg))
 		if err != nil {
+			s.clientsMu.Lock()
 			conn.Close()
 			delete(s.clients, conn)
+			s.clientsMu.Unlock()
 		}
 	}
 }
