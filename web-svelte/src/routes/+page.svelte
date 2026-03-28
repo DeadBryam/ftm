@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { useTunnels } from '$lib/stores/tunnels.svelte';
   import { useToast } from '$lib/stores/toast.svelte';
@@ -12,15 +12,17 @@
   import ConnectionsPanel from '$lib/components/ConnectionsPanel.svelte';
   import NewConnection from '$lib/components/NewConnection.svelte';
   import EditConnection from '$lib/components/EditConnection.svelte';
-  import '$lib/styles/components.css';
+  import type { Tunnel } from '$lib/types';
+
+  import '../styles/app.css';
   
   const store = useTunnels();
   const toast = useToast();
   const providerStore = useProviders();
   const theme = useTheme();
 
-  let deleteTunnel = $state(null);
-  let editingTunnelId = $state(null);
+  let deleteTunnel: Tunnel | null = $state(null);
+  let editingTunnelId: string | null = $state(null);
 
   onMount(async () => {
     theme.init();
@@ -32,13 +34,13 @@
     store.disconnect();
   });
   
-  function handleAction(action, data) {
+  function handleAction(action: string, data: unknown) {
     switch (action) {
       case 'edit':
-        editingTunnelId = data;
+        editingTunnelId = data as string;
         break;
       case 'delete':
-        deleteTunnel = data;
+        deleteTunnel = data as Tunnel;
         break;
     }
   }
@@ -67,14 +69,14 @@
 
 <svelte:head>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </svelte:head>
 
-<div class="app">
+<div class="max-w-[1200px] mx-auto flex-1 flex flex-col box-border">
   <Header />
 
-  <main class="app-main">
+  <main class="grid grid-cols-[360px_1fr] gap-5 flex-1 min-h-0 md:grid-cols-[320px_1fr] md:gap-4 lg:grid-cols-[360px_1fr] lg:gap-5 max-md:grid-cols-1 max-md:overflow-y-auto max-md:gap-4">
     {#if editingTunnelId}
       <EditConnection 
         tunnelId={editingTunnelId} 
@@ -93,66 +95,10 @@
 
 <DeleteModal 
   show={deleteTunnel !== null} 
-  name={deleteTunnel?.name || ''} 
+  name={deleteTunnel?.name ?? ''} 
   onConfirm={handleConfirmDelete} 
   onCancel={handleCancelDelete}
 />
 
 <Toasts />
 <NotificationPermission />
-
-<style>
-  :global(body) {
-    margin: 0;
-    font-family: 'Inter', system-ui, sans-serif;
-    background: var(--bg-color);
-    color: var(--text-color);
-    transition: background-color 0.3s, color 0.3s;
-  }
-
-  :global(html, body) {
-    overflow: hidden;
-  }
-
-  .app {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    box-sizing: border-box;
-  }
-
-  .app-main {
-    display: grid;
-    grid-template-columns: 360px 1fr;
-    gap: 20px;
-    flex: 1;
-    min-height: 0;
-  }
-
-  @media (max-width: 1024px) and (min-width: 768px) {
-    .app-main {
-      grid-template-columns: 320px 1fr;
-      gap: 16px;
-    }
-  }
-
-  @media (max-width: 767px) {
-    .app-main {
-      grid-template-columns: 1fr;
-      overflow-y: auto;
-      gap: 16px;
-    }
-
-    :global(html, body) {
-      height: auto;
-      overflow: auto;
-    }
-
-    .app {
-      height: auto;
-      padding: 16px;
-    }
-  }
-</style>
