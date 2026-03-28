@@ -63,12 +63,12 @@ func newDarwinSoundPlayer() SoundPlayer {
 	}
 	return &darwinSoundPlayer{
 		sounds: map[SoundType]string{
-			SoundStartup: "/System/Library/Sounds/Glass.aiff",
+			SoundStartup: "/System/Library/Sounds/Pop.aiff",
 			SoundSuccess: "/System/Library/Sounds/Tink.aiff",
 			SoundError:   "/System/Library/Sounds/Basso.aiff",
 			SoundWarning: "/System/Library/Sounds/Ping.aiff",
 			SoundAlert:   "/System/Library/Sounds/Blow.aiff",
-			SoundInfo:    "/System/Library/Sounds/Funk.aiff",
+			SoundInfo:    "/System/Library/Sounds/Submarine.aiff",
 		},
 	}
 }
