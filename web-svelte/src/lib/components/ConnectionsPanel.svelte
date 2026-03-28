@@ -6,9 +6,16 @@
   let { onAction } = $props();
 
   const store = useTunnels();
+  let hasEntered = $state(false);
+
+  $effect(() => {
+    if (!hasEntered) {
+      hasEntered = true;
+    }
+  });
 </script>
 
-<section class="panel connections-panel">
+<section class="panel connections-panel" class:entering={!hasEntered}>
   <div class="panel-header">
     <h2>Your Connections</h2>
     <span class="connection-count">{store.tunnels.length}</span>
@@ -53,11 +60,16 @@
     flex-direction: column;
     overflow: hidden;
     transition: box-shadow 0.2s ease, transform 0.2s ease;
+    opacity: 1;
+    transform: none;
+    min-height: 0;
+  }
+
+  .panel.entering {
     opacity: 0;
     transform: translateY(30px);
     animation: panelIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     animation-delay: 0.2s;
-    min-height: 0;
   }
 
   .panel:hover {
@@ -164,7 +176,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .panel {
+    .panel.entering {
       animation: none;
       opacity: 1;
       transform: none;
