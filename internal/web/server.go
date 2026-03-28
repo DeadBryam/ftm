@@ -67,7 +67,6 @@ func (s *Server) Start() error {
 		Handler: mux,
 	}
 
-	go s.broadcastLoop()
 	go s.installProgressLoop()
 	go s.httpServer.ListenAndServe()
 	return nil
@@ -119,43 +118,6 @@ func (s *Server) Port() int {
 
 func (s *Server) URL() string {
 	return fmt.Sprintf("http://localhost:%d", s.port)
-}
-
-func (s *Server) broadcastLoop() {
-	ticker := NewTicker(1)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		s.clientsMu.RLock()
-		if len(s.clients) == 0 {
-			s.clientsMu.RUnlock()
-			continue
-		}
-		s.clientsMu.RUnlock()
-
-		for _, tunnel := range s.config.Tunnels {
-			status, ok := s.manager.GetStatus(tunnel.ID)
-			if !ok {
-				update := map[string]interface{}{
-					"id":        tunnel.ID,
-					"state":     "stopped",
-					"publicUrl": "",
-				}
-				data, _ := MarshalJSON(update)
-				s.broadcast(string(data))
-				continue
-			}
-
-			update := map[string]interface{}{
-				"id":           tunnel.ID,
-				"state":        string(status.State),
-				"publicUrl":    status.PublicURL,
-				"errorMessage": status.ErrorMessage,
-			}
-			data, _ := MarshalJSON(update)
-			s.broadcast(string(data))
-		}
-	}
 }
 
 func (s *Server) installProgressLoop() {
