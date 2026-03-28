@@ -1,228 +1,140 @@
-<script>
-  let { show, name, onConfirm, onCancel } = $props();
+<script lang="ts">
+  import { X, Trash2 } from "lucide-svelte";
+  import { animate } from "motion";
+  import { cn } from "$lib/utils/cn";
+  import Button from "./Button.svelte";
+
+  let {
+    show,
+    name,
+    onConfirm,
+    onCancel,
+  }: {
+    show: boolean;
+    name: string;
+    onConfirm: () => void;
+    onCancel: () => void;
+  } = $props();
+
+  let modalRef: HTMLDivElement | undefined = $state();
+  let backdropRef: HTMLDivElement | undefined = $state();
+  let isAnimatingOut = $state(false);
+
+  $effect(() => {
+    if (show && modalRef && backdropRef && !isAnimatingOut) {
+      backdropRef.style.opacity = "0";
+      animate(backdropRef, { opacity: 1 }, { duration: 0.2 });
+
+      modalRef.style.opacity = "0";
+      modalRef.style.transform = "scale(0.92)";
+      requestAnimationFrame(() => {
+        animate(
+          modalRef!,
+          { opacity: 1, scale: 1 },
+          { type: "spring", stiffness: 280, damping: 24 },
+        );
+      });
+    }
+  });
+
+  function animateOut(): Promise<void> {
+    return Promise.all([
+      backdropRef
+        ? animate(backdropRef, { opacity: 0 }, { duration: 0.18 }).finished
+        : Promise.resolve(),
+      modalRef
+        ? animate(
+            modalRef,
+            { opacity: 0, scale: 0.92 },
+            { type: "spring", stiffness: 500, damping: 35 },
+          ).finished
+        : Promise.resolve(),
+    ]).then(() => {});
+  }
+
+  function handleCancel() {
+    if (isAnimatingOut) return;
+    isAnimatingOut = true;
+    animateOut().then(() => {
+      isAnimatingOut = false;
+      onCancel();
+    });
+  }
+
+  function handleConfirm() {
+    if (isAnimatingOut) return;
+    isAnimatingOut = true;
+    animateOut().then(() => {
+      isAnimatingOut = false;
+      onConfirm();
+    });
+  }
+
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === "Escape" && !isAnimatingOut) handleCancel();
+  }
 </script>
 
-{#if show}
-  <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<svelte:window onkeydown={show || isAnimatingOut ? handleKeydown : undefined} />
+
+{#if show || isAnimatingOut}
   <div
-    class="modal-overlay"
-    onclick={onCancel}
+    bind:this={backdropRef}
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
     role="presentation"
-    tabindex="0"
-    onkeydown={(e) => {
-      if (
-        e.key === "Enter" ||
-        e.key === " " ||
-        e.key === "Spacebar" ||
-        e.key === "Escape"
-      )
-        onCancel();
-    }}
+    onclick={handleCancel}
   >
     <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_interactive_supports_focus -->
     <div
-      class="modal"
+      bind:this={modalRef}
+      class={cn("w-[90%] max-w-md rounded-2xl bg-card shadow-2xl")}
       onclick={(e) => e.stopPropagation()}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
-      tabindex="-1"
     >
-      <div class="modal-header">
-        <h3 id="modal-title">Delete Connection</h3>
-        <button class="close-btn" onclick={onCancel} aria-label="Close dialog"
-          >&times;</button
+      <div class="flex items-center justify-between px-6 pt-6 max-md:px-5">
+        <h3
+          id="modal-title"
+          class="m-0 text-lg font-semibold text-text-heading flex items-center gap-2"
         >
+          Delete Connection
+        </h3>
+        <button
+          class={cn(
+            "w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer",
+            "bg-transparent border-none text-text-muted",
+            "transition-all duration-150 hover:rotate-90 hover:bg-hover",
+          )}
+          onclick={handleCancel}
+          aria-label="Close dialog"
+        >
+          <X size={18} />
+        </button>
       </div>
-      <div class="modal-body">
-        <p>Are you sure you want to delete <strong>{name}</strong>?</p>
-        <p class="warning">This action cannot be undone.</p>
+      <div class="px-6 py-5 max-md:px-5">
+        <p class="m-0 mb-2 text-text">
+          Are you sure you want to delete <strong>{name}</strong>?
+        </p>
+        <p class="m-0 text-sm text-text-muted">This action cannot be undone.</p>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick={onCancel}>Cancel</button>
-        <button class="btn btn-danger" onclick={onConfirm}>Delete</button>
+      <div
+        class="flex gap-3 px-6 pb-6 max-md:flex-col-reverse max-md:gap-2 max-md:px-5 max-md:pb-5"
+      >
+        <Button
+          variant="default"
+          size="lg"
+          onclick={handleCancel}
+          class="flex-1 max-md:w-full">Cancel</Button
+        >
+        <Button
+          variant="error"
+          size="lg"
+          onclick={handleConfirm}
+          class="flex-1 max-md:w-full">Delete</Button
+        >
       </div>
     </div>
   </div>
 {/if}
-
-<style>
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    animation: overlayIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  @keyframes overlayIn {
-    to {
-      background: rgba(0, 0, 0, 0.5);
-    }
-  }
-
-  .modal {
-    background: var(--card-bg);
-    border-radius: 16px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    transform: scale(0.9) translateY(20px);
-    opacity: 0;
-    animation: modalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  }
-
-  @keyframes modalIn {
-    to {
-      transform: scale(1) translateY(0);
-      opacity: 1;
-    }
-  }
-
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 24px 24px 0;
-  }
-
-  .modal-header h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-heading);
-    margin: 0;
-  }
-
-  .close-btn {
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: 0;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
-  }
-
-  .close-btn:hover {
-    background: var(--hover-bg);
-    transform: rotate(90deg);
-  }
-
-  .modal-body {
-    padding: 16px 24px;
-  }
-
-  .modal-body p {
-    margin: 0 0 8px;
-    color: var(--text-color);
-  }
-
-  .warning {
-    font-size: 13px;
-    color: var(--text-muted);
-  }
-
-  .modal-footer {
-    display: flex;
-    gap: 12px;
-    padding: 0 24px 24px;
-    justify-content: flex-end;
-  }
-
-  .btn {
-    padding: 10px 20px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    border: 1px solid var(--border-color);
-    background: var(--card-bg);
-    color: var(--text-color);
-    transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn:hover {
-    background: var(--hover-bg);
-    transform: translateY(-1px);
-  }
-
-  .btn:active {
-    transform: translateY(0) scale(0.98);
-  }
-
-  .btn-secondary {
-    border-color: var(--border-color);
-  }
-
-  .btn-danger {
-    background: var(--btn-danger-bg);
-    color: var(--badge-text);
-    border-color: var(--btn-danger-bg);
-  }
-
-  .btn-danger:hover {
-    background: var(--btn-danger-hover-bg);
-    border-color: var(--btn-danger-hover-bg);
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--btn-danger-bg) 30%, transparent);
-  }
-
-  .btn-danger:focus-visible,
-  .btn-secondary:focus-visible {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
-  }
-
-  @media (max-width: 480px) {
-    .modal {
-      width: 95%;
-      border-radius: 12px;
-    }
-
-    .modal-header {
-      padding: 20px 20px 0;
-    }
-
-    .modal-body {
-      padding: 14px 20px;
-    }
-
-    .modal-footer {
-      padding: 0 20px 20px;
-      flex-direction: column-reverse;
-      gap: 8px;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 12px;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .modal-overlay,
-    .modal,
-    .close-btn,
-    .btn {
-      animation: none;
-      transform: none;
-      transition: none;
-    }
-    .modal-overlay {
-      background: rgba(0, 0, 0, 0.5);
-    }
-    .modal {
-      opacity: 1;
-    }
-  }
-</style>
