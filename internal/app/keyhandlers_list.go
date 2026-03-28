@@ -158,5 +158,7 @@ func (m *Model) openConfigDir() {
 }
 
 func (m *Model) playBeep() {
-	fmt.Fprint(os.Stdout, Bell)
+	if m.App.Config.NotificationSound {
+		fmt.Fprint(os.Stdout, Bell)
+	}
 }
