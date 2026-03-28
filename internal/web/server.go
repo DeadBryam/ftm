@@ -21,10 +21,16 @@ import (
 //go:embed static/*
 var staticFiles embed.FS
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
+func CheckOrigin(r *http.Request) bool {
+	origin := r.Header.Get("Origin")
+	if origin == "" {
 		return true
-	},
+	}
+	return origin == "http://"+r.Host || origin == "https://"+r.Host
+}
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: CheckOrigin,
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 }
