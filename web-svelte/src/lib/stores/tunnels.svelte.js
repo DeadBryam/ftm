@@ -65,23 +65,28 @@ function handleMessage(msg) {
   });
   
   const updatedTunnel = tunnels.find(t => t.id === msg.id);
-  if (!updatedTunnel || !notifications.enabled) return;
+  if (!updatedTunnel) return;
   
   if (newState === 'online' && oldTunnel.state !== 'online') {
     notifications.notifyOnline(updatedTunnel.name, msg.publicUrl);
     if (msg.expiresAt) expirationMonitor.start(updatedTunnel);
-  }
-  
-  if (newState === 'error' && oldTunnel.state !== 'error') {
-    notifications.notifyError(updatedTunnel.name, msg.errorMessage);
-  }
-  
-  if (newState === 'timeout' && oldTunnel.state !== 'timeout') {
-    notifications.notify('Timeout', `${updatedTunnel.name} could not connect`);
+    return;
   }
   
   if (newState === 'stopped' && oldTunnel.state === 'online') {
     expirationMonitor.stop(msg.id);
+    notifications.notify('Tunnel Stopped', `${updatedTunnel.name} has been stopped`, 'info');
+    return;
+  }
+  
+  if (newState === 'error' && oldTunnel.state !== 'error') {
+    notifications.notifyError(updatedTunnel.name, msg.errorMessage);
+    return;
+  }
+  
+  if (newState === 'timeout' && oldTunnel.state !== 'timeout') {
+    notifications.notify('Timeout', `${updatedTunnel.name} could not connect`, 'error');
+    return;
   }
   
   if (newState === 'online') {
@@ -156,9 +161,9 @@ function start(id) {
 }
 
 function stop(id) {
-  tunnels = tunnels.map(t => t.id === id ? { ...t, state: 'stopped', publicUrl: null } : t);
-  expirationMonitor.stop(id);
-  tunnelsApi.stop(id).catch(() => {});
+  tunnelsApi.stop(id).catch(() => {
+    tunnels = tunnels.map(t => t.id === id ? { ...t, state: 'stopped', publicUrl: null } : t);
+  });
 }
 
 function remove(id) {

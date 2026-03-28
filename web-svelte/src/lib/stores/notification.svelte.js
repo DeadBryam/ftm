@@ -1,7 +1,11 @@
+import { useToast } from './toast.svelte.js';
+
 let permission = $state('default');
 let useOSNotifications = $state(false);
 let enabled = $state(false);
 let soundEnabled = $state(true);
+
+const toast = useToast();
 
 let audioContext = null;
 
@@ -112,14 +116,16 @@ const notificationStore = {
   },
   
   notify(title, body, type = 'info') {
-    if (!enabled && !soundEnabled) return;
-    
-    playSound(type);
+    if (soundEnabled) {
+      playSound(type);
+    }
     
     if (!enabled) return;
     
     if (useOSNotifications && permission === 'granted') {
       new Notification(title, { body });
+    } else {
+      toast.show(body, type);
     }
   },
   
