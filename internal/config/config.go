@@ -29,7 +29,7 @@ func DefaultConfig() *Config {
 	return &Config{
 		Version:              1,
 		Tunnels:              []TunnelConfig{},
-		NotificationsEnabled: false,
+		NotificationsEnabled: true,
 		NotificationSound:    true,
 		ExpirationThresholds: []int{30, 15, 10, 5, 1},
 		ProviderExpirationMinutes: map[string]int{
