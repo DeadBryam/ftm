@@ -44,7 +44,7 @@ func New() (*App, error) {
 		ProviderExpirationMinutes:  cfg.ProviderExpirationMinutes,
 	}
 	app.ExpirationMonitor = notifications.NewExpirationMonitor(expConfig, func(name string, mins int) {
-		if !cfg.NotificationsEnabled {
+		if cfg.NotificationsStatus != config.NotificationGranted {
 			return
 		}
 		if mins == 0 {
@@ -55,7 +55,7 @@ func New() (*App, error) {
 	})
 
 	app.Manager.SetNotificationHandler(func(status config.TunnelStatus) {
-		if !cfg.NotificationsEnabled {
+		if cfg.NotificationsStatus != config.NotificationGranted {
 			return
 		}
 		switch status.State {
