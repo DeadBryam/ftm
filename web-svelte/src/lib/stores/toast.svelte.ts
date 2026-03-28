@@ -1,35 +1,30 @@
-import type { Toast, ToastType } from '$lib/types';
+export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'alert';
+
+export type Toast = {
+  id: number;
+  message: string;
+  type: ToastType;
+  duration?: number;
+};
 
 let toasts: Toast[] = $state([]);
 
-export function useToast() {
-  return {
-    get toasts() { return toasts; },
-    
-    show(message: string, type: ToastType = 'info', duration: number = 3000) {
-      const id = Date.now() + Math.random();
-      const toast: Toast = { id, message, type };
-      toasts = [...toasts, toast];
-      
-      setTimeout(() => {
-        toasts = toasts.filter(t => t.id !== id);
-      }, duration);
-    },
-    
-    success(message: string, duration?: number) {
-      this.show(message, 'success', duration);
-    },
-    
-    error(message: string, duration?: number) {
-      this.show(message, 'error', duration);
-    },
-    
-    info(message: string, duration?: number) {
-      this.show(message, 'info', duration);
-    },
-    
-    remove(id: number) {
-      toasts = toasts.filter(t => t.id !== id);
-    }
-  };
+function add(message: string, type: ToastType = "info", duration = 3000) {
+  const next = { id: Date.now() + Math.random(), message, type, duration };
+  toasts = [next, ...toasts];
 }
+
+function remove(id: number) {
+  toasts = toasts.filter(t => t.id !== id);
+}
+
+export const toast = {
+  get toasts() { return toasts; },
+  show: add,
+  success: (msg: string, duration?: number) => add(msg, "success", duration),
+  error: (msg: string, duration?: number) => add(msg, "error", duration),
+  info: (msg: string, duration?: number) => add(msg, "info", duration),
+  remove,
+};
+
+export function useToast() { return toast; }
