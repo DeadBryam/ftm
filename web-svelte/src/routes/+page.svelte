@@ -5,7 +5,6 @@
   import { useProviders } from '$lib/stores/providers.svelte';
   import { useTheme } from '$lib/stores/theme.svelte';
   import Header from '$lib/components/Header.svelte';
-  import Footer from '$lib/components/Footer.svelte';
   import DeleteModal from '$lib/components/DeleteModal.svelte';
   import Toasts from '$lib/components/Toasts.svelte';
   import NotificationPermission from '$lib/components/NotificationPermission.svelte';
@@ -89,8 +88,6 @@
 
     <ConnectionsPanel onAction={handleAction} />
   </main>
-
-  <Footer />
 </div>
 
 <DeleteModal 
