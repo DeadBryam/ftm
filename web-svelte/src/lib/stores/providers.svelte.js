@@ -1,3 +1,6 @@
+import { providersApi } from '$lib/api';
+import { api } from '$lib/api';
+
 let providers = $state([]);
 let loading = $state(false);
 let error = $state(null);
@@ -12,8 +15,7 @@ export function useProviders() {
       loading = true;
       error = null;
       try {
-        const res = await fetch('/api/providers');
-        providers = await res.json();
+        providers = await providersApi.getAll();
       } catch (e) {
         error = e.message;
       } finally {
@@ -25,8 +27,7 @@ export function useProviders() {
 
 export async function detectPort() {
   try {
-    const res = await fetch('/api/detect-port');
-    const data = await res.json();
+    const data = await api.get('detect-port').json();
     return data.suggested || 30000;
   } catch {
     return 30000;
