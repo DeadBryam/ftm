@@ -2,7 +2,7 @@ import { tunnelsApi } from '$lib/api';
 import { useNotifications } from './notification.svelte.js';
 import { useExpirationMonitor } from './expiration.svelte.js';
 
-let tunnels = $state([]);
+let tunnelsById = $state({});
 let loading = $state(true);
 let error = $state(null);
 let socket = $state(null);
@@ -19,57 +19,38 @@ function handleMessage(msg) {
   
   if (!msg.id) return;
   
-  const idx = tunnels.findIndex(t => t.id === msg.id);
+  const oldTunnel = tunnelsById[msg.id];
+  if (!oldTunnel) return;
   
-  if (msg.name !== undefined || msg.provider !== undefined || msg.port !== undefined) {
-    tunnels = tunnels.map(t => {
-      if (t.id === msg.id) {
-        return {
-          ...t,
-          name: msg.name ?? t.name,
-          provider: msg.provider ?? t.provider,
-          port: msg.port ?? t.port,
-          state: msg.state ?? t.state,
-          publicUrl: msg.publicUrl ?? t.publicUrl,
-          errorMessage: msg.errorMessage ?? t.errorMessage,
-          expiresAt: msg.expiresAt ?? t.expiresAt
-        };
-      }
-      return t;
-    });
-    return;
-  }
+  const updates = {};
+  if (msg.name !== undefined) updates.name = msg.name;
+  if (msg.provider !== undefined) updates.provider = msg.provider;
+  if (msg.port !== undefined) updates.port = msg.port;
+  if (msg.state !== undefined) updates.state = msg.state;
+  if (msg.publicUrl !== undefined) updates.publicUrl = msg.publicUrl;
+  if (msg.errorMessage !== undefined) updates.errorMessage = msg.errorMessage;
+  if (msg.expiresAt !== undefined) updates.expiresAt = msg.expiresAt;
   
-  if (idx === -1) return;
+  if (Object.keys(updates).length === 0) return;
   
-  const oldTunnel = tunnels[idx];
-  const newState = msg.state || 'stopped';
+  const newState = updates.state || 'stopped';
   
   if (oldTunnel.state === newState && 
-      oldTunnel.publicUrl === (msg.publicUrl ?? oldTunnel.publicUrl) &&
-      oldTunnel.errorMessage === (msg.errorMessage ?? oldTunnel.errorMessage)) {
+      oldTunnel.publicUrl === (updates.publicUrl ?? oldTunnel.publicUrl) &&
+      oldTunnel.errorMessage === (updates.errorMessage ?? oldTunnel.errorMessage)) {
     return;
   }
   
-  tunnels = tunnels.map(t => {
-    if (t.id === msg.id) {
-      return {
-        ...t,
-        state: newState,
-        publicUrl: msg.publicUrl ?? t.publicUrl,
-        errorMessage: msg.errorMessage ?? t.errorMessage,
-        expiresAt: msg.expiresAt ?? t.expiresAt
-      };
-    }
-    return t;
-  });
+  tunnelsById = {
+    ...tunnelsById,
+    [msg.id]: { ...oldTunnel, ...updates }
+  };
   
-  const updatedTunnel = tunnels.find(t => t.id === msg.id);
-  if (!updatedTunnel) return;
+  const updatedTunnel = tunnelsById[msg.id];
   
   if (newState === 'online' && oldTunnel.state !== 'online') {
-    notifications.notifyOnline(updatedTunnel.name, msg.publicUrl);
-    if (msg.expiresAt) expirationMonitor.start(updatedTunnel);
+    notifications.notifyOnline(updatedTunnel.name, updatedTunnel.publicUrl);
+    if (updatedTunnel.expiresAt) expirationMonitor.start(updatedTunnel);
     return;
   }
   
@@ -80,7 +61,7 @@ function handleMessage(msg) {
   }
   
   if (newState === 'error' && oldTunnel.state !== 'error') {
-    notifications.notifyError(updatedTunnel.name, msg.errorMessage);
+    notifications.notifyError(updatedTunnel.name, updatedTunnel.errorMessage);
     return;
   }
   
@@ -90,9 +71,8 @@ function handleMessage(msg) {
   }
   
   if (newState === 'online') {
-    const updatedProgress = { ...installProgress };
-    delete updatedProgress[updatedTunnel.provider];
-    installProgress = updatedProgress;
+    const { [updatedTunnel.provider]: _, ...rest } = installProgress;
+    installProgress = rest;
   }
 }
 
@@ -104,7 +84,9 @@ function connect() {
   
   tunnelsApi.getAll()
     .then(data => {
-      tunnels = data;
+      const map = {};
+      data.forEach(t => { map[t.id] = t; });
+      tunnelsById = map;
       data.forEach(t => {
         if (t.state === 'online' && t.expiresAt) {
           expirationMonitor.start(t);
@@ -154,40 +136,51 @@ function disconnect() {
 }
 
 function start(id) {
-  tunnels = tunnels.map(t => t.id === id ? { ...t, state: 'starting' } : t);
+  tunnelsById = {
+    ...tunnelsById,
+    [id]: { ...tunnelsById[id], state: 'starting' }
+  };
   tunnelsApi.start(id).catch(e => {
-    tunnels = tunnels.map(t => t.id === id ? { ...t, state: 'error', errorMessage: e.message } : t);
+    tunnelsById = {
+      ...tunnelsById,
+      [id]: { ...tunnelsById[id], state: 'error', errorMessage: e.message }
+    };
   });
 }
 
 function stop(id) {
-  tunnelsApi.stop(id).catch(() => {
-    tunnels = tunnels.map(t => t.id === id ? { ...t, state: 'stopped', publicUrl: null } : t);
-  });
+  tunnelsApi.stop(id).catch(() => {});
 }
 
 function remove(id) {
   expirationMonitor.stop(id);
+  const { [id]: _, ...rest } = tunnelsById;
+  tunnelsById = rest;
   tunnelsApi.delete(id).catch(() => {});
-  tunnels = tunnels.filter(t => t.id !== id);
 }
 
 function add(data) {
   tunnelsApi.create(data).then(newTunnel => {
-    tunnels = [...tunnels, newTunnel];
+    tunnelsById = {
+      ...tunnelsById,
+      [newTunnel.id]: newTunnel
+    };
   });
 }
 
 function update(id, data) {
   return tunnelsApi.update(id, data).then(updated => {
-    tunnels = tunnels.map(t => t.id === id ? updated : t);
+    tunnelsById = {
+      ...tunnelsById,
+      [id]: updated
+    };
     return updated;
   });
 }
 
 export function useTunnels() {
   return {
-    get tunnels() { return tunnels; },
+    get tunnels() { return Object.values(tunnelsById); },
     get loading() { return loading; },
     get error() { return error; },
     get installProgress() { return installProgress; },
