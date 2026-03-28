@@ -9,8 +9,11 @@ import (
 )
 
 const (
-	AppName    = "foundry-tunnel"
-	ConfigFile = "config.yaml"
+	AppName           = "foundry-tunnel"
+	ConfigFile        = "config.yaml"
+	NotificationPending  = "pending"
+	NotificationGranted  = "granted"
+	NotificationRejected = "rejected"
 )
 
 type Config struct {
@@ -18,8 +21,8 @@ type Config struct {
 	Tunnels []TunnelConfig `yaml:"tunnels"`
 	WebPort int            `yaml:"web_port,omitempty"`
 
-	NotificationsEnabled bool `yaml:"notifications_enabled"`
-	NotificationSound    bool `yaml:"notification_sound"`
+	NotificationsStatus string `yaml:"notifications_status"`
+	NotificationSound  bool   `yaml:"notification_sound"`
 
 	ExpirationThresholds      []int          `yaml:"expiration_thresholds"`
 	ProviderExpirationMinutes map[string]int `yaml:"provider_expiration_minutes"`
@@ -27,11 +30,11 @@ type Config struct {
 
 func DefaultConfig() *Config {
 	return &Config{
-		Version:              1,
-		Tunnels:              []TunnelConfig{},
-		NotificationsEnabled: false,
-		NotificationSound:    true,
-		ExpirationThresholds: []int{30, 15, 10, 5, 1},
+		Version:               1,
+		Tunnels:               []TunnelConfig{},
+		NotificationsStatus:   NotificationPending,
+		NotificationSound:     true,
+		ExpirationThresholds:  []int{30, 15, 10, 5, 1},
 		ProviderExpirationMinutes: map[string]int{
 			"pinggy":       60,
 			"serveo":       0,
@@ -39,6 +42,12 @@ func DefaultConfig() *Config {
 			"tunnelmole":   0,
 			"localhostrun": 0,
 		},
+	}
+}
+
+func (c *Config) NormalizeNotificationsStatus() {
+	if c.NotificationsStatus != NotificationGranted && c.NotificationsStatus != NotificationRejected {
+		c.NotificationsStatus = NotificationPending
 	}
 }
 
@@ -93,6 +102,8 @@ func Load() (*Config, error) {
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, fmt.Errorf("failed to parse config: %w", err)
 	}
+
+	cfg.NormalizeNotificationsStatus()
 
 	return &cfg, nil
 }
