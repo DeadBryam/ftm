@@ -11,26 +11,52 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/process"
 )
 
+//go:embed static/*
+var staticFiles embed.FS
+
+func CheckOrigin(r *http.Request) bool {
+	origin := r.Header.Get("Origin")
+	if origin == "" {
+		return true
+	}
+	return origin == "http://"+r.Host || origin == "https://"+r.Host
+}
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: CheckOrigin,
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
+type connWrapper struct {
+	conn *websocket.Conn
+	mu   sync.Mutex
+}
+
 type Server struct {
-	manager    *process.Manager
-	config     *config.Config
-	httpServer *http.Server
-	port       int
-	clients    map[chan string]bool
-	clientsMu  sync.RWMutex
-	handlers   *Handlers
+	manager       *process.Manager
+	config        *config.Config
+	httpServer    *http.Server
+	port          int
+	clients       map[*websocket.Conn]*connWrapper
+	clientsMu     sync.RWMutex
+	handlers      *Handlers
+	StatusChannel chan config.TunnelStatus
 }
 
 func NewServer(manager *process.Manager, cfg *config.Config) *Server {
 	s := &Server{
-		manager:  manager,
-		config:   cfg,
-		clients:  make(map[chan string]bool),
+		manager:       manager,
+		config:        cfg,
+		clients:       make(map[*websocket.Conn]*connWrapper),
+		StatusChannel: make(chan config.TunnelStatus, 10),
 	}
 	s.handlers = NewHandlers(manager, cfg, s)
 	return s
@@ -60,15 +86,14 @@ func (s *Server) Start() error {
 	s.config.Save()
 
 	mux := s.setupRoutes()
-	s.setupMiddleware(mux)
 
 	s.httpServer = &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
 		Handler: mux,
 	}
 
-	go s.broadcastLoop()
 	go s.installProgressLoop()
+	go s.statusUpdateLoop()
 	go s.httpServer.ListenAndServe()
 	return nil
 }
@@ -77,6 +102,8 @@ func (s *Server) setupRoutes() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/api/", s.handlers.Route)
+
+	mux.HandleFunc("/ws/events", s.handleWebSocket)
 
 	webDist := filepath.Join("web-svelte", "dist")
 	var staticFS fs.FS
@@ -88,7 +115,7 @@ func (s *Server) setupRoutes() *http.ServeMux {
 	fileServer := http.FileServer(http.FS(staticFS))
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, "/api/") {
+		if strings.HasPrefix(r.URL.Path, "/api/") || strings.HasPrefix(r.URL.Path, "/ws/") {
 			return
 		}
 		path := r.URL.Path
@@ -101,7 +128,55 @@ func (s *Server) setupRoutes() *http.ServeMux {
 	return mux
 }
 
-func (s *Server) setupMiddleware(mux *http.ServeMux) {
+func (s *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		return
+	}
+
+	cw := &connWrapper{conn: conn}
+	s.clientsMu.Lock()
+	s.clients[conn] = cw
+	s.clientsMu.Unlock()
+
+	defer func() {
+		s.clientsMu.Lock()
+		delete(s.clients, conn)
+		s.clientsMu.Unlock()
+		cw.conn.Close()
+	}()
+
+	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+	conn.SetPongHandler(func(string) error {
+		conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+		return nil
+	})
+
+	pingTicker := time.NewTicker(30 * time.Second)
+	defer pingTicker.Stop()
+
+	done := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-pingTicker.C:
+				conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+				if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+					return
+				}
+			case <-done:
+				return
+			}
+		}
+	}()
+
+	for {
+		_, _, err := conn.ReadMessage()
+		if err != nil {
+			close(done)
+			break
+		}
+	}
 }
 
 func (s *Server) Stop() error {
@@ -121,43 +196,6 @@ func (s *Server) URL() string {
 	return fmt.Sprintf("http://localhost:%d", s.port)
 }
 
-func (s *Server) broadcastLoop() {
-	ticker := NewTicker(1)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		s.clientsMu.RLock()
-		if len(s.clients) == 0 {
-			s.clientsMu.RUnlock()
-			continue
-		}
-		s.clientsMu.RUnlock()
-
-		for _, tunnel := range s.config.Tunnels {
-			status, ok := s.manager.GetStatus(tunnel.ID)
-			if !ok {
-				update := map[string]interface{}{
-					"id":        tunnel.ID,
-					"state":     "stopped",
-					"publicUrl": "",
-				}
-				data, _ := MarshalJSON(update)
-				s.broadcast(string(data))
-				continue
-			}
-
-			update := map[string]interface{}{
-				"id":           tunnel.ID,
-				"state":        string(status.State),
-				"publicUrl":    status.PublicURL,
-				"errorMessage": status.ErrorMessage,
-			}
-			data, _ := MarshalJSON(update)
-			s.broadcast(string(data))
-		}
-	}
-}
-
 func (s *Server) installProgressLoop() {
 	for progress := range s.manager.DownloadProgress {
 		update := map[string]interface{}{
@@ -172,28 +210,38 @@ func (s *Server) installProgressLoop() {
 	}
 }
 
-func (s *Server) broadcast(msg string) {
-	s.clientsMu.RLock()
-	defer s.clientsMu.RUnlock()
-
-	for ch := range s.clients {
-		select {
-		case ch <- msg:
-		default:
+func (s *Server) statusUpdateLoop() {
+	for status := range s.StatusChannel {
+		update := map[string]interface{}{
+			"id":           status.ID,
+			"state":        string(status.State),
+			"publicUrl":    status.PublicURL,
+			"errorMessage": status.ErrorMessage,
 		}
+		data, _ := MarshalJSON(update)
+		s.broadcast(string(data))
 	}
 }
 
-func (s *Server) addClient(ch chan string) {
-	s.clientsMu.Lock()
-	s.clients[ch] = true
-	s.clientsMu.Unlock()
-}
+func (s *Server) broadcast(msg string) {
+	s.clientsMu.RLock()
+	clients := make([]*connWrapper, 0, len(s.clients))
+	for _, cw := range s.clients {
+		clients = append(clients, cw)
+	}
+	s.clientsMu.RUnlock()
 
-func (s *Server) removeClient(ch chan string) {
-	s.clientsMu.Lock()
-	delete(s.clients, ch)
-	s.clientsMu.Unlock()
+	for _, cw := range clients {
+		cw.mu.Lock()
+		err := cw.conn.WriteMessage(websocket.TextMessage, []byte(msg))
+		cw.mu.Unlock()
+		if err != nil {
+			s.clientsMu.Lock()
+			cw.conn.Close()
+			delete(s.clients, cw.conn)
+			s.clientsMu.Unlock()
+		}
+	}
 }
 
 func (s *Server) BroadcastTunnelUpdate(t config.TunnelConfig) {
@@ -219,10 +267,6 @@ func (s *Server) BroadcastTunnelUpdate(t config.TunnelConfig) {
 	s.broadcast(string(data))
 }
 
-func (s *Server) getClientChan() chan string {
-	return make(chan string, 10)
-}
-
 func (s *Server) getTunnel(id string) *config.TunnelConfig {
 	for i := range s.config.Tunnels {
 		if s.config.Tunnels[i].ID == id {
@@ -235,6 +279,3 @@ func (s *Server) getTunnel(id string) *config.TunnelConfig {
 func (s *Server) updateConfig() {
 	s.config.Save()
 }
-
-//go:embed static/*
-var staticFiles embed.FS

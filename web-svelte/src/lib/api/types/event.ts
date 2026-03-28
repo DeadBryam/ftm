@@ -20,7 +20,7 @@ export interface UnknownEvent {
   [key: string]: unknown;
 }
 
-export type SSEEvent = TunnelEvent | InstallEvent | UnknownEvent;
+export type WSEvent = TunnelEvent | InstallEvent | UnknownEvent;
 
 export interface InstallProgress {
   step: string;

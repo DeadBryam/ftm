@@ -8,6 +8,7 @@
   import Footer from '$lib/components/Footer.svelte';
   import DeleteModal from '$lib/components/DeleteModal.svelte';
   import Toasts from '$lib/components/Toasts.svelte';
+  import NotificationPermission from '$lib/components/NotificationPermission.svelte';
   import ConnectionsPanel from '$lib/components/ConnectionsPanel.svelte';
   import NewConnection from '$lib/components/NewConnection.svelte';
   import EditConnection from '$lib/components/EditConnection.svelte';
@@ -98,6 +99,7 @@
 />
 
 <Toasts />
+<NotificationPermission />
 
 <style>
   :global(body) {
