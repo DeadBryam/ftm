@@ -37,11 +37,7 @@ func (h *Handlers) Route(w http.ResponseWriter, r *http.Request) {
 	case r.URL.Path == "/api/copy-url":
 		h.handleCopyURL(w, r)
 	case strings.HasPrefix(r.URL.Path, "/api/logs/"):
-		if strings.HasSuffix(r.URL.Path, "/stream") {
-			h.handleLogsStream(w, r)
-		} else {
-			h.handleLogs(w, r)
-		}
+		h.handleLogs(w, r)
 	case r.URL.Path == "/api/tunnels/reorder":
 		h.handleReorder(w, r)
 	case r.URL.Path == "/api/status":

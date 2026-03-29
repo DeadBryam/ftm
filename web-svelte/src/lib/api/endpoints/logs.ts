@@ -3,7 +3,6 @@ import { api } from '../client';
 
 export interface LogStreamOptions {
   onLine: (line: string) => void;
-  onError?: (error: Event) => void;
   onClose?: () => void;
 }
 
