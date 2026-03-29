@@ -68,7 +68,7 @@ func (s *SettingsView) renderToggle(label string, enabled bool, focused bool, t 
 
 	icon := "[ ]"
 	if enabled {
-		icon = "✓"
+		icon = "[✓]"
 	}
 
 	iconStyle := lipgloss.NewStyle().Foreground(t.Success).Bold(true)
