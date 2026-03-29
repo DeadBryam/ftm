@@ -138,6 +138,7 @@ function connect() {
   ws.onclose = () => {
     console.log('[WS] Disconnected');
     socket = null;
+    setTimeout(connect, 5000);
   };
 
   ws.onerror = () => {
