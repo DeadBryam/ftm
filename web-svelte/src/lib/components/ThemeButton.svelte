@@ -22,9 +22,4 @@
     class="w-full h-full rounded-full"
     style="background: {color}; box-shadow: 0 2px 8px {color}50;"
   ></div>
-  {#if selected}
-    <div class="absolute inset-0 flex items-center justify-center">
-      <div class="w-4 h-4 rounded-full bg-white/90"></div>
-    </div>
-  {/if}
 </button>
