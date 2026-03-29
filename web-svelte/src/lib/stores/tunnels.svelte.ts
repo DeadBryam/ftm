@@ -93,13 +93,55 @@ function connect() {
 
   loading = true;
 
+  let statusPort: number | null = null;
+
+  const connectWebSocket = () => {
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const hostname = window.location.hostname.toLowerCase();
+    const isWailsHost =
+      hostname === 'wails' ||
+      hostname === 'wails.localhost' ||
+      hostname.endsWith('.wails.localhost');
+    const wsHost = isWailsHost && statusPort ? `127.0.0.1:${statusPort}` : window.location.host;
+
+    const ws = new WebSocket(`${wsProtocol}//${wsHost}/ws/events`);
+
+    ws.onopen = () => {
+      console.log('[WS] Connected');
+    };
+
+    ws.onmessage = (e: MessageEvent) => {
+      try {
+        const msg = JSON.parse(e.data) as TunnelMessage;
+        processStateMessage(msg);
+      } catch (err) {
+        console.error('[WS] Parse error:', err);
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('[WS] Disconnected');
+      socket = null;
+      setTimeout(connect, 5000);
+    };
+
+    ws.onerror = () => {
+      console.error('[WS] Error');
+      error = 'Connection error';
+    };
+
+    socket = ws;
+  };
+
   getStatus()
     .then((status) => {
+      statusPort = status.port;
       notifications.setStatus(status.notificationsStatus);
     })
     .catch(() => {
       notifications.setStatus('pending');
-    });
+    })
+    .finally(connectWebSocket);
 
   tunnelsApi.getAll()
     .then((data: Tunnel[]) => {
@@ -118,35 +160,6 @@ function connect() {
       error = e.message;
       loading = false;
     });
-
-  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws/events`);
-
-  ws.onopen = () => {
-    console.log('[WS] Connected');
-  };
-
-  ws.onmessage = (e: MessageEvent) => {
-    try {
-      const msg = JSON.parse(e.data) as TunnelMessage;
-      processStateMessage(msg);
-    } catch (err) {
-      console.error('[WS] Parse error:', err);
-    }
-  };
-
-  ws.onclose = () => {
-    console.log('[WS] Disconnected');
-    socket = null;
-    setTimeout(connect, 5000);
-  };
-
-  ws.onerror = () => {
-    console.error('[WS] Error');
-    error = 'Connection error';
-  };
-
-  socket = ws;
 }
 
 function disconnect() {
