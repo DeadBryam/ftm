@@ -1,3 +1,4 @@
+import { sendWsMessage, subscribeWsMessages } from '../ws';
 import { api } from '../client';
 
 export interface LogStreamOptions {
@@ -6,34 +7,51 @@ export interface LogStreamOptions {
   onClose?: () => void;
 }
 
+interface LogWsMessage {
+  type?: string;
+  id?: string;
+  line?: string;
+}
 
 export function createLogStream(
   tunnelId: string,
   options: LogStreamOptions
 ): { close: () => void } {
-  const es = new EventSource(`/api/logs/${tunnelId}/stream`);
+  let closed = false;
 
-  es.onmessage = (e: MessageEvent) => {
-    options.onLine(e.data);
-  };
-
-  es.onerror = (e) => {
-    if (options.onError) {
-      options.onError(e);
+  const unsubscribe = subscribeWsMessages((message) => {
+    if (closed || typeof message !== 'object' || message === null) {
+      return;
     }
-  };
 
-  es.close = () => {
-    if (options.onClose) {
-      options.onClose();
+    const payload = message as LogWsMessage;
+
+    if (payload.type === '__ws_open') {
+      void sendWsMessage({ type: 'logs_subscribe', id: tunnelId });
+      return;
     }
-  };
+
+    if (payload.type === 'log' && payload.id === tunnelId && typeof payload.line === 'string') {
+      options.onLine(payload.line);
+    }
+  });
+
+  void sendWsMessage({ type: 'logs_subscribe', id: tunnelId });
 
   return {
-    close: () => es.close(),
+    close: () => {
+      if (closed) {
+        return;
+      }
+      closed = true;
+      unsubscribe();
+      void sendWsMessage({ type: 'logs_unsubscribe', id: tunnelId });
+      if (options.onClose) {
+        options.onClose();
+      }
+    },
   };
 }
-
 
 export async function getLogs(tunnelId: string): Promise<string> {
   const res = await api.get(`logs/${tunnelId}`);
