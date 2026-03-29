@@ -22,15 +22,11 @@ import (
 var staticFiles embed.FS
 
 func CheckOrigin(r *http.Request) bool {
-	origin := r.Header.Get("Origin")
-	if origin == "" {
-		return true
-	}
-	return origin == "http://"+r.Host || origin == "https://"+r.Host
+	return true
 }
 
 var upgrader = websocket.Upgrader{
-	CheckOrigin: CheckOrigin,
+	CheckOrigin:     CheckOrigin,
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 }
