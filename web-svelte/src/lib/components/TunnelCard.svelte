@@ -188,7 +188,9 @@
     { label: "Delete", action: "delete", icon: Trash2, danger: true },
   ]);
 
-  const installPercent = $derived(installProgress?.percent ?? 0);
+  const installPercent = $derived(
+    Math.trunc((installProgress?.percent ?? 0) * 100) / 100,
+  );
   const installStep = $derived(installProgress?.step ?? "Installing...");
 </script>
 
