@@ -86,6 +86,7 @@ func downloadWithProgress(url, dest string, progress chan<- DownloadProgress, na
 			Current: current,
 			Percent: 100,
 			Done:    true,
+			Name:    name,
 		}
 	}
 

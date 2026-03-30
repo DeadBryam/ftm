@@ -126,8 +126,18 @@ func (s *Server) URL() string {
 
 func (s *Server) installProgressLoop() {
 	for progress := range s.manager.DownloadProgress {
+		step := "Installing..."
+		if progress.Done {
+			step = "Done"
+		}
+
 		update := map[string]interface{}{
-			"type":    "install",
+			"type": "install",
+			"install": map[string]interface{}{
+				"provider": progress.Name,
+				"percent":  progress.Percent,
+				"step":     step,
+			},
 			"percent": progress.Percent,
 			"current": progress.Current,
 			"total":   progress.Total,
