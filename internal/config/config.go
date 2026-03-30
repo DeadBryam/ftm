@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	AppName           = "foundry-tunnel"
-	ConfigFile        = "config.yaml"
+	AppName              = "foundry-tunnel"
+	ConfigFile           = "config.yaml"
 	NotificationPending  = "pending"
 	NotificationGranted  = "granted"
 	NotificationRejected = "rejected"
@@ -31,12 +31,11 @@ type Config struct {
 
 func DefaultConfig() *Config {
 	return &Config{
-		Version:               1,
-		Tunnels:               []TunnelConfig{},
-		NotificationsStatus:   NotificationPending,
-		NotificationSound:     true,
-		Theme:                 "system",
-		ExpirationThresholds:  []int{30, 15, 10, 5, 1},
+		Version:              1,
+		Tunnels:              []TunnelConfig{},
+		NotificationsStatus:  NotificationPending,
+		NotificationSound:    true,
+		ExpirationThresholds: []int{30, 15, 10, 5, 1},
 		ProviderExpirationMinutes: map[string]int{
 			"pinggy":       60,
 			"serveo":       0,
