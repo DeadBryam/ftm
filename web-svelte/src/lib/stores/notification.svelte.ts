@@ -1,15 +1,48 @@
+import { settingsApi, type Settings } from '$lib/api';
 import { useToast, type ToastType } from './toast.svelte';
-import { notificationsApi } from '$lib/api';
 
 type NotificationStatus = 'pending' | 'granted' | 'rejected';
+type NotificationChannel = 'toast' | 'os';
+
+interface NotificationEvent {
+  event?: string;
+  channel?: NotificationChannel | string;
+  title?: string;
+  body?: string;
+  toastType?: string;
+  soundType?: string;
+  soundEnabled?: boolean;
+}
 
 let status = $state<NotificationStatus>('pending');
-let useOSNotifications = $state(false);
 let soundEnabled = $state(true);
 
 const toast = useToast();
 
 let audioContext: AudioContext | null = null;
+
+const TOAST_TYPES: ToastType[] = ['success', 'error', 'info', 'warning', 'alert'];
+
+function normalizeToastType(type: string | undefined): ToastType {
+  if (!type) return 'info';
+  return TOAST_TYPES.includes(type as ToastType) ? (type as ToastType) : 'info';
+}
+
+function deriveStatusFromSettings(settings: Settings): NotificationStatus {
+  if (settings.notifications_enabled) {
+    return 'granted';
+  }
+
+  if (typeof window === 'undefined' || !('Notification' in window)) {
+    return 'rejected';
+  }
+
+  if (Notification.permission === 'default') {
+    return 'pending';
+  }
+
+  return 'rejected';
+}
 
 async function initAudio() {
   if (typeof window === 'undefined') return;
@@ -81,38 +114,38 @@ const notificationStore = {
   get status() { return status; },
   get enabled() { return status === 'granted'; },
   get soundEnabled() { return soundEnabled; },
-  set soundEnabled(value: boolean) {
-    soundEnabled = value;
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('ftm-sound-enabled', value ? 'true' : 'false');
-      } catch {}
+
+  applySettings(settings: Settings) {
+    soundEnabled = settings.notification_sound;
+    status = deriveStatusFromSettings(settings);
+  },
+
+  async syncWithSettings() {
+    try {
+      const settings = await settingsApi.get();
+      this.applySettings(settings);
+    } catch {
+      status = 'pending';
     }
   },
 
-  setStatus(newStatus: NotificationStatus) {
-    status = newStatus;
-  },
-
   async requestPermission(): Promise<boolean> {
-    if (!('Notification' in window)) {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      status = 'rejected';
+      await settingsApi.update({ notifications_enabled: false });
       return false;
     }
 
     const result = await Notification.requestPermission();
     const granted = result === 'granted';
 
-    if (granted) {
-      status = 'granted';
-      useOSNotifications = true;
-    } else {
-      status = 'rejected';
-    }
+    status = granted ? 'granted' : 'rejected';
 
     try {
-      await notificationsApi.updateStatus(granted ? 'granted' : 'rejected');
+      const settings = await settingsApi.update({ notifications_enabled: granted });
+      this.applySettings(settings);
     } catch {
-      console.error('Failed to update notification status on server');
+      return granted;
     }
 
     return granted;
@@ -120,9 +153,7 @@ const notificationStore = {
 
   reject() {
     status = 'rejected';
-    notificationsApi.updateStatus('rejected').catch(() => {
-      console.error('Failed to update notification status on server');
-    });
+    settingsApi.update({ notifications_enabled: false }).catch(() => {});
   },
 
   notify(title: string, body: string, type: ToastType = 'info') {
@@ -130,13 +161,39 @@ const notificationStore = {
       playSound(type);
     }
 
-    if (status !== 'granted') return;
-
-    if (useOSNotifications && 'Notification' in window && Notification.permission === 'granted') {
+    if (status === 'granted' && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
       new Notification(title, { body });
-    } else {
-      toast.show(body, type);
+      return;
     }
+
+    toast.show(body, type);
+  },
+
+  renderEvent(event: NotificationEvent) {
+    const title = event.title ?? 'Notification';
+    const body = event.body ?? '';
+    const soundType = event.soundType ?? 'info';
+    const toastType = normalizeToastType(event.toastType);
+    const channel = event.channel ?? 'toast';
+    const shouldPlaySound = event.soundEnabled ?? soundEnabled;
+
+    if (shouldPlaySound) {
+      playSound(soundType);
+    }
+
+    if (channel === 'os') {
+      if (status === 'granted' && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, { body });
+      }
+      return;
+    }
+
+    if (channel === 'toast') {
+      toast.show(body, toastType);
+      return;
+    }
+
+    toast.show(body, toastType);
   },
 
   notifyOnline(name: string, url: string) {

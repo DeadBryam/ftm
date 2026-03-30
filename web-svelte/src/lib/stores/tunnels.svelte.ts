@@ -1,4 +1,4 @@
-import { statusApi, tunnelsApi } from '$lib/api';
+import { tunnelsApi } from '$lib/api';
 import { subscribeWsMessages } from '$lib/api/ws';
 import { useNotifications } from './notification.svelte';
 import { useExpirationMonitor } from './expiration.svelte';
@@ -20,6 +20,15 @@ interface TunnelMessage {
   expiresAt?: number;
   done?: boolean;
   install?: { provider: string; percent: number; step: string };
+  notification?: {
+    event?: string;
+    channel?: string;
+    title?: string;
+    body?: string;
+    toastType?: string;
+    soundType?: string;
+    soundEnabled?: boolean;
+  };
 }
 
 interface InstallProgress {
@@ -33,8 +42,6 @@ let unsubscribeWs: (() => void) | null = $state(null);
 let syncInterval: ReturnType<typeof setInterval> | null = $state(null);
 let installProgress: InstallProgress = $state({});
 
-const previousStates: Record<string, { state: string; publicUrl: string; errorMessage: string }> = {};
-
 const notifications = useNotifications();
 const expirationMonitor = useExpirationMonitor();
 
@@ -46,6 +53,11 @@ function processStateMessage(msg: TunnelMessage) {
     if (msg.done) {
       void syncTunnels();
     }
+    return;
+  }
+
+  if (msg.type === 'notification' && msg.notification) {
+    notifications.renderEvent(msg.notification);
     return;
   }
 
@@ -78,27 +90,17 @@ function processStateMessage(msg: TunnelMessage) {
 
   tunnelsById = { ...tunnelsById, [msg.id]: updated };
 
-  const prevState = previousStates[msg.id] ?? { state: '', publicUrl: '', errorMessage: '' };
-  if (prevState.state !== newState || prevState.publicUrl !== newUrl || prevState.errorMessage !== newError) {
-    previousStates[msg.id] = { state: newState, publicUrl: newUrl, errorMessage: newError };
+  if (newState === 'online' && updated.expiresAt) {
+    expirationMonitor.start(updated);
+  }
 
-    if (newState === 'online' && updated.publicUrl) {
-      notifications.notifyOnline(updated.name, updated.publicUrl);
-      if (updated.expiresAt) expirationMonitor.start(updated);
-      if (updated.provider) {
-        const { [updated.provider]: _, ...rest } = installProgress;
-        installProgress = rest as InstallProgress;
-      }
-    } else if (newState === 'stopped') {
-      notifications.notify('Tunnel Stopped', `${updated.name} has been stopped`, 'info');
-      expirationMonitor.stop(msg.id);
-    } else if (newState === 'error') {
-      notifications.notifyError(updated.name, newError);
-    } else if (newState === 'timeout') {
-      notifications.notify('Timeout', `${updated.name} could not connect`, 'error');
-    } else if (newState === 'installing') {
-      notifications.notify('Installing', `Installing tunnel for ${updated.provider}...`, 'info');
-    }
+  if (newState === 'stopped') {
+    expirationMonitor.stop(msg.id);
+  }
+
+  if (newState === 'online' && updated.provider) {
+    const { [updated.provider]: _, ...rest } = installProgress;
+    installProgress = rest as InstallProgress;
   }
 }
 
@@ -111,7 +113,6 @@ async function syncTunnels() {
 
     expirationMonitor.stopAll();
     data.forEach(t => {
-      previousStates[t.id] = { state: t.state, publicUrl: t.publicUrl ?? '', errorMessage: t.errorMessage ?? '' };
       if (t.state === 'online' && t.expiresAt) {
         expirationMonitor.start(t);
       }
@@ -148,13 +149,7 @@ function connect() {
     }, 5000);
   }
 
-  statusApi.get()
-    .then((status) => {
-      notifications.setStatus(status.notificationsStatus);
-    })
-    .catch(() => {
-      notifications.setStatus('pending');
-    });
+  void notifications.syncWithSettings();
 
   tunnelsApi.getAll()
     .then((data: Tunnel[]) => {
@@ -162,7 +157,6 @@ function connect() {
       data.forEach(t => { map[t.id] = t; });
       tunnelsById = map;
       data.forEach(t => {
-        previousStates[t.id] = { state: t.state, publicUrl: t.publicUrl ?? '', errorMessage: t.errorMessage ?? '' };
         if (t.state === 'online' && t.expiresAt) {
           expirationMonitor.start(t);
         }
