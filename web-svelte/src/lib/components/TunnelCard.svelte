@@ -48,7 +48,7 @@
     installProgress = null,
   }: TunnelCardProps = $props();
 
-  let zIndex = $derived(totalItems - index);
+  const dropdownAlign = $derived(index === totalItems - 1 ? "top-left" : "left");
 
   const toast = useToast();
 
@@ -194,7 +194,6 @@
 
 <div
   class={cn("border rounded-xl cursor-default", "bg-card border-border")}
-  style="z-index: {zIndex};"
 >
   <div class="flex flex-col">
     <div
@@ -236,7 +235,7 @@
           </div>
         {/if}
       </div>
-      <div class="flex gap-2 flex-shrink-0 relative z-10">
+      <div class="flex gap-2 flex-shrink-0 relative">
         {#if isRunning}
           <Button
             variant="error"
@@ -258,6 +257,7 @@
         <Dropdown
           options={dropdownOptions}
           onSelect={handleDropdownAction}
+          align={dropdownAlign}
           ariaLabel="Tunnel options"
         >
           {#snippet children()}

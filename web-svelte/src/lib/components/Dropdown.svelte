@@ -8,7 +8,7 @@
   interface DropdownProps {
     options?: DropdownOption[];
     onSelect?: (option: DropdownOption) => void;
-    align?: "left" | "right" | "top" | "center";
+    align?: "left" | "right" | "top-left" | "top-right";
     ariaLabel?: string;
     label?: string;
     class?: string;
@@ -19,8 +19,8 @@
   const POSITION_MAP: Record<NonNullable<DropdownProps["align"]>, string> = {
     left: "left-auto right-0",
     right: "right-auto left-0",
-    top: "bottom-full mb-1.5 left-0 right-auto",
-    center: "left-1/2 -translate-x-1/2",
+    "top-left": "bottom-full mb-1.5 left-auto right-0",
+    "top-right": "bottom-full mb-1.5 right-auto left-0"
   };
 
   let {
@@ -40,7 +40,7 @@
 
   const isVisible = $derived(isOpen || isAnimating);
   const menuPosition = $derived.by(() => {
-    const vert = align === "top" ? "" : "top-full mt-1.5";
+    const vert = align.startsWith("top") ? "" : "top-full mt-1.5";
     return `${POSITION_MAP[align]} ${vert}`;
   });
 
@@ -100,7 +100,7 @@
   }
 </script>
 
-<div class="dropdown-container h-fit relative flex {className}">
+<div class={cn("dropdown-container h-fit relative flex", className)}>
   <button
     type="button"
     {id}
