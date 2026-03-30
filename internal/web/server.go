@@ -151,6 +151,7 @@ func (s *Server) installProgressLoop() {
 func (s *Server) statusUpdateLoop() {
 	for status := range s.StatusChannel {
 		update := map[string]interface{}{
+			"type":         "tunnel_state",
 			"id":           status.ID,
 			"state":        string(status.State),
 			"publicUrl":    status.PublicURL,
@@ -172,6 +173,7 @@ func (s *Server) BroadcastTunnelUpdate(t config.TunnelConfig) {
 	}
 
 	update := map[string]interface{}{
+		"type":         "tunnel_state",
 		"id":           t.ID,
 		"name":         t.Name,
 		"provider":     string(t.Provider),

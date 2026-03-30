@@ -157,6 +157,7 @@ func (h *Handlers) updateTunnel(w http.ResponseWriter, r *http.Request, id strin
 	h.server.updateConfig()
 
 	update := h.tunnelToMap(*tunnel)
+	update["type"] = "tunnel_state"
 	data, _ := MarshalJSON(update)
 	h.server.broadcast(string(data))
 
@@ -181,6 +182,7 @@ func (h *Handlers) startTunnel(w http.ResponseWriter, id string) {
 
 	if needsInstall, canInstall := h.manager.CheckInstallation(tunnel.Provider); needsInstall && canInstall {
 		update := map[string]interface{}{
+			"type":     "tunnel_state",
 			"id":       tunnel.ID,
 			"state":    "installing",
 			"provider": string(tunnel.Provider),
@@ -213,6 +215,7 @@ func (h *Handlers) startTunnel(w http.ResponseWriter, id string) {
 func (h *Handlers) installAndStart(tunnel config.TunnelConfig) {
 	if err := h.manager.InstallProvider(tunnel.Provider); err != nil {
 		update := map[string]interface{}{
+			"type":         "tunnel_state",
 			"id":           tunnel.ID,
 			"state":        "error",
 			"errorMessage": "Installation failed: " + err.Error(),
@@ -224,6 +227,7 @@ func (h *Handlers) installAndStart(tunnel config.TunnelConfig) {
 
 	if err := h.manager.Start(tunnel, func(status config.TunnelStatus) {}); err != nil {
 		update := map[string]interface{}{
+			"type":         "tunnel_state",
 			"id":           tunnel.ID,
 			"state":        "error",
 			"errorMessage": err.Error(),
@@ -255,5 +259,12 @@ func (h *Handlers) deleteTunnel(w http.ResponseWriter, id string) {
 		}
 	}
 	h.server.updateConfig()
+
+	data, _ := MarshalJSON(map[string]interface{}{
+		"type": "tunnel_deleted",
+		"id":   id,
+	})
+	h.server.broadcast(string(data))
+
 	w.WriteHeader(http.StatusOK)
 }

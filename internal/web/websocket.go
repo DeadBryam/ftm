@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
@@ -75,8 +76,9 @@ func (s *Server) writePump(client *wsClient) {
 
 func (s *Server) handleClientMessage(client *wsClient, payload []byte) {
 	var message struct {
-		Type string `json:"type"`
-		ID   string `json:"id"`
+		Type      string `json:"type"`
+		ID        string `json:"id"`
+		RequestID string `json:"requestId"`
 	}
 	if err := json.Unmarshal(payload, &message); err != nil {
 		return
@@ -84,27 +86,76 @@ func (s *Server) handleClientMessage(client *wsClient, payload []byte) {
 
 	switch message.Type {
 	case "logs_subscribe":
-		s.subscribeLogs(client, message.ID)
+		if err := s.subscribeLogs(client, message.ID); err != nil {
+			s.sendCommandNack(client, message.Type, message.ID, message.RequestID, err.Error())
+			return
+		}
+		s.sendCommandAck(client, message.Type, message.ID, message.RequestID)
 	case "logs_unsubscribe":
-		s.unsubscribeLogs(client, message.ID)
+		if err := s.unsubscribeLogs(client, message.ID); err != nil {
+			s.sendCommandNack(client, message.Type, message.ID, message.RequestID, err.Error())
+			return
+		}
+		s.sendCommandAck(client, message.Type, message.ID, message.RequestID)
+	default:
+		s.sendCommandNack(client, message.Type, message.ID, message.RequestID, "unknown command")
 	}
 }
 
-func (s *Server) subscribeLogs(client *wsClient, tunnelID string) {
-	if tunnelID == "" {
+func (s *Server) sendCommandAck(client *wsClient, command, tunnelID, requestID string) {
+	payload := map[string]interface{}{
+		"type":    "ack",
+		"command": command,
+	}
+	if tunnelID != "" {
+		payload["id"] = tunnelID
+	}
+	if requestID != "" {
+		payload["requestId"] = requestID
+	}
+	s.sendClientJSON(client, payload)
+}
+
+func (s *Server) sendCommandNack(client *wsClient, command, tunnelID, requestID, reason string) {
+	payload := map[string]interface{}{
+		"type":    "nack",
+		"command": command,
+		"reason":  reason,
+	}
+	if tunnelID != "" {
+		payload["id"] = tunnelID
+	}
+	if requestID != "" {
+		payload["requestId"] = requestID
+	}
+	s.sendClientJSON(client, payload)
+}
+
+func (s *Server) sendClientJSON(client *wsClient, payload map[string]interface{}) {
+	data, err := MarshalJSON(payload)
+	if err != nil {
 		return
+	}
+	if !client.enqueue(data) {
+		s.removeClient(client)
+	}
+}
+
+func (s *Server) subscribeLogs(client *wsClient, tunnelID string) error {
+	if tunnelID == "" {
+		return errors.New("missing tunnel id")
 	}
 
 	client.subsMu.Lock()
 	if _, ok := client.logSubscriptions[tunnelID]; ok {
 		client.subsMu.Unlock()
-		return
+		return nil
 	}
 
 	logCh, unsubscribe := s.manager.SubscribeLogs(tunnelID)
 	if logCh == nil {
 		client.subsMu.Unlock()
-		return
+		return errors.New("logs unavailable")
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -139,11 +190,13 @@ func (s *Server) subscribeLogs(client *wsClient, tunnelID string) {
 			}
 		}
 	}()
+
+	return nil
 }
 
-func (s *Server) unsubscribeLogs(client *wsClient, tunnelID string) {
+func (s *Server) unsubscribeLogs(client *wsClient, tunnelID string) error {
 	if tunnelID == "" {
-		return
+		return errors.New("missing tunnel id")
 	}
 
 	client.subsMu.Lock()
@@ -156,6 +209,8 @@ func (s *Server) unsubscribeLogs(client *wsClient, tunnelID string) {
 	if ok {
 		cancel()
 	}
+
+	return nil
 }
 
 func (s *Server) removeClient(client *wsClient) {

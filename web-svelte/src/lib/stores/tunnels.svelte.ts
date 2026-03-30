@@ -44,7 +44,15 @@ function processStateMessage(msg: TunnelMessage) {
     return;
   }
 
-  if (!msg.id) return;
+  if (msg.type === 'tunnel_deleted' && msg.id) {
+    expirationMonitor.stop(msg.id);
+    const { [msg.id]: _, ...rest } = tunnelsById;
+    tunnelsById = rest as TunnelMap;
+    return;
+  }
+
+  const isTunnelStateMessage = msg.type === 'tunnel_state' || msg.type === undefined;
+  if (!isTunnelStateMessage || !msg.id) return;
 
   const tunnel = tunnelsById[msg.id];
   if (!tunnel) return;
