@@ -35,7 +35,7 @@ func NewServer(manager *process.Manager, cfg *config.Config) *Server {
 		manager:       manager,
 		config:        cfg,
 		clients:       make(map[*wsClient]struct{}),
-		StatusChannel: make(chan config.TunnelStatus, 10),
+		StatusChannel: make(chan config.TunnelStatus, 64),
 	}
 	s.handlers = NewHandlers(manager, cfg, s)
 	return s

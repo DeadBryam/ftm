@@ -227,14 +227,6 @@ func (h *Handlers) stopTunnel(w http.ResponseWriter, id string) {
 		return
 	}
 
-	update := map[string]interface{}{
-		"id":        id,
-		"state":     "stopped",
-		"publicUrl": "",
-	}
-	data, _ := MarshalJSON(update)
-	h.server.broadcast(string(data))
-
 	tunnel := h.server.getTunnel(id)
 	if tunnel != nil {
 		h.writeTunnelJSON(w, *tunnel)

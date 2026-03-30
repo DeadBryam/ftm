@@ -55,10 +55,7 @@ func (m *Manager) SetStatusChannel(ch chan config.TunnelStatus) {
 
 func (m *Manager) callStatusUpdate(status config.TunnelStatus) {
 	if m.StatusChannel != nil {
-		select {
-		case m.StatusChannel <- status:
-		default:
-		}
+		m.StatusChannel <- status
 	}
 }
 
@@ -183,6 +180,7 @@ func (m *Manager) Start(tunnel config.TunnelConfig, onUpdate func(config.TunnelS
 	if onUpdate != nil {
 		onUpdate(mp.Status)
 	}
+	m.callStatusUpdate(mp.Status)
 
 	go m.startupTimeoutMonitor(tunnel.ID)
 	m.callExpirationStart(tunnel.ID, tunnel.Name, string(tunnel.Provider), time.Now())
@@ -250,6 +248,15 @@ func (m *Manager) Stop(tunnelID string) error {
 
 	m.callNotificationHandler(mp.Status)
 	m.callStatusUpdate(mp.Status)
+
+	mp.Status.State = config.TunnelStateStopped
+	mp.Status.PublicURL = ""
+	mp.Status.ErrorMessage = ""
+	if mp.OnUpdate != nil {
+		mp.OnUpdate(mp.Status)
+	}
+	m.callStatusUpdate(mp.Status)
+
 	m.callExpirationStop(tunnelID)
 	delete(m.processes, tunnelID)
 
