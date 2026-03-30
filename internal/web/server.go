@@ -229,7 +229,7 @@ func (s *Server) broadcastInstallingNotification(tunnel config.TunnelConfig) {
 	s.broadcastNotification("tunnel_installing", "Installing", "Installing tunnel for "+string(tunnel.Provider)+"...", "info", "info")
 }
 
-func (s *Server) broadcastNotification(eventType, title, body, toastType, soundType string) {
+func (s *Server) broadcastNotification(_ string, title, body, toastType, soundType string) {
 	channel := "toast"
 	if s.config.NotificationsStatus == config.NotificationGranted {
 		channel = "os"
@@ -238,7 +238,6 @@ func (s *Server) broadcastNotification(eventType, title, body, toastType, soundT
 	update := map[string]interface{}{
 		"type": "notification",
 		"notification": map[string]interface{}{
-			"event":        eventType,
 			"channel":      channel,
 			"title":        title,
 			"body":         body,

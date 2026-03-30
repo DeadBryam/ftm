@@ -5,7 +5,6 @@ type NotificationStatus = 'pending' | 'granted' | 'rejected';
 type NotificationChannel = 'toast' | 'os';
 
 interface NotificationEvent {
-  event?: string;
   channel?: NotificationChannel | string;
   title?: string;
   body?: string;

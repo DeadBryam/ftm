@@ -21,7 +21,6 @@ interface TunnelMessage {
   done?: boolean;
   install?: { provider: string; percent: number; step: string };
   notification?: {
-    event?: string;
     channel?: string;
     title?: string;
     body?: string;
