@@ -12,7 +12,7 @@ func (h *Handlers) handleSettings(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		h.handleGetSettings(w)
-	case http.MethodPatch:
+	case http.MethodPatch, http.MethodPost:
 		h.handlePatchSettings(w, r)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

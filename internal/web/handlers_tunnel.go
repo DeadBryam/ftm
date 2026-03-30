@@ -88,6 +88,12 @@ func (h *Handlers) parseTunnelRequest(r *http.Request) (name, provider string, p
 
 func (h *Handlers) handleTunnelActions(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/api/tunnels/")
+	path = strings.Trim(path, "/")
+	if path == "" {
+		http.Error(w, "invalid path", http.StatusBadRequest)
+		return
+	}
+
 	parts := strings.Split(path, "/")
 	if len(parts) == 0 || parts[0] == "" {
 		http.Error(w, "invalid path", http.StatusBadRequest)

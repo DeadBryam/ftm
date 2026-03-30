@@ -31,20 +31,25 @@ func (h *Handlers) Route(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	path := strings.TrimSuffix(r.URL.Path, "/")
+	if path == "" {
+		path = "/"
+	}
+
 	switch {
-	case r.URL.Path == "/api/tunnels":
+	case path == "/api/tunnels":
 		h.handleTunnels(w, r)
-	case strings.HasPrefix(r.URL.Path, "/api/logs/"):
+	case strings.HasPrefix(path, "/api/logs/"):
 		h.handleLogs(w, r)
-	case r.URL.Path == "/api/status":
+	case path == "/api/status":
 		h.handleStatus(w)
-	case r.URL.Path == "/api/settings":
+	case path == "/api/settings":
 		h.handleSettings(w, r)
-	case r.URL.Path == "/api/providers":
+	case path == "/api/providers":
 		h.handleProviders(w)
-	case r.URL.Path == "/api/detect-port":
+	case path == "/api/detect-port":
 		h.handleDetectPort(w)
-	case strings.HasPrefix(r.URL.Path, "/api/tunnels/"):
+	case strings.HasPrefix(path, "/api/tunnels/"):
 		h.handleTunnelActions(w, r)
 	default:
 		http.NotFound(w, r)
