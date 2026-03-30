@@ -38,7 +38,6 @@ let tunnelsById: TunnelMap = $state({});
 let loading = $state(true);
 let error: string | null = $state(null);
 let unsubscribeWs: (() => void) | null = $state(null);
-let syncInterval: ReturnType<typeof setInterval> | null = $state(null);
 let installProgress: InstallProgress = $state({});
 
 const notifications = useNotifications();
@@ -142,12 +141,6 @@ function connect() {
     processStateMessage(msg);
   });
 
-  if (!syncInterval) {
-    syncInterval = setInterval(() => {
-      void syncTunnels();
-    }, 5000);
-  }
-
   void notifications.syncWithSettings();
 
   tunnelsApi.getAll()
@@ -172,10 +165,6 @@ function disconnect() {
   if (unsubscribeWs) {
     unsubscribeWs();
     unsubscribeWs = null;
-  }
-  if (syncInterval) {
-    clearInterval(syncInterval);
-    syncInterval = null;
   }
   expirationMonitor.stopAll();
 }
