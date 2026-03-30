@@ -105,8 +105,8 @@
   });
 </script>
 
-<div class="fixed top-5 right-5 z-[1000] max-sm:top-2.5 max-sm:right-2.5">
-  <div class="relative w-[320px] h-14">
+<div class="fixed top-5 right-5 z-[1000] max-sm:top-2.5 max-sm:right-2.5 pointer-events-none">
+  <div class="relative w-[320px] h-14 pointer-events-none">
     {#each toast.toasts as t, i (t.id)}
       <div
         use:setStackRef={t.id}
