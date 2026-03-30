@@ -89,19 +89,6 @@ func NewManager() *Manager {
 	}
 }
 
-func (m *Manager) GetProvider(p config.Provider) (providers.Provider, bool) {
-	provider, ok := m.providers[p]
-	return provider, ok
-}
-
-func (m *Manager) ListProviders() []providers.Provider {
-	result := make([]providers.Provider, 0, len(m.providers))
-	for _, p := range m.providers {
-		result = append(result, p)
-	}
-	return result
-}
-
 func (m *Manager) CheckInstallation(providerType config.Provider) (needsInstall bool, autoInstall bool) {
 	provider, ok := m.providers[providerType]
 	if !ok {
@@ -261,14 +248,6 @@ func (m *Manager) Stop(tunnelID string) error {
 	delete(m.processes, tunnelID)
 
 	return nil
-}
-
-func (m *Manager) Get(tunnelID string) (*ManagedProcess, bool) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-
-	mp, ok := m.processes[tunnelID]
-	return mp, ok
 }
 
 func (m *Manager) GetStatus(tunnelID string) (config.TunnelStatus, bool) {

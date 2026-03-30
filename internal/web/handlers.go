@@ -107,14 +107,3 @@ func (h *Handlers) writeTunnelJSON(w http.ResponseWriter, t config.TunnelConfig)
 func MarshalJSON(v interface{}) ([]byte, error) {
 	return json.Marshal(v)
 }
-
-type TunnelView struct {
-	ID           string
-	Name         string
-	Provider     string
-	ProviderName string
-	Port         int
-	State        string
-	PublicURL    string
-	ErrorMessage string
-}
