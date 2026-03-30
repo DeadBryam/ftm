@@ -67,29 +67,29 @@
 
   const statusConfig: Record<StatusKey, StatusColors> = {
     running: {
-      bg: "bg-status-running",
-      text: "text-status-running-text",
-      dot: "bg-status-running-dot",
+      bg: "bg-status-running/50",
+      text: "text-status-running",
+      dot: "bg-status-running",
     },
     starting: {
-      bg: "bg-status-starting",
-      text: "text-status-starting-text",
-      dot: "bg-status-starting-dot",
+      bg: "bg-status-starting/50",
+      text: "text-status-starting",
+      dot: "bg-status-starting",
     },
     installing: {
-      bg: "bg-status-installing",
-      text: "text-status-installing-text",
-      dot: "bg-status-installing-dot",
+      bg: "bg-status-installing/50",
+      text: "text-status-installing",
+      dot: "bg-status-installing",
     },
     error: {
-      bg: "bg-status-error",
+      bg: "bg-status-error/50",
       text: "text-status-error-text",
-      dot: "bg-status-error-dot",
+      dot: "bg-status-error",
     },
     stopped: {
-      bg: "bg-status-stopped",
-      text: "text-status-stopped-text",
-      dot: "bg-status-stopped-dot",
+      bg: "bg-status-stopped/50",
+      text: "text-status-stopped",
+      dot: "bg-status-stopped",
     },
   };
 
