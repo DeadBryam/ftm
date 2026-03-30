@@ -38,8 +38,6 @@ func (h *Handlers) Route(w http.ResponseWriter, r *http.Request) {
 		h.handleLogs(w, r)
 	case r.URL.Path == "/api/status":
 		h.handleStatus(w)
-	case r.URL.Path == "/api/notifications":
-		h.handleNotifications(w, r)
 	case r.URL.Path == "/api/settings":
 		h.handleSettings(w, r)
 	case r.URL.Path == "/api/providers":
@@ -73,7 +71,6 @@ func (h *Handlers) tunnelToMap(t config.TunnelConfig) map[string]interface{} {
 		item["errorMessage"] = status.ErrorMessage
 		item["state"] = string(status.State)
 	}
-
 
 	if item["state"] == "stopped" {
 		if needsInstall, canInstall := h.manager.CheckInstallation(t.Provider); needsInstall && canInstall {
