@@ -23,7 +23,6 @@ type Config struct {
 
 	NotificationsStatus string `yaml:"notifications_status"`
 	NotificationSound   bool   `yaml:"notification_sound"`
-	Theme               string `yaml:"theme"`
 
 	ExpirationThresholds      []int          `yaml:"expiration_thresholds"`
 	ProviderExpirationMinutes map[string]int `yaml:"provider_expiration_minutes"`
