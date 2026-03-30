@@ -40,21 +40,17 @@
 
     requestAnimationFrame(() => {
       if (sectionEl)
-        animate(
-          sectionEl,
-          { opacity: 1, y: 0 },
-          { duration: 0.4, type: "spring" },
-        );
+        animate(sectionEl, { opacity: 1 }, { duration: 0.4, type: "spring" });
       if (headerEl)
         animate(
           headerEl,
-          { opacity: 1, y: 0 },
+          { opacity: 1 },
           { duration: 0.4, delay: 0.05, type: "spring" },
         );
       if (contentEl)
         animate(
           contentEl,
-          { opacity: 1, y: 0 },
+          { opacity: 1 },
           { duration: 0.4, delay: 0.1, type: "spring" },
         );
     });
@@ -85,21 +81,17 @@
 
 <section
   bind:this={sectionEl}
-  style="opacity: 0; transform: translateY(12px);"
+  style="opacity: 0;"
   class="rounded-xl p-5 bg-card border border-border"
 >
-  <div
-    bind:this={headerEl}
-    style="opacity: 0; transform: translateY(8px);"
-    class="mb-5"
-  >
+  <div bind:this={headerEl} style="opacity: 0;" class="mb-5">
     <h2
       class="text-base font-semibold text-text-heading flex items-center gap-2"
     >
       New Connection
     </h2>
   </div>
-  <div bind:this={contentEl} style="opacity: 0; transform: translateY(8px);">
+  <div bind:this={contentEl} style="opacity: 0;">
     <form onsubmit={handleSubmit}>
       <div class="mb-4">
         <label

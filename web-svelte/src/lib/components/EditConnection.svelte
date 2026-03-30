@@ -39,19 +39,19 @@
         animate(
           sectionEl,
 
-          { opacity: 1, y: 0 },
+          { opacity: 1 },
           { duration: 0.4, type: "spring" },
         );
       if (headerEl)
         animate(
           headerEl,
-          { opacity: 1, y: 0 },
+          { opacity: 1 },
           { duration: 0.4, delay: 0.05, type: "spring" },
         );
       if (contentEl)
         animate(
           contentEl,
-          { opacity: 1, y: 0 },
+          { opacity: 1 },
           { duration: 0.4, delay: 0.1, type: "spring" },
         );
     });
@@ -105,12 +105,12 @@
 
 <section
   bind:this={sectionEl}
-  style="opacity: 0; transform: translateY(12px);"
+  style="opacity: 0;"
   class="rounded-xl p-5 bg-card border border-border"
 >
   <div
     bind:this={headerEl}
-    style="opacity: 0; transform: translateY(8px);"
+    style="opacity: 0;"
     class="flex items-center justify-between mb-5"
   >
     <h2
@@ -126,7 +126,7 @@
       <X size={18} />
     </button>
   </div>
-  <div bind:this={contentEl} style="opacity: 0; transform: translateY(8px);">
+  <div bind:this={contentEl} style="opacity: 0;">
     <form onsubmit={handleSubmit}>
       <div class="mb-4">
         <label

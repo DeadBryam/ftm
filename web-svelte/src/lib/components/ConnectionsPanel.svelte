@@ -18,21 +18,17 @@
   onMount(() => {
     requestAnimationFrame(() => {
       if (sectionEl)
-        animate(
-          sectionEl,
-          { opacity: 1, y: 0 },
-          { duration: 0.4, type: "spring" },
-        );
+        animate(sectionEl, { opacity: 1 }, { duration: 0.4, type: "spring" });
       if (headerEl)
         animate(
           headerEl,
-          { opacity: 1, y: 0 },
+          { opacity: 1 },
           { duration: 0.4, delay: 0.05, type: "spring" },
         );
       if (contentEl)
         animate(
           contentEl,
-          { opacity: 1, y: 0 },
+          { opacity: 1 },
           { duration: 0.4, delay: 0.1, type: "spring" },
         );
     });
@@ -41,7 +37,7 @@
 
 <section
   bind:this={sectionEl}
-  style="opacity: 0; transform: translateY(12px);"
+  style="opacity: 0;"
   class={cn(
     "flex flex-col overflow-hidden rounded-xl border shadow-sm transition-all duration-200",
     "hover:shadow-lg hover:-translate-y-px",
@@ -50,7 +46,7 @@
 >
   <div
     bind:this={headerEl}
-    style="opacity: 0; transform: translateY(8px);"
+    style="opacity: 0;"
     class={cn(
       "flex shrink-0 items-center justify-between px-4 py-3 border-b",
       "bg-url-bg border-border-light",
@@ -69,7 +65,7 @@
   </div>
   <div
     bind:this={contentEl}
-    style="opacity: 0; transform: translateY(8px);"
+    style="opacity: 0;"
     class="flex-1 overflow-y-auto p-4"
   >
     {#if store.loading}
