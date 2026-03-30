@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte';
-  import Toasts from '$lib/components/Toasts.svelte';
-  import { subscribeWsMessages } from '$lib/api/ws';
+  import { onDestroy, onMount } from "svelte";
+  import Toasts from "$lib/components/Toasts.svelte";
+  import { subscribeWsMessages } from "$lib/api/ws";
+
+  import "../styles/app.css";
 
   let unsubscribeWs: (() => void) | null = null;
 

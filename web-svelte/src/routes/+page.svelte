@@ -12,7 +12,6 @@
   import EditConnection from "$lib/components/EditConnection.svelte";
   import type { Tunnel } from "$lib/types";
 
-  import "../styles/app.css";
   import { cn } from "$lib/utils/cn";
 
   const store = useTunnels();
@@ -93,7 +92,7 @@
   <main
     class={cn(
       "grid grid-cols-[360px_1fr] gap-5 flex-1 min-h-0 md:grid-cols-[320px_1fr] md:gap-4 ",
-      "lg:grid-cols-[360px_1fr] lg:gap-5 max-md:grid-cols-1 max-md:overflow-y-auto max-md:gap-4 max-h-[calc(100dvh-11rem)]"
+      "lg:grid-cols-[360px_1fr] lg:gap-5 max-md:grid-cols-1 max-md:overflow-y-auto max-md:gap-4 max-h-[calc(100dvh-11rem)]",
     )}
   >
     {#if editingTunnelId}
