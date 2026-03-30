@@ -35,13 +35,17 @@ func (h *Handlers) listTunnels(w http.ResponseWriter) {
 
 func (h *Handlers) createTunnel(w http.ResponseWriter, r *http.Request) {
 	name, providerStr, port := h.parseTunnelRequest(r)
-	if name == "" || providerStr == "" || port < 1 {
+	if name == "" || providerStr == "" {
 		http.Error(w, "missing fields", http.StatusBadRequest)
 		return
 	}
 
-	if port < 1 || port > 65535 {
+	if port == 0 {
 		port = 30000
+	}
+	if port < 1 || port > 65535 {
+		http.Error(w, "invalid port", http.StatusBadRequest)
+		return
 	}
 
 	tunnel := config.TunnelConfig{
@@ -85,7 +89,7 @@ func (h *Handlers) parseTunnelRequest(r *http.Request) (name, provider string, p
 func (h *Handlers) handleTunnelActions(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/api/tunnels/")
 	parts := strings.Split(path, "/")
-	if len(parts) < 1 {
+	if len(parts) == 0 || parts[0] == "" {
 		http.Error(w, "invalid path", http.StatusBadRequest)
 		return
 	}
@@ -93,6 +97,10 @@ func (h *Handlers) handleTunnelActions(w http.ResponseWriter, r *http.Request) {
 	action := ""
 	if len(parts) > 1 {
 		action = parts[1]
+	}
+	if len(parts) > 2 {
+		http.Error(w, "invalid path", http.StatusBadRequest)
+		return
 	}
 
 	switch r.Method {
@@ -118,6 +126,10 @@ func (h *Handlers) handleTunnelActions(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "unknown action", http.StatusBadRequest)
 		}
 	case http.MethodDelete:
+		if action != "" {
+			http.Error(w, "unknown action", http.StatusBadRequest)
+			return
+		}
 		h.deleteTunnel(w, id)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
