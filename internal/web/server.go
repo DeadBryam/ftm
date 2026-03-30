@@ -120,6 +120,12 @@ func (s *Server) Port() int {
 	return s.port
 }
 
+func (s *Server) ClientCount() int {
+	s.clientsMu.RLock()
+	defer s.clientsMu.RUnlock()
+	return len(s.clients)
+}
+
 func (s *Server) URL() string {
 	return fmt.Sprintf("http://localhost:%d", s.port)
 }

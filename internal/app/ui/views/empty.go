@@ -1,6 +1,7 @@
 package views
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -12,6 +13,7 @@ type EmptyState struct {
 	Height    int
 	Width     int
 	Dashboard string
+	Sessions  int
 }
 
 func NewEmptyState() *EmptyState {
@@ -49,9 +51,13 @@ func (e *EmptyState) Render() string {
 		Foreground(textDim).
 		Render("Or press 'a' to start")
 
+	tipText := "💡 Tip: Web dashboard at " + e.Dashboard
+	if e.Sessions > 0 {
+		tipText += "  •  ws:" + fmt.Sprintf("%d", e.Sessions)
+	}
 	tip := lipgloss.NewStyle().
 		Foreground(bronze).
-		Render("💡 Tip: Web dashboard at " + e.Dashboard)
+		Render(tipText)
 
 	contentHeight := 12
 	paddingTop := (e.Height - contentHeight) / 2

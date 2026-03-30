@@ -21,6 +21,7 @@ func (h *Handlers) handleStatus(w http.ResponseWriter) {
 		"port":                h.server.Port(),
 		"version":             version.Version,
 		"notificationsStatus": status,
+		"wsClients":           h.server.ClientCount(),
 	})
 }
 

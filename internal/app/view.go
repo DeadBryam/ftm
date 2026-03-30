@@ -40,6 +40,7 @@ func (m *Model) viewList() string {
 	view.Cursor = m.Cursor
 	view.Message = m.Message
 	view.Dashboard = m.App.WebServer.URL()
+	view.Sessions = m.App.WebServer.ClientCount()
 	view.TwoColumnLimit = TwoColumnThreshold
 
 	return view.Render()
@@ -104,6 +105,7 @@ func (m *Model) viewEmptyState() string {
 	view.Height = m.Height
 	view.Width = m.Width
 	view.Dashboard = m.App.WebServer.URL()
+	view.Sessions = m.App.WebServer.ClientCount()
 
 	return view.Render()
 }
