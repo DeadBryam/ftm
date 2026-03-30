@@ -6,7 +6,6 @@
   import { useTheme } from "$lib/stores/theme.svelte";
   import Header from "$lib/components/Header.svelte";
   import DeleteModal from "$lib/components/DeleteModal.svelte";
-  import Toasts from "$lib/components/Toasts.svelte";
   import NotificationPermission from "$lib/components/NotificationPermission.svelte";
   import ConnectionsPanel from "$lib/components/ConnectionsPanel.svelte";
   import NewConnection from "$lib/components/NewConnection.svelte";
@@ -118,5 +117,4 @@
   onCancel={handleCancelDelete}
 />
 
-<Toasts />
 <NotificationPermission />
