@@ -1,10 +1,7 @@
 export { tunnelsApi } from './tunnels';
 export { providersApi } from './providers';
-export { createLogStream, getLogs } from './logs';
-export type { LogStreamOptions } from './logs';
-export { getStatus } from './status';
-export type { StatusResponse } from './status';
-export { updateNotificationsStatus } from './notifications';
-export type { NotificationsUpdateRequest, NotificationsUpdateResponse } from './notifications';
-export { getSettings, updateSettings } from './settings';
+export { logsApi } from './logs';
+export { statusApi } from './status';
+export { notificationsApi } from './notifications';
+export { settingsApi } from './settings';
 export type { Settings } from './settings';

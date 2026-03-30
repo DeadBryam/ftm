@@ -1,4 +1,4 @@
-import { getSettings, updateSettings, type Settings } from '$lib/api';
+import { settingsApi, type Settings } from '$lib/api';
 
 let settings = $state<Settings>({
   notifications_enabled: false,
@@ -8,7 +8,7 @@ let settings = $state<Settings>({
 let loaded = $state(false);
 
 async function load() {
-  settings = await getSettings();
+  settings = await settingsApi.get();
   loaded = true;
 }
 
@@ -16,7 +16,7 @@ async function update(partial: Partial<Settings>) {
   const old = { ...settings };
   settings = { ...settings, ...partial };
   try {
-    settings = await updateSettings(partial);
+    settings = await settingsApi.update(partial);
   } catch {
     settings = old;
   }

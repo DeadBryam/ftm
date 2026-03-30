@@ -1,18 +1,13 @@
 import { api } from '../client';
 
-export interface NotificationsUpdateRequest {
-  status: 'granted' | 'rejected';
-}
+type NotificationsUpdateStatus = 'granted' | 'rejected';
 
-export interface NotificationsUpdateResponse {
+interface NotificationsUpdateResponse {
   success: boolean;
   status: 'pending' | 'granted' | 'rejected';
 }
 
-export async function updateNotificationsStatus(
-  status: 'granted' | 'rejected'
-): Promise<NotificationsUpdateResponse> {
-  return api
-    .post('notifications', { json: { status } })
-    .json();
-}
+export const notificationsApi = {
+  updateStatus: (status: NotificationsUpdateStatus): Promise<NotificationsUpdateResponse> =>
+    api.post('notifications', { json: { status } }).json(),
+};

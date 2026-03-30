@@ -12,7 +12,7 @@ interface LogWsMessage {
   line?: string;
 }
 
-export function createLogStream(
+function createStream(
   tunnelId: string,
   options: LogStreamOptions
 ): { close: () => void } {
@@ -52,7 +52,11 @@ export function createLogStream(
   };
 }
 
-export async function getLogs(tunnelId: string): Promise<string> {
-  const res = await api.get(`logs/${tunnelId}`);
-  return res.text();
+function get(tunnelId: string): Promise<string> {
+  return api.get(`logs/${tunnelId}`).text();
 }
+
+export const logsApi = {
+  createStream,
+  get,
+};

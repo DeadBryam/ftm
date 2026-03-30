@@ -5,10 +5,8 @@ export interface Settings {
   notification_sound: boolean;
 }
 
-export async function getSettings(): Promise<Settings> {
-  return api.get('settings').json();
-}
-
-export async function updateSettings(settings: Partial<Settings>): Promise<Settings> {
-  return api.patch('settings', { json: settings }).json();
-}
+export const settingsApi = {
+  get: (): Promise<Settings> => api.get('settings').json(),
+  update: (settings: Partial<Settings>): Promise<Settings> =>
+    api.patch('settings', { json: settings }).json(),
+};

@@ -1,5 +1,5 @@
 import { useToast, type ToastType } from './toast.svelte';
-import { updateNotificationsStatus } from '$lib/api';
+import { notificationsApi } from '$lib/api';
 
 type NotificationStatus = 'pending' | 'granted' | 'rejected';
 
@@ -110,7 +110,7 @@ const notificationStore = {
     }
 
     try {
-      await updateNotificationsStatus(granted ? 'granted' : 'rejected');
+      await notificationsApi.updateStatus(granted ? 'granted' : 'rejected');
     } catch {
       console.error('Failed to update notification status on server');
     }
@@ -120,7 +120,7 @@ const notificationStore = {
 
   reject() {
     status = 'rejected';
-    updateNotificationsStatus('rejected').catch(() => {
+    notificationsApi.updateStatus('rejected').catch(() => {
       console.error('Failed to update notification status on server');
     });
   },

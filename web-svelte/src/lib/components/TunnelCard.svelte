@@ -10,7 +10,7 @@
     Play,
     Trash2,
   } from "lucide-svelte";
-  import { createLogStream, getLogs } from "$lib/api";
+  import { logsApi } from "$lib/api";
   import { cn } from "$lib/utils/cn";
   import { formatLogs } from "$lib/utils/logs";
   import Button from "./Button.svelte";
@@ -140,7 +140,7 @@
     loadingLogs = true;
     logs = "";
 
-    getLogs(tunnel.id)
+    logsApi.get(tunnel.id)
       .then((initial) => {
         logs = formatLogs(initial);
         loadingLogs = false;
@@ -150,7 +150,7 @@
         loadingLogs = false;
       });
 
-    logStream = createLogStream(tunnel.id, {
+    logStream = logsApi.createStream(tunnel.id, {
       onLine: (line: string) => {
         logs = logs + "\n" + formatLogs(line);
       },

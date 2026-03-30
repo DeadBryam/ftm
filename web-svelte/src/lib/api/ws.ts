@@ -1,4 +1,4 @@
-import { getStatus } from './endpoints/status';
+import { statusApi } from './endpoints/status';
 
 type WsHandler = (message: unknown) => void;
 
@@ -42,7 +42,7 @@ function notifyListeners(message: unknown) {
 
 async function resolveStatusPort(): Promise<number | null> {
   if (!statusPortPromise) {
-    statusPortPromise = getStatus()
+    statusPortPromise = statusApi.get()
       .then((status) => status.port)
       .catch(() => null);
   }

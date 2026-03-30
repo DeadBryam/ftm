@@ -6,6 +6,6 @@ export interface StatusResponse {
   notificationsStatus: 'pending' | 'granted' | 'rejected';
 }
 
-export async function getStatus(): Promise<StatusResponse> {
-  return api.get('status').json();
-}
+export const statusApi = {
+  get: (): Promise<StatusResponse> => api.get('status').json(),
+};

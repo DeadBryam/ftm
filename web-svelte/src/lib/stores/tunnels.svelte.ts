@@ -1,4 +1,4 @@
-import { tunnelsApi, getStatus } from '$lib/api';
+import { statusApi, tunnelsApi } from '$lib/api';
 import { subscribeWsMessages } from '$lib/api/ws';
 import { useNotifications } from './notification.svelte';
 import { useExpirationMonitor } from './expiration.svelte';
@@ -101,7 +101,7 @@ function connect() {
     processStateMessage(message as TunnelMessage);
   });
 
-  getStatus()
+  statusApi.get()
     .then((status) => {
       notifications.setStatus(status.notificationsStatus);
     })
