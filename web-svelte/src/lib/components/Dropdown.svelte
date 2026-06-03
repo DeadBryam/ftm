@@ -21,7 +21,7 @@
     left: "left-auto right-0",
     right: "right-auto left-0",
     "top-left": "bottom-full mb-1.5 left-auto right-0",
-    "top-right": "bottom-full mb-1.5 right-auto left-0"
+    "top-right": "bottom-full mb-1.5 right-auto left-0",
   };
 
   let t = $derived($translate);
@@ -65,10 +65,8 @@
   function handleOutsideClick(e: MouseEvent) {
     if (!isOpen) return;
     const target = e.target as HTMLElement;
-    if (
-      target.closest(".dropdown-trigger") ||
-      target.closest(".dropdown-menu")
-    ) return;
+    if (target.closest(".dropdown-trigger") || target.closest(".dropdown-menu"))
+      return;
     close();
   }
 
@@ -77,14 +75,9 @@
   }
 
   $effect(() => {
-    if (isOpen) {
-      document.addEventListener("click", handleOutsideClick, true);
-      document.addEventListener("keydown", handleKeydown);
-    } else {
-      document.removeEventListener("click", handleOutsideClick, true);
-      document.removeEventListener("keydown", handleKeydown);
-    }
-
+    if (!isOpen) return;
+    document.addEventListener("click", handleOutsideClick, true);
+    document.addEventListener("keydown", handleKeydown);
     return () => {
       document.removeEventListener("click", handleOutsideClick, true);
       document.removeEventListener("keydown", handleKeydown);
@@ -152,10 +145,9 @@
           )}
         >
           {#if option.icon}
-            {@const IconComponent =
-              option.icon as import("svelte").Component<{
-                size?: number;
-              }>}
+            {@const IconComponent = option.icon as import("svelte").Component<{
+              size?: number;
+            }>}
             <IconComponent size={16} />
           {/if}
           <span>{option.label}</span>
