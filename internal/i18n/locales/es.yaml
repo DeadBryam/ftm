@@ -161,7 +161,7 @@ settings_title: "⚙ Configuración"
 settings_nav_hint: "↑/↓ Navegar  •  espacio/enter Cambiar  •  esc Volver"
 
 tunnel_logs: "📋  Logs del Túnel"
-logs_nav_hint: "esc/b: Volver • ↑/↓: Scroll"
+logs_nav_hint: "esc: Volver • ↑/↓: Scroll"
 
 # UI elements
 play_indicator: "▶"
