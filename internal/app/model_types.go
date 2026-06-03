@@ -117,9 +117,9 @@ var DefaultKeys = KeyMap{
 		key.WithHelp("esc", "back"),
 	),
 	Quit: key.NewBinding(
-		key.WithKeys("ctrl+c"),
-		key.WithKeys("esc"),
+		key.WithKeys("ctrl+c", "esc"),
 		key.WithHelp("ctrl+c", "quit"),
+		key.WithHelp("esc", "quit"),
 	),
 	Help: key.NewBinding(
 		key.WithKeys("?"),
