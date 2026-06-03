@@ -57,7 +57,8 @@
     animate(menuEl, { opacity: 0, scale: 1, y: -4 }, { type: "spring" });
   }
 
-  function toggle() {
+  function toggle(e: MouseEvent) {
+    e?.stopPropagation();
     isOpen ? close() : open();
   }
 
@@ -95,7 +96,7 @@
   <button
     type="button"
     {id}
-    onclick={(e) => { e.stopPropagation(); toggle(); }}
+    onclick={toggle}
     aria-label={ariaLabel}
     aria-expanded={isOpen}
     aria-haspopup="true"
