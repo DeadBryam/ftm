@@ -29,7 +29,7 @@ const (
 
 type Settings struct {
 	NotificationsEnabled bool
-	NotificationSound   bool
+	NotificationSound    bool
 	Theme                string
 }
 
@@ -113,12 +113,13 @@ var DefaultKeys = KeyMap{
 		key.WithHelp("s", "settings"),
 	),
 	Back: key.NewBinding(
-		key.WithKeys("esc", "b"),
-		key.WithHelp("esc/b", "back"),
+		key.WithKeys("esc"),
+		key.WithHelp("esc", "back"),
 	),
 	Quit: key.NewBinding(
-		key.WithKeys("q", "ctrl+c"),
-		key.WithHelp("q/ctrl+c", "quit"),
+		key.WithKeys("ctrl+c", "esc"),
+		key.WithHelp("ctrl+c", "quit"),
+		key.WithHelp("esc", "quit"),
 	),
 	Help: key.NewBinding(
 		key.WithKeys("?"),

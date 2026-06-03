@@ -139,7 +139,7 @@ arrow_hint: "← → para cambiar"
 numbers_hint: "solo números"
 submit_new: "Crear Túnel"
 submit_edit: "Guardar Cambios"
-form_nav_hint: "TAB: navegar  •  ENTER: enviar  •  ESC: cancelar"
+form_nav_hint: "TAB: Navegar  •  ENTER: Enviar  •  ESC: Cancelar"
 
 # Empty states
 no_tunnels: "No hay túneles configurados"
@@ -158,10 +158,10 @@ tip_dashboard: "💡 Tip: Panel web en"
 
 # Settings UI
 settings_title: "⚙ Configuración"
-settings_nav_hint: "↑/↓ navegar  •  espacio/enter cambiar  •  esc volver"
+settings_nav_hint: "↑/↓ Navegar  •  espacio/enter Cambiar  •  esc Volver"
 
 tunnel_logs: "📋  Logs del Túnel"
-logs_nav_hint: "esc/b: volver • ↑/↓: scroll"
+logs_nav_hint: "esc: Volver • ↑/↓: Scroll"
 
 # UI elements
 play_indicator: "▶"
@@ -243,8 +243,8 @@ validation_required_fields: "Nombre y Puerto son requeridos"
 
 # TUI Elements
 app_name_tui: "🎲  Foundry Tunnel Manager"
-web: "web"
-config: "configuración"
+web: "Web"
+config: "Configuración"
 
 # CLI
 uninstall_not_found: "ftm no está instalado o no está en PATH"
