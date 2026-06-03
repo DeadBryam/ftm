@@ -158,10 +158,10 @@ tip_dashboard: "💡 Tip: Web dashboard at"
 
 # Settings UI
 settings_title: "⚙ Settings"
-settings_nav_hint: "↑/↓ navigate  •  space/enter toggle  •  esc back"
+settings_nav_hint: "↑/↓ Navigate  •  space/enter Toggle  •  esc Back"
 
 tunnel_logs: "📋  Tunnel Logs"
-logs_nav_hint: "esc/b: back • ↑/↓: scroll"
+logs_nav_hint: "esc/b: Back • ↑/↓: Scroll"
 
 # UI elements
 play_indicator: "▶"
@@ -243,8 +243,8 @@ validation_required_fields: "Name and Port are required"
 
 # TUI Elements
 app_name_tui: "🎲  Foundry Tunnel Manager"
-web: "web"
-config: "config"
+web: "Web"
+config: "Config"
 
 # CLI
 uninstall_not_found: "ftm is not installed or not in PATH"
