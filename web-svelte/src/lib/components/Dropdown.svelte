@@ -120,6 +120,8 @@
     bind:this={menuEl}
     id={id ? `${id}-menu` : undefined}
     role="menu"
+    inert={!isOpen}
+    aria-hidden={!isOpen}
     aria-orientation="vertical"
     style="opacity: 0; scale: 0.95; transform: translateY(-4px);"
     class={cn(
