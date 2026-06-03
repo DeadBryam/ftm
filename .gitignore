@@ -52,5 +52,6 @@ desktop/frontend/
 # .specs
 *.specs
 .docs
+.pi
 
 AGENTS.md
