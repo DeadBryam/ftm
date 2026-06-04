@@ -105,20 +105,18 @@
     class={cn(
       "flex-1 min-h-0",
       embedded
-        ? "grid grid-cols-1 gap-3"
+        ? "grid grid-cols-[320px_1fr] gap-4"
         : "grid grid-cols-[360px_1fr] gap-5 md:grid-cols-[320px_1fr] md:gap-4 lg:grid-cols-[360px_1fr] lg:gap-5 max-md:grid-cols-1 max-md:overflow-y-auto max-md:gap-4 max-h-[calc(100dvh-11rem)]",
     )}
   >
-    {#if !embedded}
-      {#if editingTunnelId}
-        <EditConnection
-          tunnelId={editingTunnelId}
-          onCancel={handleEditCancel}
-          onSaved={handleEditSaved}
-        />
-      {:else}
-        <NewConnection />
-      {/if}
+    {#if editingTunnelId}
+      <EditConnection
+        tunnelId={editingTunnelId}
+        onCancel={handleEditCancel}
+        onSaved={handleEditSaved}
+      />
+    {:else}
+      <NewConnection />
     {/if}
 
     <ConnectionsPanel onAction={handleAction} />
