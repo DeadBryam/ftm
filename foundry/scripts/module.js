@@ -1,0 +1,86 @@
+import { FtmManager } from './ftm-manager.js';
+import { FtmApp } from './ftm-app.js';
+
+const MODULE_ID = 'ftm-tunnel';
+const SETTING_AUTO_START = 'autoStart';
+const SETTING_PORT = 'port';
+
+function log(...args) {
+  console.log(`[${MODULE_ID}]`, ...args);
+}
+
+Hooks.once('init', () => {
+  game.settings.register(MODULE_ID, SETTING_AUTO_START, {
+    name: 'Auto-start ftm',
+    hint: 'Start the ftm server automatically when Foundry is ready',
+    scope: 'client',
+    config: true,
+    type: Boolean,
+    default: true,
+  });
+
+  game.settings.register(MODULE_ID, SETTING_PORT, {
+    name: 'Web port',
+    hint: 'Port the ftm web server should bind to (default 40500)',
+    scope: 'client',
+    config: true,
+    type: Number,
+    default: 40500,
+  });
+
+  game.modules.get(MODULE_ID).api = { FtmManager, FtmApp };
+});
+
+Hooks.once('ready', async () => {
+  const port = game.settings.get(MODULE_ID, SETTING_PORT);
+  const manager = new FtmManager({ port });
+
+  game.ftm = { manager, app: null };
+
+  if (!game.settings.get(MODULE_ID, SETTING_AUTO_START)) {
+    log('autoStart disabled, skipping');
+    return;
+  }
+
+  try {
+    if (!(await manager.isInstalled())) {
+      log('installing ftm binary...');
+      ui.notifications.info('Installing ftm binary (first run)...');
+      const v = await manager.install();
+      log(`installed ftm v${v}`);
+    }
+
+    log('starting ftm server...');
+    await manager.startServer();
+    log(`ftm-ready on ${manager.apiBase}`);
+
+    ui.notifications.info(`ftm ready — open the Tunnel sidebar button`);
+  } catch (err) {
+    log('startup failed:', err);
+    ui.notifications.error(`ftm: ${err.message}`);
+  }
+});
+
+Hooks.on('getSceneControlButtons', (controls) => {
+  const tokenControls = controls.tokens;
+  if (!tokenControls?.tools) return;
+  tokenControls.tools['ftm-tunnel'] = {
+    name: 'ftm-tunnel',
+    title: 'Open FTM Tunnel Dashboard',
+    icon: 'fas fa-network-wired',
+    onClick: () => {
+      if (!game.ftm?.app) {
+        game.ftm = game.ftm ?? {};
+        game.ftm.app = new FtmApp(game.ftm.manager);
+      }
+      game.ftm.app.render(true);
+    },
+  };
+});
+
+Hooks.on('closeGame', async () => {
+  if (game.ftm?.manager) {
+    log('shutting down ftm');
+    await game.ftm.manager.stop();
+  }
+});
