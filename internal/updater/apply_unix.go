@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
-	"time"
 )
 
 func applyUpdate(execPath, tmpPath string) error {
@@ -23,13 +22,11 @@ func applyUpdate(execPath, tmpPath string) error {
 	}
 	if err := os.Rename(tmpPath, execPath); err != nil {
 		_ = os.Rename(oldPath, execPath)
+		os.Remove(tmpPath)
 		return err
 	}
 
-	go func() {
-		time.Sleep(2 * time.Second)
-		_ = os.Remove(oldPath)
-	}()
+	_ = os.Remove(oldPath)
 
 	if runtime.GOOS == "darwin" {
 		_ = exec.Command("xattr", "-d", "com.apple.quarantine", execPath).Run()

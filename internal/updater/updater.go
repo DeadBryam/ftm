@@ -94,7 +94,10 @@ func (u *Updater) Check(currentVersion string) (*Info, error) {
 
 func (u *Updater) fetchLatest() (*Release, error) {
 	url := fmt.Sprintf("%s/repos/%s/releases/latest", githubAPI, u.repo)
-	req, _ := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("create request: %w", err)
+	}
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("User-Agent", userAgent)
 
@@ -152,7 +155,10 @@ func (u *Updater) Apply(info *Info) error {
 
 func downloadFile(url string, dst *os.File) error {
 	cli := &http.Client{Timeout: downloadTimeout}
-	req, _ := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("create request: %w", err)
+	}
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Accept", "application/octet-stream")
 
