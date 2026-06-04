@@ -31,29 +31,32 @@
   <div
     class="flex flex-wrap items-center gap-3 px-4 py-3 mb-5 rounded-lg border border-primary/30 bg-primary/10 text-sm"
   >
-    <span class="font-semibold text-primary">
-      ↑ {t('update_web_banner', { latest: $updateStore.info.latest })}
-    </span>
-
-    {#if $updateStore.applying}
-      <span class="text-text-muted">{t('update_applying')}</span>
-    {:else}
-      <button
-        class="px-3 py-1.5 rounded-md bg-primary text-white font-medium hover:bg-primary/90 transition-colors"
-        onclick={() => updateStore.apply()}
+    <div class="flex items-center gap-3 flex-wrap">
+      <span class="font-semibold text-primary">
+        ↑ {t('update_web_banner', { latest: $updateStore.info.latest })}
+      </span>
+      <a
+        href={$updateStore.info.releaseUrl}
+        target="_blank"
+        rel="noreferrer"
+        class="text-text-muted hover:text-primary underline"
       >
-        {t('update_web_button')}
-      </button>
-    {/if}
+        {t('update_web_notes')}
+      </a>
+    </div>
 
-    <a
-      href={$updateStore.info.releaseUrl}
-      target="_blank"
-      rel="noreferrer"
-      class="text-text-muted hover:text-primary underline"
-    >
-      {t('update_web_notes')}
-    </a>
+    <div class="ml-auto">
+      {#if $updateStore.applying}
+        <span class="text-text-muted">{t('update_applying')}</span>
+      {:else}
+        <button
+          class="px-3 py-1.5 rounded-md bg-primary text-white font-medium hover:bg-primary/90 transition-colors cursor-pointer"
+          onclick={() => updateStore.apply()}
+        >
+          {t('update_web_button')}
+        </button>
+      {/if}
+    </div>
   </div>
 {/if}
 
