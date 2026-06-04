@@ -8,42 +8,10 @@ import (
 	"github.com/sthbryan/ftm/internal/app"
 	"github.com/sthbryan/ftm/internal/cli"
 	"github.com/sthbryan/ftm/internal/i18n"
-	"github.com/sthbryan/ftm/internal/updater"
 	"github.com/sthbryan/ftm/internal/version"
 )
 
 var BuildVersion string
-
-func doUpdate(checkOnly bool) {
-	_ = i18n.Load()
-	u := updater.New("sthbryan/ftm")
-	info, err := u.Check(version.Version)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, i18n.TF("update_check_failed", err.Error())+"\n")
-		os.Exit(1)
-	}
-
-	fmt.Println(i18n.TF("update_current_version", info.CurrentVersion))
-	fmt.Println(i18n.TF("update_latest_version", info.LatestVersion))
-
-	if !info.HasUpdate {
-		fmt.Println(i18n.T("update_up_to_date"))
-		return
-	}
-
-	fmt.Println(i18n.TF("update_available", info.Tag))
-	fmt.Println(i18n.TF("update_release_url", info.ReleaseURL))
-	if checkOnly {
-		return
-	}
-
-	fmt.Println(i18n.TF("update_downloading", info.AssetName))
-	if err := u.Apply(info); err != nil {
-		fmt.Fprintf(os.Stderr, i18n.TF("update_apply_failed", err.Error())+"\n")
-		os.Exit(1)
-	}
-	fmt.Println(i18n.TF("update_success", info.LatestVersion))
-}
 
 func main() {
 	_ = cli.Init()
@@ -72,12 +40,18 @@ func main() {
 	}
 
 	if *checkOnly {
-		doUpdate(true)
+		if err := cli.Update(true); err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
 		os.Exit(0)
 	}
 
 	if *update {
-		doUpdate(false)
+		if err := cli.Update(false); err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
 		os.Exit(0)
 	}
 
