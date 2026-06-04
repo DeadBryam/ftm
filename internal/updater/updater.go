@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -124,10 +123,6 @@ func (u *Updater) fetchLatest() (*Release, error) {
 }
 
 func (u *Updater) Apply(info *Info) error {
-	if runtime.GOOS == "windows" {
-		return fmt.Errorf("self-update on Windows is not supported yet; please reinstall from %s", info.ReleaseURL)
-	}
-
 	execPath, err := os.Executable()
 	if err != nil {
 		return fmt.Errorf("locate binary: %w", err)
@@ -151,31 +146,8 @@ func (u *Updater) Apply(info *Info) error {
 		os.Remove(tmpPath)
 		return fmt.Errorf("close temp: %w", err)
 	}
-	if err := os.Chmod(tmpPath, 0755); err != nil {
-		os.Remove(tmpPath)
-		return fmt.Errorf("chmod: %w", err)
-	}
 
-	oldPath := execPath + ".old"
-	_ = os.Remove(oldPath)
-	if err := os.Rename(execPath, oldPath); err != nil {
-		os.Remove(tmpPath)
-		return fmt.Errorf("backup old binary: %w", err)
-	}
-	if err := os.Rename(tmpPath, execPath); err != nil {
-		_ = os.Rename(oldPath, execPath)
-		return fmt.Errorf("install new binary: %w", err)
-	}
-
-	go func() {
-		time.Sleep(2 * time.Second)
-		_ = os.Remove(oldPath)
-	}()
-
-	if runtime.GOOS == "darwin" {
-		_ = exec.Command("xattr", "-d", "com.apple.quarantine", execPath).Run()
-	}
-	return nil
+	return applyUpdate(execPath, tmpPath)
 }
 
 func downloadFile(url string, dst *os.File) error {
