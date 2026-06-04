@@ -4,44 +4,28 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"os/exec"
-	"path/filepath"
 
 	"github.com/sthbryan/ftm/internal/app"
+	"github.com/sthbryan/ftm/internal/cli"
 	"github.com/sthbryan/ftm/internal/i18n"
 	"github.com/sthbryan/ftm/internal/version"
 )
 
 var BuildVersion string
 
-func doUninstall() {
-	binaryPath, err := exec.LookPath("ftm")
-	if err != nil {
-		fmt.Println(i18n.T("uninstall_not_found"))
-		os.Exit(1)
-	}
-
-	absPath, err := filepath.EvalSymlinks(binaryPath)
-	if err != nil {
-		absPath = binaryPath
-	}
-
-	fmt.Println(i18n.TF("uninstall_removing", absPath))
-	if err := os.Remove(absPath); err != nil {
-		fmt.Fprintf(os.Stderr, i18n.TF("uninstall_error", err.Error())+"\n")
-		os.Exit(1)
-	}
-
-	fmt.Println(i18n.T("uninstall_success"))
-}
-
 func main() {
+	if err := cli.Init(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
 	var (
 		webOnly     = flag.Bool("web", false, "Start web dashboard and open browser")
 		server      = flag.Bool("server", false, "Start web dashboard only (no browser)")
 		port        = flag.Int("port", 0, "Web server port (auto-detect if not specified)")
 		showVersion = flag.Bool("version", false, "Show version")
 		uninstall   = flag.Bool("uninstall", false, "Uninstall ftm")
+		update      = flag.Bool("update", false, "Update ftm to the latest release")
+		checkOnly   = flag.Bool("check", false, "Check for updates without installing")
 	)
 	flag.Parse()
 
@@ -51,7 +35,26 @@ func main() {
 	}
 
 	if *uninstall {
-		doUninstall()
+		if err := cli.Uninstall(); err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
+
+	if *checkOnly {
+		if err := cli.Update(true); err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
+
+	if *update {
+		if err := cli.Update(false); err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
 		os.Exit(0)
 	}
 

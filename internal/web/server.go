@@ -28,6 +28,9 @@ type Server struct {
 	clientsMu     sync.RWMutex
 	handlers      *Handlers
 	StatusChannel chan config.TunnelStatus
+	updateSvc     *updateService
+	updateCtx     context.Context
+	updateCancel  context.CancelFunc
 }
 
 func NewServer(manager *process.Manager, cfg *config.Config) *Server {
@@ -38,6 +41,8 @@ func NewServer(manager *process.Manager, cfg *config.Config) *Server {
 		StatusChannel: make(chan config.TunnelStatus, 64),
 	}
 	s.handlers = NewHandlers(manager, cfg, s)
+	s.updateCtx, s.updateCancel = context.WithCancel(context.Background())
+	s.updateSvc = newUpdateService(s.broadcast)
 	return s
 }
 
@@ -71,6 +76,7 @@ func (s *Server) Start() error {
 		Handler: mux,
 	}
 
+	s.updateSvc.Start(s.updateCtx)
 	go s.installProgressLoop()
 	go s.statusUpdateLoop()
 	go s.httpServer.ListenAndServe()
@@ -108,6 +114,9 @@ func (s *Server) setupRoutes() *http.ServeMux {
 }
 
 func (s *Server) Stop() error {
+	if s.updateCancel != nil {
+		s.updateCancel()
+	}
 	if s.httpServer != nil {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*5e9)
 		defer cancel()

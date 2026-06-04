@@ -1,6 +1,7 @@
 # Binaries
 /ftm
 /ftm-*
+*.old
 *.exe
 bin/
 

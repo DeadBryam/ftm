@@ -51,6 +51,8 @@ func (h *Handlers) Route(w http.ResponseWriter, r *http.Request) {
 		h.handleI18n(w, r)
 	case path == "/api/i18n/current":
 		h.handleI18nCurrent(w, r)
+	case path == "/api/update":
+		h.handleUpdate(w, r)
 	case path == "/api/detect-port":
 		h.handleDetectPort(w)
 	case strings.HasPrefix(path, "/api/tunnels/"):
