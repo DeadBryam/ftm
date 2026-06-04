@@ -1,0 +1,15 @@
+{
+  "FTM_TUNNEL": "FTM Tunnel",
+  "FTM_OPEN": "Open Tunnel Dashboard",
+  "FTM_INSTALLING": "Installing ftm binary...",
+  "FTM_INSTALL_FAILED": "Failed to install ftm: {error}",
+  "FTM_STARTING": "Starting ftm server...",
+  "FTM_START_FAILED": "Failed to start ftm: {error}",
+  "FTM_STOPPING": "Stopping ftm server...",
+  "FTM_ALREADY_RUNNING": "ftm is already running on port {port}",
+  "FTM_TITLE": "FTM Tunnel Manager",
+  "FTM_SETTINGS": {
+    "AUTO_START": "Start ftm automatically when Foundry is ready",
+    "PORT": "Web server port"
+  }
+}
