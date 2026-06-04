@@ -4,37 +4,15 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"os/exec"
-	"path/filepath"
 
 	"github.com/sthbryan/ftm/internal/app"
+	"github.com/sthbryan/ftm/internal/cli"
 	"github.com/sthbryan/ftm/internal/i18n"
 	"github.com/sthbryan/ftm/internal/updater"
 	"github.com/sthbryan/ftm/internal/version"
 )
 
 var BuildVersion string
-
-func doUninstall() {
-	binaryPath, err := exec.LookPath("ftm")
-	if err != nil {
-		fmt.Println(i18n.T("uninstall_not_found"))
-		os.Exit(1)
-	}
-
-	absPath, err := filepath.EvalSymlinks(binaryPath)
-	if err != nil {
-		absPath = binaryPath
-	}
-
-	fmt.Println(i18n.TF("uninstall_removing", absPath))
-	if err := os.Remove(absPath); err != nil {
-		fmt.Fprintf(os.Stderr, i18n.TF("uninstall_error", err.Error())+"\n")
-		os.Exit(1)
-	}
-
-	fmt.Println(i18n.T("uninstall_success"))
-}
 
 func doUpdate(checkOnly bool) {
 	_ = i18n.Load()
@@ -68,6 +46,7 @@ func doUpdate(checkOnly bool) {
 }
 
 func main() {
+	_ = cli.Init()
 	var (
 		webOnly     = flag.Bool("web", false, "Start web dashboard and open browser")
 		server      = flag.Bool("server", false, "Start web dashboard only (no browser)")
@@ -85,7 +64,10 @@ func main() {
 	}
 
 	if *uninstall {
-		doUninstall()
+		if err := cli.Uninstall(); err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
 		os.Exit(0)
 	}
 
