@@ -14,7 +14,10 @@ import (
 var BuildVersion string
 
 func main() {
-	_ = cli.Init()
+	if err := cli.Init(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
 	var (
 		webOnly     = flag.Bool("web", false, "Start web dashboard and open browser")
 		server      = flag.Bool("server", false, "Start web dashboard only (no browser)")

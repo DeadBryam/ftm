@@ -21,23 +21,23 @@ func (h *Handlers) handleUpdate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) getUpdate(w http.ResponseWriter) {
-	info := h.server.updateSvc.Info()
-	w.Header().Set("Content-Type", "application/json")
-	if info == nil {
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"current":   version.Version,
-			"hasUpdate": false,
-		})
-		return
-	}
-	_ = json.NewEncoder(w).Encode(map[string]interface{}{
+	resp := map[string]interface{}{
 		"current":    version.Version,
-		"latest":     info.LatestVersion,
-		"tag":        info.Tag,
-		"assetName":  info.AssetName,
-		"releaseUrl": info.ReleaseURL,
-		"hasUpdate":  info.HasUpdate,
-	})
+		"latest":     "",
+		"tag":        "",
+		"assetName":  "",
+		"releaseUrl": "",
+		"hasUpdate":  false,
+	}
+	if info := h.server.updateSvc.Info(); info != nil {
+		resp["latest"] = info.LatestVersion
+		resp["tag"] = info.Tag
+		resp["assetName"] = info.AssetName
+		resp["releaseUrl"] = info.ReleaseURL
+		resp["hasUpdate"] = info.HasUpdate
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (h *Handlers) postUpdate(w http.ResponseWriter) {
