@@ -1,6 +1,9 @@
 package app
 
 import (
+	"os"
+	"time"
+
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/sthbryan/ftm/internal/i18n"
@@ -30,6 +33,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case statusUpdateMsg:
 		return m.handleStatusUpdate(msg)
+
+	case updateCheckMsg:
+		return m.handleUpdateCheck(msg)
+
+	case updateApplyMsg:
+		return m.handleUpdateApply(msg)
 	}
 
 	return m, nil
@@ -73,4 +82,26 @@ func (m *Model) handleStatusUpdate(msg statusUpdateMsg) (tea.Model, tea.Cmd) {
 		m.showMessage(i18n.TF("error_state", msg.status.ErrorMessage))
 	}
 	return m, nil
+}
+
+func (m *Model) handleUpdateCheck(msg updateCheckMsg) (tea.Model, tea.Cmd) {
+	if msg.err == nil && msg.info != nil && msg.info.HasUpdate {
+		m.UpdateAvailable = msg.info
+	}
+	return m, scheduleUpdateRecheck()
+}
+
+func (m *Model) handleUpdateApply(msg updateApplyMsg) (tea.Model, tea.Cmd) {
+	if msg.err != nil {
+		m.showMessage(i18n.TF("update_apply_failed", msg.err.Error()))
+		return m, nil
+	}
+	os.Exit(0)
+	return m, nil
+}
+
+func scheduleUpdateRecheck() tea.Cmd {
+	return tea.Tick(6*time.Hour, func(time.Time) tea.Msg {
+		return checkUpdateCmd()()
+	})
 }

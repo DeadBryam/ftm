@@ -22,6 +22,7 @@ func (m *Model) Init() tea.Cmd {
 	return tea.Batch(
 		tickCmd(),
 		m.checkDownloadProgress(),
+		checkUpdateCmd(),
 	)
 }
 

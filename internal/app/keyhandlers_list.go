@@ -47,6 +47,9 @@ func (m *Model) handleListKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 	case key.Matches(msg, m.Keys.Delete):
 		return m.handleListDelete()
+
+	case key.Matches(msg, m.Keys.Update):
+		return m.handleListUpdate()
 	}
 
 	return m, nil
@@ -156,6 +159,14 @@ func (m *Model) openConfigDir() {
 		return
 	}
 	m.showMessage(i18n.T("config_opened"))
+}
+
+func (m *Model) handleListUpdate() (tea.Model, tea.Cmd) {
+	if m.UpdateAvailable == nil {
+		return m, nil
+	}
+	m.showMessage(i18n.T("update_applying"))
+	return m, applyUpdateCmd(m.UpdateAvailable)
 }
 
 func (m *Model) playBeep() {

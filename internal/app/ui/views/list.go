@@ -30,6 +30,7 @@ type ListView struct {
 	Dashboard      string
 	Sessions       int
 	TwoColumnLimit int
+	UpdateBadge    string
 }
 
 func NewListView() *ListView {
@@ -69,7 +70,14 @@ func (l *ListView) twoColumn() string {
 	b.WriteString(title)
 	b.WriteString(strings.Repeat(" ", l.Width-lipgloss.Width(title)-lipgloss.Width(versionStr)-ui.HeaderMargin))
 	b.WriteString(versionStr)
-	b.WriteString("\n\n")
+	b.WriteString("\n")
+
+	if l.UpdateBadge != "" {
+		badgeStyle := lipgloss.NewStyle().Foreground(ui.ThemeDefault.Gold).Bold(true)
+		b.WriteString(badgeStyle.Render(l.UpdateBadge))
+		b.WriteString("\n")
+	}
+	b.WriteString("\n")
 
 	leftWidth := int(float64(l.Width) * 0.4)
 	rightWidth := l.Width - leftWidth - 3
@@ -152,7 +160,14 @@ func (l *ListView) singleColumn() string {
 	b.WriteString(title)
 	b.WriteString(strings.Repeat(" ", l.Width-lipgloss.Width(title)-lipgloss.Width(versionStr)-ui.HeaderMargin))
 	b.WriteString(versionStr)
-	b.WriteString("\n\n")
+	b.WriteString("\n")
+
+	if l.UpdateBadge != "" {
+		badgeStyle := lipgloss.NewStyle().Foreground(ui.ThemeDefault.Gold).Bold(true)
+		b.WriteString(badgeStyle.Render(l.UpdateBadge))
+		b.WriteString("\n")
+	}
+	b.WriteString("\n")
 
 	if l.Dashboard != "" {
 		urlStyle := lipgloss.NewStyle().Foreground(gold)

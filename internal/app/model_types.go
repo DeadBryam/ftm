@@ -13,6 +13,7 @@ import (
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/i18n"
 	"github.com/sthbryan/ftm/internal/providers"
+	"github.com/sthbryan/ftm/internal/updater"
 )
 
 type viewState int
@@ -53,6 +54,7 @@ type KeyMap struct {
 	Back     key.Binding
 	Quit     key.Binding
 	Help     key.Binding
+	Update   key.Binding
 }
 
 var DefaultKeys = KeyMap{
@@ -125,6 +127,10 @@ var DefaultKeys = KeyMap{
 		key.WithKeys("?"),
 		key.WithHelp("?", "help"),
 	),
+	Update: key.NewBinding(
+		key.WithKeys("u"),
+		key.WithHelp("u", "update"),
+	),
 }
 
 type Model struct {
@@ -148,6 +154,7 @@ type Model struct {
 	PendingTunnel       *config.TunnelConfig
 	ProgressBar         progress.Model
 	SettingsView        *views.SettingsView
+	UpdateAvailable     *updater.Info
 }
 
 type FormData struct {
