@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
+  import { page } from "$app/stores";
   import { useTunnels } from "$lib/stores/tunnels.svelte";
   import { useToast } from "$lib/stores/toast.svelte";
   import { useProviders } from "$lib/stores/providers.svelte";
@@ -22,6 +23,7 @@
   const theme = useTheme();
 
   let t = $derived($translate);
+  let embedded = $derived($page.url.searchParams.get("embedded") === "1");
 
   let deleteTunnel: Tunnel | null = $state(null);
   let editingTunnelId: string | null = $state(null);
@@ -92,25 +94,31 @@
   />
 </svelte:head>
 
-<div class="max-w-[1200px] mx-auto flex-1 flex flex-col box-border">
-  <Header />
+<div class={cn("flex-1 flex flex-col box-border", embedded ? "p-4" : "max-w-[1200px] mx-auto")}>
+  {#if !embedded}
+    <Header />
+  {/if}
 
   <UpdateBanner />
 
   <main
     class={cn(
-      "grid grid-cols-[360px_1fr] gap-5 flex-1 min-h-0 md:grid-cols-[320px_1fr] md:gap-4 ",
-      "lg:grid-cols-[360px_1fr] lg:gap-5 max-md:grid-cols-1 max-md:overflow-y-auto max-md:gap-4 max-h-[calc(100dvh-11rem)]",
+      "flex-1 min-h-0",
+      embedded
+        ? "grid grid-cols-1 gap-3"
+        : "grid grid-cols-[360px_1fr] gap-5 md:grid-cols-[320px_1fr] md:gap-4 lg:grid-cols-[360px_1fr] lg:gap-5 max-md:grid-cols-1 max-md:overflow-y-auto max-md:gap-4 max-h-[calc(100dvh-11rem)]",
     )}
   >
-    {#if editingTunnelId}
-      <EditConnection
-        tunnelId={editingTunnelId}
-        onCancel={handleEditCancel}
-        onSaved={handleEditSaved}
-      />
-    {:else}
-      <NewConnection />
+    {#if !embedded}
+      {#if editingTunnelId}
+        <EditConnection
+          tunnelId={editingTunnelId}
+          onCancel={handleEditCancel}
+          onSaved={handleEditSaved}
+        />
+      {:else}
+        <NewConnection />
+      {/if}
     {/if}
 
     <ConnectionsPanel onAction={handleAction} />
