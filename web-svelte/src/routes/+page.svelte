@@ -5,6 +5,7 @@
   import { useProviders } from "$lib/stores/providers.svelte";
   import { useTheme } from "$lib/stores/theme.svelte";
   import Header from "$lib/components/Header.svelte";
+  import UpdateBanner from "$lib/components/UpdateBanner.svelte";
   import DeleteModal from "$lib/components/DeleteModal.svelte";
   import NotificationPermission from "$lib/components/NotificationPermission.svelte";
   import ConnectionsPanel from "$lib/components/ConnectionsPanel.svelte";
@@ -93,6 +94,8 @@
 
 <div class="max-w-[1200px] mx-auto flex-1 flex flex-col box-border">
   <Header />
+
+  <UpdateBanner />
 
   <main
     class={cn(
