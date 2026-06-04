@@ -18,15 +18,15 @@ Share your Foundry VTT world with players anywhere. No port forwarding needed.
 ## Interfaces
 
 ### TUI
-![TUI](docs/tui.jpg)
+![TUI](docs/tui.webp)
 
 ### Web
-![Web](docs/web.jpg)
+![Web](docs/web.webp)
 
 Access at `http://localhost:40500` 
 
 ### Desktop App
-![Desktop](docs/desktop.jpg)
+![Desktop](docs/desktop.webp)
 
 Native desktop application with embedded web server.
 
