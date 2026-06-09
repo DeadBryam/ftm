@@ -2,7 +2,7 @@
   "id": "ftm-tunnel",
   "title": "FTM Tunnel",
   "description": "Expose Foundry VTT to the internet via the ftm tunnel manager. Auto-installs the ftm binary on first run, manages its lifecycle, and exposes the tunnel dashboard inside Foundry.",
-  "version": "0.1.0",
+  "version": "0.9.0",
   "author": "sthbryan",
   "url": "https://github.com/sthbryan/ftm",
   "license": "MIT",

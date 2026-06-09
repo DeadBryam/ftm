@@ -151,9 +151,29 @@ jobs:
           name: ftm-desktop-${{ matrix.suffix }}
           path: desktop/build/bin
 
+  package-foundry:
+    name: Package Foundry Module
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create foundry module archive
+        shell: bash
+        run: |
+          cd foundry
+          zip -r ../ftm-foundry.zip .
+
+      - name: Upload foundry artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ftm-foundry
+          path: |
+            ftm-foundry.zip
+            foundry/module.json
+
   release:
     name: Create Release
-    needs: [build-cli, build-desktop]
+    needs: [build-cli, build-desktop, package-foundry]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
