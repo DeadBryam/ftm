@@ -12,7 +12,8 @@
     "minimum": "12",
     "verified": "13"
   },
-  "esmodules": ["./scripts/module.js"],
+  "scripts": ["./scripts/ftm-backend.js"],
+  "esmodules": ["./scripts/module.js", "./scripts/ftm-app.js"],
   "styles": ["./styles/module.css"],
   "languages": [
     {
