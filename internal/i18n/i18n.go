@@ -3,7 +3,6 @@ package i18n
 import (
 	"embed"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -138,27 +137,7 @@ func InitFromConfig(cfg *config.Config) {
 	SetLanguageWithFallback(systemLang)
 }
 
-func detectSystemLang() string {
-	lang := os.Getenv("LANG")
-	if lang == "" {
-		return DefaultLang
-	}
 
-	tag, err := language.Parse(lang)
-	if err != nil {
-		return DefaultLang
-	}
-
-	base, _ := tag.Base()
-	switch base.String() {
-	case "en":
-		return LangEN
-	case "es":
-		return LangES
-	default:
-		return DefaultLang
-	}
-}
 
 func SupportedLanguages() []string {
 	return []string{LangEN, LangES}
