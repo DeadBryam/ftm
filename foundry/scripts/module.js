@@ -85,6 +85,7 @@ Hooks.once('ready', async () => {
 });
 
 Hooks.on('getSceneControlButtons', (controls) => {
+  if (!Array.isArray(controls)) return;
   const tokenControls = controls.find((c) => c.name === 'token');
   if (!tokenControls?.tools) return;
   tokenControls.tools.push({

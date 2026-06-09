@@ -11,7 +11,7 @@
   const DEFAULT_REPO = 'sthbryan/ftm';
 
   function resolveDataPath() {
-    if (process.env.FOUNDRY_DATA_PATH) return process.env.FOUNDRY_DATA_PATH;
+    if (typeof process !== 'undefined' && process.env?.FOUNDRY_DATA_PATH) return process.env.FOUNDRY_DATA_PATH;
     if (typeof globalThis.game !== 'undefined' && globalThis.game?.userData?.path) {
       return globalThis.game.userData.path;
     }
