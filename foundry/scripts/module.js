@@ -1,57 +1,46 @@
 const MODULE_ID = 'ftm-tunnel';
-const BRIDGE = 'http://localhost:40501';
+const FTM_API = 'http://localhost:40500';
 
 function log(...args) { console.log(`[${MODULE_ID}]`, ...args); }
 
-async function bridge(action) {
+async function checkFtm() {
   try {
-    const res = await fetch(`${BRIDGE}/${action}`, { signal: AbortSignal.timeout(5000) });
+    const res = await fetch(`${FTM_API}/api/status`, { signal: AbortSignal.timeout(3000) });
+    return res.ok ? { connected: true, apiBase: FTM_API } : { connected: false };
+  } catch {
+    return { connected: false };
+  }
+}
+
+async function bridge(cmd) {
+  try {
+    const res = await fetch(`http://localhost:40501/${cmd}`, { signal: AbortSignal.timeout(8000) });
     return await res.json();
-  } catch (err) {
-    return { error: err.message, offline: true };
+  } catch {
+    return { error: 'bridge offline' };
   }
 }
 
 Hooks.once('init', () => {
-  game.settings.register(MODULE_ID, 'port', {
-    name: 'Web port', hint: 'Port the ftm web server (default 40500)',
-    scope: 'client', config: true, type: Number, default: 40500,
-  });
-  game.modules.get(MODULE_ID).api = { bridge };
+  game.modules.get(MODULE_ID).api = { checkFtm, bridge };
 });
 
 Hooks.once('ready', async () => {
-  const status = await bridge('status');
-  if (status?.offline) {
-    log('bridge not running');
-    ui.notifications.info('ftm: Run "node modules/ftm-tunnel/ftm-bridge.js" once — it auto-installs to Windows Startup');
-  } else {
-    log('bridge online:', status);
-    game.ftm = { bridgeStatus: status };
-
-    if (!status.installed) {
-      log('auto-installing...');
-      const res = await bridge('install');
-      if (res?.error) return ui.notifications.error(`ftm install: ${res.error}`);
-      log(`installed v${res.version}`);
-    }
-  }
+  const status = await checkFtm();
+  log(status.connected ? 'ftm running' : 'ftm not running');
+  game.ftm = game.ftm || {};
+  game.ftm.app = new FtmDashboard();
 });
 
 Hooks.on('getSceneControlButtons', (controls) => {
   if (!Array.isArray(controls)) return;
-  const token = controls.find(c => c.name === 'token');
-  if (!token?.tools) return;
-  token.tools.push({
-    name: 'ftm-tunnel', title: 'FTM Tunnel Dashboard',
+  const t = controls.find(c => c.name === 'token');
+  if (!t?.tools) return;
+  t.tools.push({
+    name: 'ftm-tunnel', title: 'FTM Tunnel',
     icon: 'fas fa-network-wired',
     onClick: () => game.ftm?.app?.render(true),
   });
-});
-
-Hooks.once('ready', () => {
-  game.ftm = game.ftm || {};
-  game.ftm.app = new FtmDashboard();
 });
 
 class FtmDashboard extends foundry.applications.api.HandlebarsApplicationMixin(
@@ -59,32 +48,25 @@ class FtmDashboard extends foundry.applications.api.HandlebarsApplicationMixin(
 ) {
   static DEFAULT_OPTIONS = {
     id: 'ftm-tunnel-app', title: 'FTM Tunnel Manager',
-    width: 600, height: 400, resizable: true,
+    width: 600, height: 500, resizable: true,
     template: 'modules/ftm-tunnel/templates/app.hbs',
   };
 
   async _prepareContext() {
-    const s = await bridge('status');
+    const s = await checkFtm();
     return {
-      bridgeOnline: !s?.offline,
-      installed: s?.installed ?? false,
-      running: s?.running ?? false,
-      version: s?.version ?? '—',
-      binPath: s?.binPath ?? '',
-      apiBase: s?.apiBase ?? 'http://localhost:40500',
-      error: s?.error ?? null,
+      connected: s.connected,
+      apiBase: s.apiBase || '',
     };
   }
 
   _onRender(...args) {
     super._onRender(...args);
-    ['install', 'start', 'stop', 'refresh'].forEach(a => {
+    ['stop', 'refresh'].forEach(a => {
       const el = this.element?.querySelector(`[data-action="${a}"]`);
       if (!el) return;
       el.addEventListener('click', async () => {
-        if (a === 'install') { el.disabled = true; el.textContent = 'Installing...'; }
-        const res = await bridge(a);
-        if (res?.error && !res?.offline) ui.notifications.error(res.error);
+        if (a === 'stop') await bridge('stop');
         await this.render();
       });
     });
