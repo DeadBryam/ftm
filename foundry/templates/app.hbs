@@ -1,3 +1,51 @@
-<div class="ftm-frame-wrapper">
-  <iframe src="{{apiBase}}/?embedded=1" frameborder="0" allow="clipboard-read; clipboard-write"></iframe>
+<div style="padding: 1em; font-family: sans-serif;">
+  <h2>FTM Tunnel Manager</h2>
+
+  {{#unless bridgeOnline}}
+    <div style="padding: 0.75em; background: #2b1a1a; border: 1px solid #c92a2a; border-radius: 4px; margin: 1em 0;">
+      <strong style="color: #ff6b6b;">Bridge offline</strong>
+      <p style="margin: 0.5em 0 0; font-size: 0.9em;">
+        Run this in a terminal:<br>
+        <code style="background: #111; padding: 0.25em 0.5em; border-radius: 3px; display: inline-block; margin-top: 0.25em;">
+          node modules/ftm-tunnel/ftm-bridge.js
+        </code>
+      </p>
+    </div>
+  {{else}}
+    <div style="margin: 1em 0; padding: 0.5em; background: #222; border-radius: 4px;">
+      <strong>Status:</strong>
+      {{#if running}}
+        <span style="color: #51cf66;">Running</span>
+      {{else if installed}}
+        <span style="color: #ffd43b;">Installed (stopped)</span>
+      {{else}}
+        <span style="color: #868e96;">Not installed</span>
+      {{/if}}
+      {{#if version}}<span style="color: #868e96; margin-left: 1em;">v{{version}}</span>{{/if}}
+    </div>
+
+    <div style="display: flex; gap: 0.5em; flex-wrap: wrap;">
+      {{#unless installed}}
+        <button data-action="install">⬇ Download & Install</button>
+      {{/unless}}
+
+      {{#if installed}}
+        {{#unless running}}
+          <button data-action="start">▶ Start Server</button>
+        {{else}}
+          <button data-action="stop" style="background: #c92a2a;">⏹ Stop Server</button>
+        {{/unless}}
+      {{/if}}
+
+      <button data-action="refresh">🔄 Refresh</button>
+    </div>
+
+    <hr style="border-color: #333; margin: 1em 0;">
+
+    <div style="font-size: 0.85em; color: #868e96;">
+      API: <a href="{{apiBase}}" target="_blank">{{apiBase}}</a><br>
+      Platform: {{platform}}<br>
+      {{#if binPath}}Binary: {{binPath}}{{/if}}
+    </div>
+  {{/unless}}
 </div>
