@@ -17,7 +17,7 @@ const PLATFORM_MAP = { darwin: 'macos', linux: 'linux', win32: 'windows' };
 
 function platformAsset() {
   const osName = PLATFORM_MAP[os.platform()] || os.platform();
-  const arch = os.arch === 'arm64' ? 'arm64' : 'x64';
+  const arch = os.arch() === 'arm64' ? 'arm64' : 'x64';
   const ext = os.platform() === 'win32' ? '.exe' : '';
   return `ftm-${osName}-${arch}${ext}`;
 }
