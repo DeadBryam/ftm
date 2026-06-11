@@ -10,6 +10,7 @@
   "FTM_TITLE": "FTM Tunnel Manager",
   "FTM_SETTINGS": {
     "AUTO_START": "Start ftm automatically when Foundry is ready",
+    "AUTO_START_HINT": "If disabled, ftm is only started when you click Start in the dashboard.",
     "PORT": "Web server port"
   }
 }
