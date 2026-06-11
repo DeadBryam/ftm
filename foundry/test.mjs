@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Standalone smoke test for FtmManager. No Foundry required.
-// Run: FOUNDRY_DATA_PATH=/tmp/ftm-test node internal/foundry/test.mjs
+// Run: FOUNDRY_DATA_PATH=/tmp/ftm-test node foundry/test.mjs
 
 import { FtmManager } from './scripts/ftm-manager.js';
 
@@ -23,6 +23,8 @@ console.log('[test] server is up');
 
 const tunnels = await m.getTunnels();
 console.log(`[test] ${tunnels.length} tunnel(s) configured`);
+
+console.log('[test] status:', await m.status());
 
 console.log('[test] stop...');
 await m.stop();

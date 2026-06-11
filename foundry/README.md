@@ -1,8 +1,8 @@
 # ftm-foundry
 
-Foundry VTT module that exposes the local server to the internet via [ftm](https://github.com/sthbryan/ftm).
+Foundry VTT v14 module that exposes the local server to the internet via [ftm](https://github.com/sthbryan/ftm).
 
-## Install (user-facing)
+## Install
 
 1. In Foundry VTT: **Add-on Modules → Install Module**
 2. Paste this manifest URL:
@@ -11,47 +11,44 @@ Foundry VTT module that exposes the local server to the internet via [ftm](https
    ```
 3. Enable the module in your world
 
-On first run the module:
-- Downloads the latest `ftm` binary for your OS from GitHub
-- Saves it to `<foundry-data>/ftm/ftm{,.exe}`
+On **world ready** the module:
+- Downloads the latest `ftm` binary for your OS into `<foundry-data>/ftm/`
 - Spawns `ftm --web --server` and waits for `:40500` to respond
-- Registers a sidebar button that opens the tunnel dashboard
+- Adds a sidebar control that opens the FTM Tunnel dashboard
 
 ## Architecture
 
 ```
-foundry/                    (sibling of desktop/ and web-svelte/)
+foundry/
 ├── module.json
 ├── scripts/
-│   ├── module.js          hooks, settings, sidebar button
-│   ├── ftm-manager.js     pure Node: isInstalled / install / start / stop / api
-│   └── ftm-app.js         ApplicationV2 wrapping an iframe to :40500
+│   ├── module.js         Foundry v14 hooks + ApplicationV2 dashboard
+│   └── ftm-manager.js    pure Node: install / start / stop / status
 ├── templates/
-│   └── app.hbs            single iframe element
+│   └── app.hbs           dashboard template (iframe to :40500)
 ├── styles/
-│   └── module.css         minimal frame styling
+│   └── module.css        dashboard styling
 └── lang/
     └── en.json
 ```
 
 ## Test on Mac (no Foundry required)
 
-The manager is pure Node — no Foundry globals, no DOM. Run a quick smoke test:
+The manager is pure Node — no Foundry globals, no DOM. Smoke test:
 
 ```bash
 FOUNDRY_DATA_PATH=/tmp/ftm-test node foundry/test.mjs
 ```
 
-This mocks `game.userData.path`, downloads the real binary, spawns it, hits the API, and cleans up.
+Mocks the data path, downloads the real binary, spawns it, hits the API, and cleans up.
 
-## Test in Foundry (Windows recommended for user)
+## Test in Foundry v14 (portable)
 
-1. Open Foundry VTT in demo mode (no license key → watermark, but modules work)
-2. Install the module with the manifest URL above
-3. On world ready, watch the console for `ftm-ready`
-4. Click the new sidebar button "Tunnel" to open the dashboard
+1. Open Foundry VTT portable / demo mode
+2. Install with the manifest URL above
+3. On world ready, watch the console (F12) for `[ftm-tunnel]` logs
+4. Click the sidebar **network icon** to open the dashboard
 
 ## Settings
 
-- `ftm.autoStart` (default `true`) — spawn `ftm` on Foundry ready
-- `ftm.port` (default `40500`) — port ftm should bind to
+(none exposed yet — module starts/stops ftm automatically on ready/close)
