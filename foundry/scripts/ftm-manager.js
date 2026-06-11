@@ -3,8 +3,8 @@
 // Foundry v14 portable: dataPath comes from game.userData?.path in module.js,
 // or from FOUNDRY_DATA_PATH env when running standalone (test.mjs).
 
-import { spawn } from 'node:child_process';
-import { promises as fs, createWriteStream } from 'node:fs';
+import { spawn, execFileSync } from 'node:child_process';
+import { promises as fs, createWriteStream, constants as fsConstants } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import https from 'node:https';
@@ -93,8 +93,19 @@ export class FtmManager {
     await downloadToFile(asset.browser_download_url, tmp);
     await fs.rename(tmp, this.binPath);
     if (os.platform() !== 'win32') await fs.chmod(this.binPath, 0o755);
+    this.#stripMacOSQuarantine(this.binPath);
 
     return release.tag_name.replace(/^v/, '');
+  }
+
+  #stripMacOSQuarantine(p) {
+    if (os.platform() !== 'darwin') return;
+    try {
+      execFileSync('xattr', ['-dr', 'com.apple.quarantine', p], { stdio: 'ignore' });
+    } catch {}
+    try {
+      execFileSync('xattr', ['-d', 'com.apple.provenance', p], { stdio: 'ignore' });
+    } catch {}
   }
 
   async startServer() {
