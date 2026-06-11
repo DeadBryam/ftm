@@ -1,51 +1,32 @@
-<div style="padding: 1em; font-family: sans-serif;">
-  <h2>FTM Tunnel Manager</h2>
+<div class="ftm-dashboard">
+  <header class="ftm-header">
+    <h2><i class="fas fa-network-wired"></i> {{localize "FTM_TITLE"}}</h2>
+    <div class="ftm-status {{#if connected}}ftm-ok{{else}}ftm-off{{/if}}">
+      {{#if connected}}
+        <i class="fas fa-circle"></i> {{localize "FTM_TUNNEL"}}
+      {{else}}
+        <i class="fas fa-circle-xmark"></i> offline
+      {{/if}}
+    </div>
+  </header>
+
+  <section class="ftm-frame-wrapper">
+    {{#if connected}}
+      <iframe src="{{apiBase}}" title="FTM Dashboard"></iframe>
+    {{else}}
+      <div class="ftm-empty">
+        <p>ftm server is not running.</p>
+        <button data-action="start"><i class="fas fa-play"></i> {{localize "FTM_STARTING"}}</button>
+        <button data-action="refresh"><i class="fas fa-rotate"></i> Refresh</button>
+      </div>
+    {{/if}}
+  </section>
 
   {{#if connected}}
-    <div style="margin: 1em 0; padding: 0.5em; background: #222; border-radius: 4px;">
-      <strong>Status:</strong> <span style="color: #51cf66;">Running</span>
-    </div>
-    <div style="display: flex; gap: 0.5em;">
-      <button data-action="stop" style="background: #c92a2a;">Stop Server</button>
-      <button data-action="refresh">Refresh</button>
-    </div>
-    <div style="margin-top: 0.5em; font-size: 0.85em; color: #868e96;">
-      API: <a href="{{apiBase}}" target="_blank">{{apiBase}}</a>
-    </div>
-
-  {{else}}
-    <div style="margin: 1em 0; padding: 0.75em; background: #1a1a2b; border: 1px solid #4a4a8a; border-radius: 4px;">
-      <strong style="color: #7b7bff;">ftm no está corriendo</strong>
-      <p style="margin: 0.5em 0; font-size: 0.9em;">
-        Elige un método para iniciarlo:
-      </p>
-    </div>
-
-    <details style="margin-bottom: 0.5em;" open>
-      <summary style="cursor: pointer; font-weight: bold; color: #7b7bff;">
-        ✅ Init Script (recomendado — automático)
-      </summary>
-      <div style="margin: 0.5em 0 0 1em; font-size: 0.85em;">
-        <p>Pega este código en <strong>Settings → World Settings → Init Scripts</strong> una vez:</p>
-        <pre style="background: #111; padding: 0.5em; border-radius: 4px; overflow-x: auto; font-size: 0.85em; max-height: 300px;">
-const {spawn}=require('child_process');const fs=require('fs');const path=require('path');const https=require('https');const REPO='sthbryan/ftm';const BIN_DIR=path.join(process.env.FOUNDRY_DATA_PATH||'.','ftm');const BIN_NAME=process.platform==='win32'?'ftm.exe':'ftm';const BIN_PATH=path.join(BIN_DIR,BIN_NAME);function asset(){const map={darwin:'macos',linux:'linux',win32:'windows'};const os=map[process.platform]||process.platform;const arch=process.arch==='arm64'?'arm64':'x64';return`ftm-${os}-${arch}${process.platform==='win32'?'.exe':''}`}function dl(url,dest){return new Promise((r,j)=>https.get(url,res=>res.statusCode===200?res.pipe(fs.createWriteStream(dest)).on('finish',r):j(Error('HTTP '+res.statusCode))).on('error',j))}async function main(){fs.mkdirSync(BIN_DIR,{recursive:true});if(!fs.existsSync(BIN_PATH)){console.log('[ftm] downloading...');await dl(`https://github.com/${REPO}/releases/latest/download/${asset()}`,BIN_PATH+'.tmp');fs.renameSync(BIN_PATH+'.tmp',BIN_PATH);if(process.platform!=='win32')fs.chmodSync(BIN_PATH,0o755)}const child=spawn(BIN_PATH,['--web','--server'],{stdio:'ignore',windowsHide:true});process.on('exit',()=>child.kill());console.log('[ftm] ready')}main().catch(e=>console.error('[ftm]',e.message))
-        </pre>
-        <p style="margin-top: 0.5em; color: #868e96;">El binario se descarga solo. Se inicia/apaga con Foundry.</p>
-      </div>
-    </details>
-
-    <details style="margin-bottom: 0.5em;">
-      <summary style="cursor: pointer; font-weight: bold; color: #868e96;">
-        Terminal (manual)
-      </summary>
-      <div style="margin: 0.5em 0 0 1em; font-size: 0.85em;">
-        <p>Descarga el binario de <a href="https://github.com/sthbryan/ftm/releases/latest" target="_blank">GitHub Releases</a> y ejecuta:</p>
-        <code style="background: #111; padding: 0.25em 0.5em; border-radius: 3px; display: inline-block;">ftm.exe --web --server</code>
-      </div>
-    </details>
-
-    <div style="margin-top: 1em;">
-      <button data-action="refresh">Check Connection</button>
-    </div>
+  <footer class="ftm-footer">
+    <span>API: <a href="{{apiBase}}" target="_blank">{{apiBase}}</a></span>
+    <button data-action="stop"><i class="fas fa-stop"></i> Stop</button>
+    <button data-action="refresh"><i class="fas fa-rotate"></i> Refresh</button>
+  </footer>
   {{/if}}
 </div>
