@@ -96,8 +96,21 @@ func TestManagerReportsCrashedProvider(t *testing.T) {
 		t.Errorf("PublicURL = %q after the process died, want it cleared", status.PublicURL)
 	}
 
-	if _, ok := m.GetStatus("t1"); ok {
-		t.Error("crashed tunnel is still registered as running")
+	if m.IsRunning("t1") {
+		t.Error("crashed tunnel is still reported as running")
+	}
+
+	// The terminal state has to survive for /api/tunnels, which reads
+	// GetStatus: a reload used to show a bare "stopped" with no message.
+	persisted, ok := m.GetStatus("t1")
+	if !ok {
+		t.Fatal("crashed tunnel has no status left for the REST API to report")
+	}
+	if persisted.State != config.TunnelStateError {
+		t.Errorf("persisted state = %q, want %q", persisted.State, config.TunnelStateError)
+	}
+	if persisted.ErrorMessage == "" {
+		t.Error("persisted status lost the error message")
 	}
 }
 

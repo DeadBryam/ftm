@@ -249,7 +249,11 @@ func (m *Manager) watchExit(tunnelID string, proc *providers.Process) {
 		return
 	}
 
-	delete(m.processes, tunnelID)
+	// The entry is kept with a nil Process rather than deleted, so the terminal
+	// state survives: GetStatus is what /api/tunnels reads, and dropping the
+	// entry meant a crashed tunnel reported "error" over the WebSocket and then
+	// plain "stopped" with no message as soon as the page was reloaded.
+	mp.Process = nil
 	mp.closeLogSubscribers()
 
 	mp.Status.PublicURL = ""
@@ -319,8 +323,10 @@ func (m *Manager) startupTimeoutMonitor(tunnelID string, proc *providers.Process
 		return
 	}
 
-	// Removed before teardown so watchExit stays quiet about this exit.
-	delete(m.processes, tunnelID)
+	// Detached from the process before teardown so watchExit stays quiet about
+	// this exit, while the entry itself is kept so the timeout is still
+	// readable from /api/tunnels.
+	mp.Process = nil
 	mp.closeLogSubscribers()
 
 	mp.Status.State = config.TunnelStateTimeout
