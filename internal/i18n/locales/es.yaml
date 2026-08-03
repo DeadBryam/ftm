@@ -189,6 +189,7 @@ appearance_section: "Apariencia"
 current_theme: "Tema actual"
 language_section: "Idioma"
 go_back: "Volver"
+lang_auto: "Automático (sistema)"
 lang_en: "English"
 lang_es: "Español"
 

@@ -14,6 +14,15 @@ const (
 	NotificationPending  = "pending"
 	NotificationGranted  = "granted"
 	NotificationRejected = "rejected"
+
+	// ConfigVersion is the current on-disk schema version. Bump it whenever a
+	// stored config needs rewriting on load, and add a step to migrate.
+	ConfigVersion = 2
+
+	// LanguageAuto follows the operating system language. It is the default so
+	// that a config which was never touched does not look like a deliberate
+	// choice of English.
+	LanguageAuto = "auto"
 )
 
 type Config struct {
@@ -31,8 +40,8 @@ type Config struct {
 
 func DefaultConfig() *Config {
 	return &Config{
-		Version:              1,
-		Language:             "en",
+		Version:              ConfigVersion,
+		Language:             LanguageAuto,
 		Tunnels:              []TunnelConfig{},
 		NotificationsStatus:  NotificationPending,
 		NotificationSound:    true,
@@ -45,6 +54,31 @@ func DefaultConfig() *Config {
 			"localhostrun": 0,
 		},
 	}
+}
+
+// migrate brings a stored config up to ConfigVersion, reporting whether
+// anything changed and therefore needs writing back.
+func (c *Config) migrate() bool {
+	changed := false
+
+	// v1 wrote `language: en` as its default. Because InitFromConfig only
+	// detected the system language when the field was empty, that default made
+	// every install look like the user had explicitly chosen English and left
+	// detection permanently dead. A v1 config never offered that choice, so
+	// hand these back to auto-detection.
+	if c.Version < 2 {
+		if c.Language == "" || c.Language == "en" {
+			c.Language = LanguageAuto
+		}
+		changed = true
+	}
+
+	if c.Version != ConfigVersion {
+		c.Version = ConfigVersion
+		changed = true
+	}
+
+	return changed
 }
 
 func (c *Config) NormalizeNotificationsStatus() {
@@ -106,6 +140,12 @@ func Load() (*Config, error) {
 	}
 
 	cfg.NormalizeNotificationsStatus()
+
+	if cfg.migrate() {
+		if err := cfg.Save(); err != nil {
+			return nil, fmt.Errorf("failed to persist migrated config: %w", err)
+		}
+	}
 
 	return &cfg, nil
 }

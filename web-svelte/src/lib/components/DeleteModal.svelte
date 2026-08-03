@@ -2,7 +2,7 @@
   import { X, Trash2 } from "lucide-svelte";
   import { animate } from "motion";
   import { cn } from "$lib/utils/cn";
-  import { translate } from "$lib/i18n";
+  import { t } from "$lib/stores/i18n.svelte";
   import Button from "./Button.svelte";
 
   let {
@@ -16,8 +16,6 @@
     onConfirm: () => void;
     onCancel: () => void;
   } = $props();
-
-  let t = $derived($translate);
 
   let modalRef: HTMLDivElement | undefined = $state();
   let backdropRef: HTMLDivElement | undefined = $state();

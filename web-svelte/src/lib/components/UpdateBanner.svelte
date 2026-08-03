@@ -1,10 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { useUpdate } from '$lib/stores/update.svelte';
-  import { translate } from '$lib/i18n';
+  import { t } from '$lib/stores/i18n.svelte';
   import { subscribeWsMessages } from '$lib/api/ws';
-
-  let t = $derived($translate);
   const update = useUpdate();
 
   onMount(() => {

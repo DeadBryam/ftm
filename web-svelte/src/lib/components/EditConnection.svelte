@@ -5,13 +5,12 @@
   import { useProviders, detectPort } from "$lib/stores/providers.svelte";
   import { useToast } from "$lib/stores/toast.svelte";
   import { useTunnels } from "$lib/stores/tunnels.svelte";
-  import { translate } from "$lib/i18n";
+  import { t } from "$lib/stores/i18n.svelte";
   import Button from "./Button.svelte";
   import Dropdown from "./Dropdown.svelte";
   import type { DropdownOption } from "$lib/types";
 
   let { tunnelId, onCancel, onSaved } = $props();
-  let t = $derived($translate);
 
   let sectionEl: HTMLElement | undefined = $state();
   let headerEl: HTMLElement | undefined = $state();

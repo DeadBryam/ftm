@@ -3,7 +3,7 @@
   import { animate, spring } from "motion";
   import { onMount } from "svelte";
   import { useTunnels } from "$lib/stores/tunnels.svelte";
-  import { translate } from "$lib/i18n";
+  import { t } from "$lib/stores/i18n.svelte";
   import { cn } from "$lib/utils/cn";
   import TunnelCard from "./TunnelCard.svelte";
 
@@ -11,7 +11,6 @@
     $props();
 
   const store = useTunnels();
-  let t = $derived($translate);
 
   let sectionEl: HTMLElement | undefined = $state();
   let headerEl: HTMLElement | undefined = $state();
