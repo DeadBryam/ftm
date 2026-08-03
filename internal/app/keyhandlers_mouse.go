@@ -16,7 +16,7 @@ func (m *Model) itemAt(row int) (int, bool) {
 		return 0, false
 	}
 
-	index := offset / views.ItemHeight
+	index := m.listFirst + offset/views.ItemHeight
 	if index >= len(m.Items) {
 		return 0, false
 	}

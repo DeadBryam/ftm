@@ -82,6 +82,8 @@ notification_tunnel_expiring: "{name} expires in {minutes} minutes"
 notification_tunnel_expired: "{name} has expired"
 
 # Settings
+more_above: "↑ {0} more"
+more_below: "↓ {0} more"
 navigate: "Navigate"
 start_stop: "Start/stop"
 settings: "Settings"

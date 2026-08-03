@@ -60,6 +60,7 @@ func (m *Model) viewList() string {
 
 	rendered := view.Render()
 	m.listTop = view.ListTop
+	m.listFirst = view.FirstItem
 
 	return rendered
 }

@@ -58,6 +58,7 @@ type Model struct {
 	SettingsView        *views.SettingsView
 	UpdateAvailable     *updater.Info
 	listTop             int
+	listFirst           int
 	pendingDeleteID     string
 	pendingDeleteName   string
 	messageUntil        time.Time

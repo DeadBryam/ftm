@@ -34,9 +34,30 @@ type ListView struct {
 	Shortcuts      []components.Shortcut
 
 	ListTop int
+
+	VisibleRows int
+	FirstItem   int
 }
 
 const ItemHeight = 1
+
+const (
+	singleColumnChrome = 6
+	twoColumnChrome    = 7
+)
+
+func (l *ListView) rowsAvailable(chrome int) int {
+	if l.Height <= 0 {
+		return 0
+	}
+
+	rows := (l.Height - l.ListTop - chrome) / ItemHeight
+	if rows < 1 {
+		return 1
+	}
+
+	return rows
+}
 
 func NewListView() *ListView {
 	return &ListView{
@@ -110,6 +131,7 @@ func (l *ListView) twoColumn() string {
 	if l.UpdateBadge != "" {
 		l.ListTop++
 	}
+	l.VisibleRows = l.rowsAvailable(twoColumnChrome)
 
 	listContent := l.renderTunnelList(leftWidth - 2)
 	detailContent := l.renderDetailPanel(rightWidth - 2)
@@ -118,8 +140,13 @@ func (l *ListView) twoColumn() string {
 	detailLines := strings.Split(detailContent, "\n")
 
 	maxLines := len(listLines)
-	if len(detailLines) > maxLines {
-		maxLines = len(detailLines)
+	if detail := len(detailLines); detail > maxLines {
+		if budget := l.rowsAvailable(twoColumnChrome); budget > 0 && detail > budget {
+			detail = budget
+		}
+		if detail > maxLines {
+			maxLines = detail
+		}
 	}
 
 	for i := 0; i < maxLines; i++ {
@@ -186,12 +213,15 @@ func (l *ListView) singleColumn() string {
 	if l.UpdateBadge != "" {
 		l.ListTop++
 	}
+	if l.Dashboard != "" {
+		l.ListTop += 2
+	}
+	l.VisibleRows = l.rowsAvailable(singleColumnChrome)
 
 	if l.Dashboard != "" {
 		urlStyle := lipgloss.NewStyle().Foreground(gold)
 		b.WriteString(urlStyle.Render(i18n.T("dashboard_label") + " " + l.Dashboard + " " + i18n.T("press_w_hint")))
 		b.WriteString("\n\n")
-		l.ListTop += 2
 	}
 
 	b.WriteString(l.renderTunnelList(l.Width - 2))
@@ -211,10 +241,38 @@ func (l *ListView) singleColumn() string {
 	return b.String()
 }
 
+func (l *ListView) visibleWindow() (first, count int) {
+	total := len(l.Items)
+	if l.VisibleRows <= 0 || l.VisibleRows >= total {
+		return 0, total
+	}
+
+	first = l.Cursor - l.VisibleRows/2
+	if first < 0 {
+		first = 0
+	}
+	if first > total-l.VisibleRows {
+		first = total - l.VisibleRows
+	}
+
+	return first, l.VisibleRows
+}
+
 func (l *ListView) renderTunnelList(width int) string {
 	var b strings.Builder
 
-	for i, item := range l.Items {
+	first, count := l.visibleWindow()
+	l.FirstItem = first
+	last := first + count
+
+	if first > 0 {
+		b.WriteString(l.scrollHint(width, i18n.TF("more_above", first)))
+		b.WriteString("\n")
+		l.ListTop++
+	}
+
+	for i := first; i < last; i++ {
+		item := l.Items[i]
 		tunnelItem := components.TunnelItem{
 			Selected:    i == l.Cursor,
 			Name:        item.Name,
@@ -224,14 +282,26 @@ func (l *ListView) renderTunnelList(width int) string {
 			StatusMsg:   item.StatusMsg,
 			Width:       width,
 		}
-		line := tunnelItem.Render()
-		b.WriteString(line)
-		if i < len(l.Items)-1 {
+		b.WriteString(tunnelItem.Render())
+		if i < last-1 {
 			b.WriteString("\n")
 		}
 	}
 
+	if remaining := len(l.Items) - last; remaining > 0 {
+		b.WriteString("\n")
+		b.WriteString(l.scrollHint(width, i18n.TF("more_below", remaining)))
+	}
+
 	return b.String()
+}
+
+func (l *ListView) scrollHint(width int, text string) string {
+	return lipgloss.NewStyle().
+		Foreground(ui.ThemeDefault.TextDim).
+		Width(ui.Clamp(width, 0)).
+		Align(lipgloss.Center).
+		Render(text)
 }
 
 func (l *ListView) renderDetailPanel(width int) string {
