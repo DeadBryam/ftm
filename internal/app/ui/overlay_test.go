@@ -3,6 +3,8 @@ package ui
 import (
 	"strings"
 	"testing"
+
+	"charm.land/lipgloss/v2"
 )
 
 func background(width, height int) string {
@@ -32,6 +34,26 @@ func TestOverlayFitsTheTerminal(t *testing.T) {
 
 	if lines := strings.Count(out, "\n") + 1; lines != height {
 		t.Errorf("rendered %d lines, want %d", lines, height)
+	}
+}
+
+func TestOverlayPaintsEveryCell(t *testing.T) {
+	const width, height = 40, 12
+
+	for name, out := range map[string]string{
+		"over a list":   Overlay(background(width, height), "MODAL", width, height),
+		"over nothing":  Overlay("", "MODAL", width, height),
+		"short content": Overlay("one\ntwo", "MODAL", width, height),
+	} {
+		lines := strings.Split(out, "\n")
+		if len(lines) != height {
+			t.Errorf("%s: rendered %d lines, want %d", name, len(lines), height)
+		}
+		for i, line := range lines {
+			if w := lipgloss.Width(line); w != width {
+				t.Errorf("%s: line %d is %d cells wide, want %d", name, i, w, width)
+			}
+		}
 	}
 }
 

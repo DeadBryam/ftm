@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"strings"
+
 	"charm.land/lipgloss/v2"
 )
 
@@ -12,10 +14,25 @@ func Overlay(background, foreground string, width, height int) string {
 	x := Clamp((width-lipgloss.Width(foreground))/2, 0)
 	y := Clamp((height-lipgloss.Height(foreground))/2, 0)
 
-	return lipgloss.NewCanvas(width, height).
+	canvas := lipgloss.NewCanvas(width, height).
 		Compose(lipgloss.NewCompositor(
 			lipgloss.NewLayer(background),
 			lipgloss.NewLayer(foreground).X(x).Y(y).Z(1),
 		)).
 		Render()
+
+	return Fill(canvas, width, height)
+}
+
+func Fill(content string, width, height int) string {
+	lines := strings.Split(content, "\n")
+	for len(lines) < height {
+		lines = append(lines, "")
+	}
+
+	for i, line := range lines[:height] {
+		lines[i] = line + Repeat(" ", width-lipgloss.Width(line))
+	}
+
+	return strings.Join(lines[:height], "\n")
 }

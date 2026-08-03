@@ -20,13 +20,13 @@ func (m *Model) View() tea.View {
 		case viewLogs:
 			content = m.viewLogs()
 		case viewAddForm:
-			content = m.viewAddForm(false)
+			content = ui.Overlay(m.viewList(), m.viewAddForm(false), m.Width, m.Height)
 		case viewEditForm:
-			content = m.viewAddForm(true)
+			content = ui.Overlay(m.viewList(), m.viewAddForm(true), m.Width, m.Height)
 		case viewDownloading:
 			content = m.viewDownloading()
 		case viewSettings:
-			content = m.viewSettings()
+			content = ui.Overlay(m.viewList(), m.viewSettings(), m.Width, m.Height)
 		case viewConfirm:
 			content = ui.Overlay(m.viewList(), m.viewConfirm(), m.Width, m.Height)
 		default:
@@ -34,7 +34,7 @@ func (m *Model) View() tea.View {
 		}
 	}
 
-	v := tea.NewView(content)
+	v := tea.NewView(ui.Fill(content, m.Width, m.Height))
 	v.AltScreen = true
 	v.MouseMode = tea.MouseModeCellMotion
 	return v
@@ -145,8 +145,6 @@ func (m *Model) getTunnelName(id string) string {
 
 func (m *Model) viewAddForm(isEdit bool) string {
 	view := views.NewFormView()
-	view.Width = m.Width
-	view.Height = m.Height
 	view.Focus = m.FormFocus
 	view.IsEditMode = isEdit
 	view.Name = m.FormValues.Name
@@ -180,8 +178,6 @@ func (m *Model) viewConfirm() string {
 
 func (m *Model) viewSettings() string {
 	view := views.NewSettingsView()
-	view.Width = m.Width
-	view.Height = m.Height
 	if m.SettingsView != nil {
 		view.NotificationsEnabled = m.SettingsView.NotificationsEnabled
 		view.NotificationSound = m.SettingsView.NotificationSound
