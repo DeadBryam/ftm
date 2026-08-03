@@ -103,7 +103,14 @@ func Notify(title, body string) error {
 		log.Printf("[notification] %s: %s", title, body)
 		return nil
 	}
-	return notifier.Notify(title, body)
+
+	go func() {
+		if err := notifier.Notify(title, body); err != nil {
+			log.Printf("[notification] %s: %v", title, err)
+		}
+	}()
+
+	return nil
 }
 
 func Notifyf(title, format string, args ...interface{}) error {
@@ -122,7 +129,14 @@ func PlaySound(t SoundType) error {
 	if soundPlayer == nil || !available {
 		return nil
 	}
-	return soundPlayer.PlaySound(t)
+
+	go func() {
+		if err := soundPlayer.PlaySound(t); err != nil {
+			log.Printf("[notification] sound: %v", err)
+		}
+	}()
+
+	return nil
 }
 
 func IsAvailable() bool {
