@@ -18,10 +18,10 @@
     "@sveltejs/vite-plugin-svelte": "^7.2.0",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/svelte": "^5.4.2",
+    "@types/node": "^26.1.2",
     "clsx": "^2.1.1",
     "ky": "^2.0.2",
     "lucide-svelte": "^1.0.1",
-    "motion": "^12.43.0",
     "svelte": "^5.56.8",
     "svelte-check": "^4.7.4",
     "tailwind-merge": "^3.6.0",
@@ -30,6 +30,7 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
+    "runed": "^0.37.1",
     "svelte-sonner": "^1.1.1"
   }
 }
