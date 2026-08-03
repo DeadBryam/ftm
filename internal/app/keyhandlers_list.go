@@ -171,6 +171,6 @@ func (m *Model) handleListUpdate() (tea.Model, tea.Cmd) {
 
 func (m *Model) playBeep() {
 	if m.App.Config.NotificationSound {
-		fmt.Fprint(os.Stdout, Bell)
+		fmt.Fprint(os.Stdout, "\a")
 	}
 }

@@ -15,6 +15,7 @@ type Theme struct {
 	Offline    color.Color
 	Connecting color.Color
 	Error      color.Color
+	Danger     color.Color
 	Stopped    color.Color
 	Success    color.Color
 }
@@ -29,6 +30,7 @@ func DefaultTheme() *Theme {
 		Offline:    lipgloss.Color("#2a2824"),
 		Connecting: lipgloss.Color("#3a3020"),
 		Error:      lipgloss.Color("#3a2020"),
+		Danger:     lipgloss.Color("#ff6b6b"),
 		Stopped:    lipgloss.Color("#3a3a3a"),
 		Success:    lipgloss.Color("#7cb69d"),
 	}

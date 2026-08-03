@@ -81,7 +81,7 @@ func (d *DetailPanel) Render() string {
 		b.WriteString("\n")
 
 		errorBox := lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#ff6b6b")).
+			Foreground(ui.ThemeDefault.Danger).
 			Width(d.Width - 2).
 			Render(d.ErrorMsg)
 		b.WriteString(errorBox)

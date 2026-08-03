@@ -5,8 +5,8 @@ import (
 	"charm.land/bubbles/v2/list"
 	"charm.land/bubbles/v2/progress"
 	"charm.land/bubbles/v2/viewport"
-	"charm.land/lipgloss/v2"
 
+	"github.com/sthbryan/ftm/internal/app/ui"
 	"github.com/sthbryan/ftm/internal/config"
 )
 
@@ -15,7 +15,7 @@ func NewModel(app *App) *Model {
 	h.ShowAll = true
 
 	p := progress.New(
-		progress.WithColors(lipgloss.Color("#c9a227"), lipgloss.Color("#8b7355")),
+		progress.WithColors(ui.ThemeDefault.Gold, ui.ThemeDefault.Bronze),
 		progress.WithWidth(40),
 		progress.WithoutPercentage(),
 	)
