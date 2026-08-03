@@ -5,6 +5,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/providers"
@@ -129,6 +130,54 @@ func TestLogBufferSkipsBlankLines(t *testing.T) {
 		if got[i] != want[i] {
 			t.Errorf("line %d = %q, want %q", i, got[i], want[i])
 		}
+	}
+}
+
+// Live log subscribers must see lines in the order the process wrote them.
+// Publishing each line from its own goroutine shuffled them.
+func TestLogBufferPublishesLinesInOrder(t *testing.T) {
+	lb := NewLogBuffer()
+
+	var got []string
+	lb.OnNewLine = func(line string) { got = append(got, line) }
+
+	if _, err := lb.Write([]byte("one\ntwo\nthree\n")); err != nil {
+		t.Fatalf("Write failed: %v", err)
+	}
+	if _, err := lb.Write([]byte("four\nfive\n")); err != nil {
+		t.Fatalf("Write failed: %v", err)
+	}
+
+	want := []string{"one", "two", "three", "four", "five"}
+	if len(got) != len(want) {
+		t.Fatalf("published %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("published %v, want %v", got, want)
+		}
+	}
+}
+
+// A subscriber that blocks must not deadlock the writer against lb.mu.
+func TestLogBufferWriteDoesNotHoldLockDuringPublish(t *testing.T) {
+	lb := NewLogBuffer()
+	lb.OnNewLine = func(string) {
+		// Reading the buffer from inside the callback deadlocks if Write still
+		// holds the lock while publishing.
+		lb.GetLines()
+	}
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		lb.Write([]byte("line\n")) //nolint:errcheck // the write cannot fail
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("Write deadlocked while publishing to a subscriber")
 	}
 }
 
