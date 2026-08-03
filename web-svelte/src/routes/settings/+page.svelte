@@ -3,12 +3,7 @@
   import { useSettings } from "$lib/stores/settings.svelte";
   import { useNotifications } from "$lib/stores/notification.svelte";
   import { useTheme } from "$lib/stores/theme.svelte";
-  import {
-    i18n,
-    translate,
-    availableLanguages,
-    currentLanguage,
-  } from "$lib/i18n";
+  import { t, useI18n, LANGUAGE_AUTO } from "$lib/stores/i18n.svelte";
   import {
     Bell,
     BellOff,
@@ -26,9 +21,13 @@
   const settingsStore = useSettings();
   const notifications = useNotifications();
   const theme = useTheme();
+  const i18n = useI18n();
 
   let saving = $state(false);
-  let t = $derived($translate);
+
+  // "auto" is a preference rather than a catalogue, so it is offered alongside
+  // the translated languages instead of coming back from the API.
+  const languageOptions = $derived([LANGUAGE_AUTO, ...i18n.available]);
 
   onMount(async () => {
     theme.init();
@@ -65,8 +64,10 @@
   async function changeLanguage(lang: string) {
     saving = true;
     try {
-      await i18n.setLanguage(lang);
+      // Persist first: "auto" resolves server-side, so the catalogue can only
+      // be fetched correctly once the server knows the new preference.
       await settingsStore.update({ language: lang });
+      await i18n.setLanguage(lang);
     } finally {
       saving = false;
     }
@@ -90,7 +91,7 @@
     {/if}
   </div>
 
-  {#if !settingsStore.loaded || $i18n.loading}
+  {#if !settingsStore.loaded || !i18n.ready}
     <div class="flex justify-center py-12">
       <div
         class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"
@@ -131,11 +132,11 @@
       <SettingsSection title={t("language_section")}>
         {#snippet children()}
           <div class="flex gap-2">
-            {#each $availableLanguages as lang}
+            {#each languageOptions as lang}
               <button
                 class={clsx(
                   "px-4 py-2 rounded-lg border transition-colors cursor-pointer",
-                  $currentLanguage === lang
+                  settingsStore.settings.language === lang
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-border hover:border-primary/50",
                 )}

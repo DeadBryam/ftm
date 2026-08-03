@@ -60,8 +60,6 @@ func TestAllowedHost(t *testing.T) {
 		{"localhost", true},
 		{"[::1]:40500", true},
 		{"wails.localhost", true},
-
-		// DNS rebinding: resolves to loopback, but the Host gives it away.
 		{"evil.com:40500", false},
 		{"rebind.evil.com:40500", false},
 		{"192.168.1.50:40500", false},

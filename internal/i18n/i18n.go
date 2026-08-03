@@ -125,16 +125,19 @@ func LoadFromYAML(lang string, content []byte) error {
 	return nil
 }
 
+// InitFromConfig selects the UI language: an explicit choice in the config
+// wins, anything else follows the operating system.
 func InitFromConfig(cfg *config.Config) {
+	SetLanguageWithFallback(ResolveLanguage(cfg.Language))
+}
 
-	systemLang := detectSystemLang()
-
-	if cfg.Language != "" {
-		SetLanguageWithFallback(cfg.Language)
-		return
+// ResolveLanguage maps a configured language onto one that is actually loaded.
+// The empty string and "auto" both mean "ask the operating system".
+func ResolveLanguage(configured string) string {
+	if configured == "" || configured == config.LanguageAuto {
+		return detectSystemLang()
 	}
-
-	SetLanguageWithFallback(systemLang)
+	return configured
 }
 
 func SupportedLanguages() []string {

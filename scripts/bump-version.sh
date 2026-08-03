@@ -11,14 +11,8 @@ VERSION_NO_V=$(echo $VERSION | sed 's/^v//')
 
 echo "Bumping version to $VERSION_NO_V..."
 
-# Update Makefile
-if [ -f "Makefile" ]; then
-    sed -i.bak "s/^VERSION := .*/VERSION := $VERSION_NO_V/" Makefile
-    rm -f Makefile.bak
-    echo "✓ Updated Makefile"
-fi
-
-# Update version.go
+# Version string for the binary comes from `git describe` at build time
+# (see Makefile). Keep a sensible default in version.go for plain `go build`.
 if [ -f "internal/version/version.go" ]; then
     sed -i.bak "s/^var Version = .*/var Version = \"$VERSION_NO_V\"/" internal/version/version.go
     rm -f internal/version/version.go.bak

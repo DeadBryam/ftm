@@ -21,11 +21,6 @@ type AutoInstaller interface {
 	Install(progress chan<- DownloadProgress) error
 }
 
-type Process struct {
-	Cancel    context.CancelFunc
-	PublicURL string
-}
-
 type LogLine struct {
 	Line        string
 	IsError     bool

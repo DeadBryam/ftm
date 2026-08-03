@@ -14,14 +14,12 @@
   import type { Tunnel } from "$lib/types";
 
   import { cn } from "$lib/utils/cn";
-  import { translate } from "$lib/i18n";
+  import { t } from "$lib/stores/i18n.svelte";
 
   const store = useTunnels();
   const toast = useToast();
   const providerStore = useProviders();
   const theme = useTheme();
-
-  let t = $derived($translate);
 
   let deleteTunnel: Tunnel | null = $state(null);
   let editingTunnelId: string | null = $state(null);

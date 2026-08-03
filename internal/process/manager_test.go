@@ -7,9 +7,6 @@ import (
 	"github.com/sthbryan/ftm/internal/config"
 )
 
-// A status consumer that never reads must not be able to wedge the Manager.
-// callStatusUpdate runs with m.mu held, so a blocking send would deadlock every
-// other operation -- including the TUI, which shares the lock.
 func TestCallStatusUpdateDoesNotBlockOnFullChannel(t *testing.T) {
 	m := NewManager()
 	m.SetStatusChannel(make(chan config.TunnelStatus, 2))

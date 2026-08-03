@@ -20,22 +20,25 @@ func NewLogBuffer() *LogBuffer {
 }
 
 func (lb *LogBuffer) Write(p []byte) (n int, err error) {
-	lb.mu.Lock()
-	defer lb.mu.Unlock()
-
-	lines := strings.Split(string(p), "\n")
-	for _, line := range lines {
+	var added []string
+	for _, line := range strings.Split(string(p), "\n") {
 		if line = strings.TrimSpace(line); line != "" {
-			lb.lines = append(lb.lines, line)
-
-			if lb.OnNewLine != nil {
-				go lb.OnNewLine(line)
-			}
+			added = append(added, line)
 		}
 	}
 
+	lb.mu.Lock()
+	lb.lines = append(lb.lines, added...)
 	if len(lb.lines) > lb.maxLen {
 		lb.lines = lb.lines[len(lb.lines)-lb.maxLen:]
+	}
+	notify := lb.OnNewLine
+	lb.mu.Unlock()
+
+	if notify != nil {
+		for _, line := range added {
+			notify(line)
+		}
 	}
 
 	return len(p), nil

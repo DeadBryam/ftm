@@ -44,6 +44,7 @@ type TunnelStatus struct {
 	LogLines     []string
 	Players      int
 	MaxPlayers   int
+	ExpiresAt    int64
 }
 
 func (tc *TunnelConfig) Status() TunnelStatus {

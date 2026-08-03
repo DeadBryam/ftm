@@ -2,8 +2,10 @@ package app
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"runtime"
+	"sync"
 
 	tea "charm.land/bubbletea/v2"
 
@@ -21,6 +23,8 @@ type App struct {
 	WebServer         *web.Server
 	DownloadProgress  chan providers.DownloadProgress
 	ExpirationMonitor *notifications.ExpirationMonitor
+
+	shutdownOnce sync.Once
 }
 
 func New() (*App, error) {
@@ -45,6 +49,7 @@ func New() (*App, error) {
 	}
 
 	app.Manager.SetProgressChannel(app.DownloadProgress)
+	app.Manager.SetProviderExpiration(cfg.ProviderExpirationMinutes)
 	notifications.Init()
 	notifications.SetSoundEnabled(cfg.NotificationSound)
 	notifications.SetNotificationsEnabled(cfg.NotificationsStatus == config.NotificationGranted)
@@ -104,10 +109,6 @@ func (a *App) Run() error {
 	return err
 }
 
-// StartWebServer is idempotent: both main and Run call it, and starting a
-// second server would leave the first one orphaned on its own port, still
-// serving a dashboard that no longer receives status updates because the
-// Manager only publishes to the most recent status channel.
 func (a *App) StartWebServer() error {
 	if a.WebServer != nil {
 		return nil
@@ -179,13 +180,18 @@ func (a *App) shouldUseNativeNotifications() bool {
 }
 
 func (a *App) Shutdown() {
-	if a.WebServer != nil {
-		a.WebServer.Stop()
-	}
-	if a.Manager != nil {
-		a.Manager.StopAll()
-	}
-	if a.ExpirationMonitor != nil {
-		a.ExpirationMonitor.StopAll()
-	}
+	a.shutdownOnce.Do(func() {
+
+		if a.Manager != nil {
+			a.Manager.StopAll()
+		}
+		if a.WebServer != nil {
+			if err := a.WebServer.Stop(); err != nil {
+				fmt.Fprintf(os.Stderr, "Error stopping web server: %v\n", err)
+			}
+		}
+		if a.ExpirationMonitor != nil {
+			a.ExpirationMonitor.StopAll()
+		}
+	})
 }

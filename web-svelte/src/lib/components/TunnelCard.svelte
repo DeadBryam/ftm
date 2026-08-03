@@ -12,7 +12,7 @@
     X,
   } from "lucide-svelte";
   import { logsApi } from "$lib/api";
-  import { translate } from "$lib/i18n";
+  import { t } from "$lib/stores/i18n.svelte";
   import { cn } from "$lib/utils/cn";
   import { formatLogs } from "$lib/utils/logs";
   import Button from "./Button.svelte";
@@ -48,8 +48,6 @@
     totalItems = 1,
     installProgress = null,
   }: TunnelCardProps = $props();
-
-  let t = $derived($translate);
   const dropdownAlign = $derived(index === totalItems - 1 && totalItems > 1 ? "top-left" : "left");
 
   const toast = useToast();

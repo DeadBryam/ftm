@@ -1,11 +1,10 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { cn } from '$lib/utils/cn';
-  import { translate } from '$lib/i18n';
+  import { t } from '$lib/stores/i18n.svelte';
   import { Settings } from 'lucide-svelte';
 
   let isSettings = $derived($page.url.pathname === '/settings');
-  let t = $derived($translate);
 </script>
 
 <header class="flex justify-between items-center mb-6 pb-5 border-b flex-shrink-0 z-10 border-border">

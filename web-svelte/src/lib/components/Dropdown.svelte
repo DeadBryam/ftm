@@ -2,7 +2,7 @@
   import { cn } from "$lib/utils/cn";
   import { ChevronDown } from "lucide-svelte";
   import { animate, spring } from "motion";
-  import { translate } from "$lib/i18n";
+  import { t } from "$lib/stores/i18n.svelte";
   import type { DropdownOption } from "$lib/types";
   import type { Snippet } from "svelte";
 
@@ -23,8 +23,6 @@
     "top-left": "bottom-full mb-1.5 left-auto right-0",
     "top-right": "bottom-full mb-1.5 right-auto left-0",
   };
-
-  let t = $derived($translate);
 
   let {
     options = [],

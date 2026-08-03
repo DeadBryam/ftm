@@ -1,17 +1,21 @@
 {
-  "$schema": "https://wails.io/schemas/config.v2.json",
   "name": "ftm",
   "outputfilename": "ftm-desktop",
-  "frontend": "../web-svelte",
-  "frontend:install": "cd ../web-svelte && bun install",
-  "frontend:build": "../scripts/build-web-assets.sh",
+  "version": "0.10.0",
   "author": {
     "name": "Bryan Villafuerte",
     "email": "bryamu.u@gmail.com"
   },
-  "version": "0.10.0",
-  "icon": [
-    "icon.ico",
-    "icon.png"
-  ]
+  "frontend": {
+    "dir": "../web-svelte",
+    "install": "bun install",
+    "build": "../scripts/build-web-assets.sh"
+  },
+  "info": {
+    "companyName": "sthbryan",
+    "productName": "Foundry Tunnel Manager",
+    "productVersion": "0.10.0",
+    "copyright": "Copyright (c) Bryan Villafuerte",
+    "comments": "Foundry Tunnel Manager desktop shell (Wails v3)"
+  }
 }

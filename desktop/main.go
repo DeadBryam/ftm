@@ -1,8 +1,6 @@
 package main
 
 import (
-	"context"
-	"embed"
 	"flag"
 	"fmt"
 	"log"
@@ -10,71 +8,60 @@ import (
 
 	"github.com/sthbryan/ftm/internal/app"
 	"github.com/sthbryan/ftm/internal/version"
-	"github.com/wailsapp/wails/v2"
-	wailsassetserver "github.com/wailsapp/wails/v2/pkg/assetserver"
-	"github.com/wailsapp/wails/v2/pkg/options"
-	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
-	"github.com/wailsapp/wails/v2/pkg/options/mac"
-	"github.com/wailsapp/wails/v2/pkg/options/windows"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
-
-//go:embed all:frontend/dist
-var assets embed.FS
 
 func main() {
 	var port int
 	flag.IntVar(&port, "port", 0, "Web server port")
 	flag.Parse()
 
-	application, err := app.New()
+	ftmApp, err := app.New()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 
 	if port > 0 {
-		application.Config.WebPort = port
+		ftmApp.Config.WebPort = port
 	}
 
-	if err := application.StartWebServer(); err != nil {
+	if err := ftmApp.StartWebServer(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error starting web server: %v\n", err)
 		os.Exit(1)
 	}
 
-	webURL := application.WebServer.URL()
+	webURL := ftmApp.WebServer.URL()
 	fmt.Printf("Foundry Tunnel Manager v%s\n", version.Version)
 	fmt.Printf("Desktop app running at: %s\n", webURL)
 
-	proxyHandler := wailsassetserver.NewProxyServer(webURL)
-
-	err = wails.Run(&options.App{
-		Title:  "Foundry Tunnel Manager",
-		Width:  1200,
-		Height: 800,
-		AssetServer: &assetserver.Options{
-			Assets:  assets,
-			Handler: proxyHandler,
+	// Load the embedded HTTP dashboard directly in the webview (no asset proxy).
+	// Origins already allow loopback; see internal/web/origin.go.
+	wailsApp := application.New(application.Options{
+		Name:        "Foundry Tunnel Manager",
+		Description: "Share your Foundry VTT world without port forwarding",
+		Mac: application.MacOptions{
+			ApplicationShouldTerminateAfterLastWindowClosed: true,
 		},
-		Mac: &mac.Options{
-			TitleBar: mac.TitleBarHiddenInset(),
-		},
-		Windows: &windows.Options{
-			WebviewIsTransparent: false,
-		},
-		OnStartup: func(ctx context.Context) {
-			log.Println("App starting...")
-		},
-		OnShutdown: func(ctx context.Context) {
+		OnShutdown: func() {
 			log.Println("App shutting down...")
-		},
-		Bind:             []interface{}{},
-		BackgroundColour: options.NewRGB(255, 255, 255),
-		Debug: options.Debug{
-			OpenInspectorOnStartup: false,
+			ftmApp.Shutdown()
 		},
 	})
 
-	if err != nil {
+	wailsApp.Window.NewWithOptions(application.WebviewWindowOptions{
+		Title:            "Foundry Tunnel Manager",
+		Width:            1200,
+		Height:           800,
+		URL:              webURL,
+		BackgroundColour: application.NewRGB(255, 255, 255),
+		DevToolsEnabled:  false,
+		Mac: application.MacWindow{
+			TitleBar: application.MacTitleBarHiddenInset,
+		},
+	})
+
+	if err := wailsApp.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error running Wails: %v\n", err)
 		os.Exit(1)
 	}

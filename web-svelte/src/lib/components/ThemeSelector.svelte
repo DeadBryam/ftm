@@ -1,7 +1,7 @@
 <script lang="ts">
   import ThemeButton from './ThemeButton.svelte';
   import { useTheme } from '$lib/stores/theme.svelte';
-  import { translate } from '$lib/i18n';
+  import { t } from '$lib/stores/i18n.svelte';
 
   interface ThemeGroup {
     name: string;
@@ -15,8 +15,6 @@
   let { groups }: Props = $props();
 
   const theme = useTheme();
-
-  let t = $derived($translate);
 
   const themeNames: Record<string, string> = {
     'dracula': 'Dracula',

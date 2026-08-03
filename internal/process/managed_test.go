@@ -5,13 +5,12 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/providers"
 )
 
-// fakeProvider reports a URL for any line containing one, mimicking the real
-// providers closely enough to exercise the writer's line splitting.
 type fakeProvider struct{}
 
 func (fakeProvider) Name() string       { return "Fake" }
@@ -56,8 +55,6 @@ func TestURLCaptureFindsURLInCompleteLine(t *testing.T) {
 	}
 }
 
-// Provider output arrives in arbitrary chunks, so a URL can be split across two
-// writes. The tail has to be buffered until its newline shows up.
 func TestURLCaptureJoinsSplitWrites(t *testing.T) {
 	got := collectURLs(t, []string{"tunnel ready at https://abc.tryclo", "udflare.com\n"})
 
@@ -132,8 +129,50 @@ func TestLogBufferSkipsBlankLines(t *testing.T) {
 	}
 }
 
-// GetLines must hand back a copy: the TUI renders the result while the process
-// keeps writing, and a shared slice would race.
+func TestLogBufferPublishesLinesInOrder(t *testing.T) {
+	lb := NewLogBuffer()
+
+	var got []string
+	lb.OnNewLine = func(line string) { got = append(got, line) }
+
+	if _, err := lb.Write([]byte("one\ntwo\nthree\n")); err != nil {
+		t.Fatalf("Write failed: %v", err)
+	}
+	if _, err := lb.Write([]byte("four\nfive\n")); err != nil {
+		t.Fatalf("Write failed: %v", err)
+	}
+
+	want := []string{"one", "two", "three", "four", "five"}
+	if len(got) != len(want) {
+		t.Fatalf("published %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("published %v, want %v", got, want)
+		}
+	}
+}
+
+func TestLogBufferWriteDoesNotHoldLockDuringPublish(t *testing.T) {
+	lb := NewLogBuffer()
+	lb.OnNewLine = func(string) {
+
+		lb.GetLines()
+	}
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		lb.Write([]byte("line\n")) //nolint:errcheck
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("Write deadlocked while publishing to a subscriber")
+	}
+}
+
 func TestLogBufferGetLinesReturnsCopy(t *testing.T) {
 	lb := NewLogBuffer()
 	if _, err := lb.Write([]byte("original\n")); err != nil {

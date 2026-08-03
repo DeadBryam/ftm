@@ -6,8 +6,6 @@ import (
 	"testing"
 )
 
-// isolateHome points the config directory at a temp dir so tests never touch
-// the developer's real ~/.config/foundry-tunnel.
 func isolateHome(t *testing.T) string {
 	t.Helper()
 
@@ -36,6 +34,97 @@ func TestLoadCreatesDefaultConfigWhenMissing(t *testing.T) {
 	path := filepath.Join(home, ".config", AppName, ConfigFile)
 	if _, err := os.Stat(path); err != nil {
 		t.Fatalf("Load() did not persist a default config at %s: %v", path, err)
+	}
+}
+
+func TestLoadDefaultsToAutoLanguage(t *testing.T) {
+	isolateHome(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() failed: %v", err)
+	}
+
+	// A fresh install must not look like the user picked English, or system
+	// detection never gets a chance to run.
+	if cfg.Language != LanguageAuto {
+		t.Fatalf("Language = %q on a fresh config, want %q", cfg.Language, LanguageAuto)
+	}
+}
+
+// v1 shipped `language: en` as its default, which permanently disabled system
+// detection. Those users never chose English, so migration hands them back.
+func TestMigrateV1EnglishBecomesAuto(t *testing.T) {
+	tests := []struct {
+		name    string
+		version int
+		lang    string
+		want    string
+	}{
+		{"v1 default english", 1, "en", LanguageAuto},
+		{"v1 empty", 1, "", LanguageAuto},
+		{"v1 explicit spanish is kept", 1, "es", "es"},
+		{"v2 english is a real choice", 2, "en", "en"},
+		{"v2 auto stays auto", 2, LanguageAuto, LanguageAuto},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := &Config{Version: tt.version, Language: tt.lang}
+			cfg.migrate()
+
+			if cfg.Language != tt.want {
+				t.Errorf("Language = %q, want %q", cfg.Language, tt.want)
+			}
+			if cfg.Version != ConfigVersion {
+				t.Errorf("Version = %d, want %d", cfg.Version, ConfigVersion)
+			}
+		})
+	}
+}
+
+func TestMigrateReportsWhetherItChangedAnything(t *testing.T) {
+	current := &Config{Version: ConfigVersion, Language: "es"}
+	if current.migrate() {
+		t.Error("migrate() = true for an up-to-date config, want false")
+	}
+
+	old := &Config{Version: 1, Language: "en"}
+	if !old.migrate() {
+		t.Error("migrate() = false for a v1 config, want true")
+	}
+}
+
+// Migrating has to survive a restart, otherwise every launch rewrites the file.
+func TestLoadPersistsMigration(t *testing.T) {
+	home := isolateHome(t)
+
+	dir := filepath.Join(home, ".config", AppName)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	legacy := "version: 1\nlanguage: en\nnotification_sound: true\ntunnels: []\n"
+	if err := os.WriteFile(filepath.Join(dir, ConfigFile), []byte(legacy), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	first, err := Load()
+	if err != nil {
+		t.Fatalf("Load() failed: %v", err)
+	}
+	if first.Language != LanguageAuto {
+		t.Fatalf("Language = %q after migrating, want %q", first.Language, LanguageAuto)
+	}
+
+	second, err := Load()
+	if err != nil {
+		t.Fatalf("second Load() failed: %v", err)
+	}
+	if second.Version != ConfigVersion {
+		t.Errorf("Version = %d on reload, want the migration persisted as %d", second.Version, ConfigVersion)
+	}
+	if second.Language != LanguageAuto {
+		t.Errorf("Language = %q on reload, want %q", second.Language, LanguageAuto)
 	}
 }
 
@@ -138,8 +227,6 @@ func TestTunnelCRUD(t *testing.T) {
 	}
 }
 
-// GetTunnel hands out a pointer into the slice, so callers can mutate config
-// in place. Removing an entry must not leave that aliasing behind.
 func TestGetTunnelReturnsLivePointer(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.AddTunnel(TunnelConfig{ID: "a", Name: "First", LocalPort: 30000})
