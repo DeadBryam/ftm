@@ -1,18 +1,22 @@
 package ui
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"image/color"
+
+	"charm.land/lipgloss/v2"
+)
 
 type Theme struct {
-	Gold       lipgloss.Color
-	Bronze     lipgloss.Color
-	Text       lipgloss.Color
-	TextDim    lipgloss.Color
-	Online     lipgloss.Color
-	Offline    lipgloss.Color
-	Connecting lipgloss.Color
-	Error      lipgloss.Color
-	Stopped    lipgloss.Color
-	Success    lipgloss.Color
+	Gold       color.Color
+	Bronze     color.Color
+	Text       color.Color
+	TextDim    color.Color
+	Online     color.Color
+	Offline    color.Color
+	Connecting color.Color
+	Error      color.Color
+	Stopped    color.Color
+	Success    color.Color
 }
 
 func DefaultTheme() *Theme {

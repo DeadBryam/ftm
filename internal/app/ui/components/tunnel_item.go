@@ -2,9 +2,10 @@ package components
 
 import (
 	"fmt"
+	"image/color"
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
 	"github.com/sthbryan/ftm/internal/app/ui"
 	"github.com/sthbryan/ftm/internal/i18n"
 )
@@ -64,7 +65,7 @@ func StatusLabel(state int) string {
 }
 
 func (t *TunnelItem) Render() string {
-	var bgColor lipgloss.Color
+	var bgColor color.Color
 
 	switch t.StatusState {
 	case TunnelStateStarting, TunnelStateConnecting:
@@ -113,13 +114,13 @@ func (t *TunnelItem) Render() string {
 	return itemStyle.Render(content)
 }
 
-func (t *TunnelItem) statusBadge(bgColor lipgloss.Color) string {
+func (t *TunnelItem) statusBadge(bgColor color.Color) string {
 	return lipgloss.NewStyle().
 		Background(bgColor).
 		Render(StatusBadge(t.StatusState))
 }
 
-func (t *TunnelItem) name(bgColor lipgloss.Color) string {
+func (t *TunnelItem) name(bgColor color.Color) string {
 	name := t.Name
 	if len(name) > 18 {
 		name = name[:15] + "..."
@@ -132,7 +133,7 @@ func (t *TunnelItem) name(bgColor lipgloss.Color) string {
 		Render(name)
 }
 
-func (t *TunnelItem) statusText(bgColor lipgloss.Color) string {
+func (t *TunnelItem) statusText(bgColor color.Color) string {
 	return lipgloss.NewStyle().
 		Foreground(ui.ThemeDefault.Text).
 		Background(bgColor).
@@ -140,7 +141,7 @@ func (t *TunnelItem) statusText(bgColor lipgloss.Color) string {
 		Render(t.StatusMsg)
 }
 
-func (t *TunnelItem) meta(bgColor lipgloss.Color) string {
+func (t *TunnelItem) meta(bgColor color.Color) string {
 	meta := fmt.Sprintf("%s: %d", t.Provider, t.LocalPort)
 
 	return lipgloss.NewStyle().
