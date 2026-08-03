@@ -9,12 +9,11 @@
   import DeleteModal from "$lib/components/DeleteModal.svelte";
   import NotificationPermission from "$lib/components/NotificationPermission.svelte";
   import ConnectionsPanel from "$lib/components/ConnectionsPanel.svelte";
-  import NewConnection from "$lib/components/NewConnection.svelte";
-  import EditConnection from "$lib/components/EditConnection.svelte";
+  import ConnectionForm from "$lib/components/ConnectionForm.svelte";
   import type { Tunnel } from "$lib/types";
-
   import { cn } from "$lib/utils/cn";
   import { t } from "$lib/stores/i18n.svelte";
+  import { ChevronDown } from "lucide-svelte";
 
   const store = useTunnels();
   const toast = useToast();
@@ -23,6 +22,7 @@
 
   let deleteTunnel: Tunnel | null = $state(null);
   let editingTunnelId: string | null = $state(null);
+  let formOpen = $state(true);
 
   onMount(async () => {
     theme.init();
@@ -38,6 +38,7 @@
     switch (action) {
       case "edit":
         editingTunnelId = data as string;
+        formOpen = true;
         break;
       case "delete": {
         const tunnel = data as Tunnel;
@@ -75,43 +76,66 @@
   function handleEditSaved() {
     editingTunnelId = null;
   }
+
+  function handleCreateFirst() {
+    formOpen = true;
+    editingTunnelId = null;
+    queueMicrotask(() => {
+      const el = document.getElementById("conn-name");
+      el?.focus();
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }
 </script>
 
-<svelte:head>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin="anonymous"
-  />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
-    rel="stylesheet"
-  />
-</svelte:head>
-
-<div class="max-w-[1200px] mx-auto flex-1 flex flex-col box-border">
+<div class="flex min-h-0 flex-1 flex-col">
   <Header />
 
   <UpdateBanner />
 
   <main
     class={cn(
-      "grid grid-cols-[360px_1fr] gap-5 flex-1 min-h-0 md:grid-cols-[320px_1fr] md:gap-4 ",
-      "lg:grid-cols-[360px_1fr] lg:gap-5 max-md:grid-cols-1 max-md:overflow-y-auto max-md:gap-4 max-h-[calc(100dvh-11rem)]",
+      "grid min-h-0 flex-1 gap-5",
+      "max-md:grid-cols-1 max-md:content-start",
+      "md:grid-cols-[minmax(0,20rem)_1fr] lg:grid-cols-[minmax(0,22rem)_1fr]",
     )}
   >
-    {#if editingTunnelId}
-      <EditConnection
-        tunnelId={editingTunnelId}
-        onCancel={handleEditCancel}
-        onSaved={handleEditSaved}
+    <div class="min-h-0 max-md:order-1 md:order-2 md:min-h-0">
+      <ConnectionsPanel
+        onAction={handleAction}
+        onCreateFirst={handleCreateFirst}
       />
-    {:else}
-      <NewConnection />
-    {/if}
+    </div>
 
-    <ConnectionsPanel onAction={handleAction} />
+    <div class="max-md:order-2 md:order-1">
+      <button
+        type="button"
+        class="mb-3 flex w-full items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-left text-sm font-medium text-text-heading md:hidden"
+        onclick={() => (formOpen = !formOpen)}
+        aria-expanded={formOpen}
+      >
+        <span>
+          {editingTunnelId ? t("edit_connection") : t("new_connection")}
+        </span>
+        <ChevronDown
+          size={18}
+          class={cn("transition-transform", formOpen && "rotate-180")}
+        />
+      </button>
+
+      <div class={cn(!formOpen && "max-md:hidden")}>
+        {#if editingTunnelId}
+          <ConnectionForm
+            mode="edit"
+            tunnelId={editingTunnelId}
+            onCancel={handleEditCancel}
+            onSaved={handleEditSaved}
+          />
+        {:else}
+          <ConnectionForm mode="create" />
+        {/if}
+      </div>
+    </div>
   </main>
 </div>
 
