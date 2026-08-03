@@ -17,10 +17,10 @@ const (
 )
 
 type Config struct {
-	Version int            `yaml:"version"`
-	Tunnels []TunnelConfig `yaml:"tunnels"`
-	WebPort int            `yaml:"web_port,omitempty"`
-	Language string        `yaml:"language"`
+	Version  int            `yaml:"version"`
+	Tunnels  []TunnelConfig `yaml:"tunnels"`
+	WebPort  int            `yaml:"web_port,omitempty"`
+	Language string         `yaml:"language"`
 
 	NotificationsStatus string `yaml:"notifications_status"`
 	NotificationSound   bool   `yaml:"notification_sound"`
