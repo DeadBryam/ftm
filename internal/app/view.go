@@ -43,6 +43,7 @@ func (m *Model) viewList() string {
 	view.Dashboard = m.App.WebServer.URL()
 	view.Sessions = m.App.WebServer.ClientCount()
 	view.TwoColumnLimit = TwoColumnThreshold
+	view.Shortcuts = m.Keys.listShortcuts()
 	if m.UpdateAvailable != nil {
 		view.UpdateBadge = i18n.TF("update_tui_badge", m.UpdateAvailable.LatestVersion)
 	}

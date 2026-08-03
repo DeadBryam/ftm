@@ -31,6 +31,7 @@ type ListView struct {
 	Sessions       int
 	TwoColumnLimit int
 	UpdateBadge    string
+	Shortcuts      []components.Shortcut
 }
 
 func NewListView() *ListView {
@@ -138,7 +139,10 @@ func (l *ListView) twoColumn() string {
 		b.WriteString("\n")
 	}
 
-	b.WriteString(components.NewHelpBar().Render())
+	help := components.NewHelpBar()
+	help.Shortcuts = l.Shortcuts
+	help.Width = l.Width
+	b.WriteString(help.Render())
 
 	return b.String()
 }
@@ -184,7 +188,10 @@ func (l *ListView) singleColumn() string {
 		b.WriteString("\n")
 	}
 
-	b.WriteString(components.NewHelpBar().Render())
+	help := components.NewHelpBar()
+	help.Shortcuts = l.Shortcuts
+	help.Width = l.Width
+	b.WriteString(help.Render())
 
 	return b.String()
 }

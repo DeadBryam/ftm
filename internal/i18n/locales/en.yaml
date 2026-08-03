@@ -78,6 +78,9 @@ notification_tunnel_expiring: "{name} expires in {minutes} minutes"
 notification_tunnel_expired: "{name} has expired"
 
 # Settings
+navigate: "Navigate"
+start_stop: "Start/stop"
+copy_url: "Copy URL"
 settings: "Settings"
 language: "Language"
 theme: "Theme"

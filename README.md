@@ -13,7 +13,7 @@ Share your Foundry VTT world with players anywhere. No port forwarding needed.
 - **Notifications**: Desktop notifications for tunnel events (online, stopped, error, expiring)
 - **Sounds**: Configurable sound alerts for tunnel status changes
 
-**TUI shortcuts:** `↑/↓` navigate, `s` start/stop, `l` logs, `c` copy URL, `w` web, `o` open config, `a` add, `d` delete, `q` quit
+**TUI shortcuts:** `↑↓`/`kj` navigate, `enter`/`t` start/stop, `l` logs, `c` copy URL, `a` add, `e` edit, `d` delete, `s` settings, `w` web, `o` open config, `u` update, `?` help, `esc` back, `q` quit
 
 ## Interfaces
 
