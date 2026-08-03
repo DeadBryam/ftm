@@ -20,7 +20,7 @@ fi
 
 # Update version.go
 if [ -f "internal/version/version.go" ]; then
-    sed -i.bak "s/const Version = .*/const Version = \"$VERSION_NO_V\"/" internal/version/version.go
+    sed -i.bak "s/^var Version = .*/var Version = \"$VERSION_NO_V\"/" internal/version/version.go
     rm -f internal/version/version.go.bak
     echo "✓ Updated internal/version/version.go"
 fi

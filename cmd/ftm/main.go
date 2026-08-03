@@ -11,8 +11,6 @@ import (
 	"github.com/sthbryan/ftm/internal/version"
 )
 
-var BuildVersion string
-
 func main() {
 	if err := cli.Init(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -58,10 +56,6 @@ func main() {
 		os.Exit(0)
 	}
 
-	if BuildVersion == "" {
-		BuildVersion = version.Version
-	}
-
 	application, err := app.New()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -78,7 +72,7 @@ func main() {
 	}
 
 	url := application.WebServer.URL()
-	fmt.Printf("🎲 Foundry Tunnel Manager v%s\n", BuildVersion)
+	fmt.Printf("🎲 Foundry Tunnel Manager v%s\n", version.Version)
 	fmt.Printf(i18n.TF("dashboard_url", url))
 
 	if *webOnly {
