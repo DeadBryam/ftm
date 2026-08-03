@@ -101,7 +101,7 @@ ftm --web        # Web dashboard only
 ## Build from Source
 
 **Requirements:**
-- Go 1.21+
+- Go 1.25+
 - Bun 1.3+ (for building web frontend)
 - Wails (for desktop app)
 
