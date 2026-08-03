@@ -5,27 +5,43 @@
 # (Manager.Stop, Config.Save and clipboard.Write all fail silently today).
 # Turning it on wholesale would either bury those in a mechanical sweep or
 # paint CI red. It gets its own pass.
-run:
-  timeout: 5m
+#
+# Config format is golangci-lint v2 (required for Go 1.25+).
+version: "2"
 
 linters:
-  disable-all: true
+  default: none
   enable:
+    - bodyclose
     - govet
+    - ineffassign
+    - misspell
     - staticcheck
     - unused
-    - ineffassign
-    - gosimple
-    - misspell
-    - bodyclose
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      # The bubbletea mouse API these use is deprecated, but the whole mouse
+      # handler is being rewritten against the newer API in the TUI pass.
+      - linters:
+          - staticcheck
+        path: internal/app/keyhandlers_mouse\.go
+        text: SA1019
+    paths:
+      - desktop
+      - third_party$
+      - builtin$
+      - examples$
 
-issues:
-  exclude-dirs:
-    - desktop
-  exclude-rules:
-    # The bubbletea mouse API these use is deprecated, but the whole mouse
-    # handler is being rewritten against the newer API in the TUI pass.
-    - path: internal/app/keyhandlers_mouse\.go
-      linters:
-        - staticcheck
-      text: "SA1019"
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

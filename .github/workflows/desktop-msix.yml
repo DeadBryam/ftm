@@ -1,0 +1,109 @@
+# Build Windows desktop + MSIX on demand (no GitHub Release).
+# Run from Actions → "Desktop MSIX" → Run workflow.
+# Download the msix-ftm-desktop artifact when the job finishes.
+name: Desktop MSIX
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  GO_VERSION: '1.25'
+  BUN_VERSION: '1.3'
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version (e.g. 0.10.0). Defaults to 0.0.0+run_id'
+        required: false
+        default: ''
+      identity_name:
+        description: 'MSIX Identity Name (Partner Center). Empty = secret MS_STORE_IDENTITY_NAME or sthbryan.ftm'
+        required: false
+        default: ''
+      publisher:
+        description: 'MSIX Publisher CN=... (Partner Center). Empty = secret MS_STORE_PUBLISHER or CN=ftm-ci'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-msix-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-msix:
+    name: Build Windows desktop + MSIX
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Build web assets
+        shell: bash
+        run: |
+          cd web-svelte && bun install && bun run build
+          rm -rf ../internal/web/static
+          mkdir -p ../internal/web/static
+          cp -r dist/* ../internal/web/static/
+          touch ../internal/web/static/.gitkeep
+
+      - name: Build desktop
+        shell: bash
+        run: |
+          mkdir -p desktop/build/bin
+          CGO_ENABLED=1 go build -tags production -ldflags "-s -w" \
+            -o desktop/build/bin/ftm-desktop-windows.exe ./desktop
+
+      - name: Package MSIX
+        shell: pwsh
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_IDENTITY: ${{ inputs.identity_name }}
+          INPUT_PUBLISHER: ${{ inputs.publisher }}
+          SECRET_IDENTITY: ${{ secrets.MS_STORE_IDENTITY_NAME }}
+          SECRET_PUBLISHER: ${{ secrets.MS_STORE_PUBLISHER }}
+        run: |
+          $ver = $env:INPUT_VERSION
+          if ([string]::IsNullOrWhiteSpace($ver)) {
+            $ver = "0.0.0.${{ github.run_number }}"
+          }
+          $id = $env:INPUT_IDENTITY
+          if ([string]::IsNullOrWhiteSpace($id)) { $id = $env:SECRET_IDENTITY }
+          if ([string]::IsNullOrWhiteSpace($id)) { $id = "sthbryan.ftm" }
+          $pub = $env:INPUT_PUBLISHER
+          if ([string]::IsNullOrWhiteSpace($pub)) { $pub = $env:SECRET_PUBLISHER }
+          if ([string]::IsNullOrWhiteSpace($pub)) { $pub = "CN=ftm-ci" }
+
+          Write-Host "MSIX IdentityName=$id Publisher=$pub Version=$ver"
+          .\scripts\package-msix.ps1 `
+            -ExePath .\desktop\build\bin\ftm-desktop-windows.exe `
+            -Version $ver `
+            -IdentityName $id `
+            -Publisher $pub `
+            -OutputDir .\desktop\build\msix `
+            -OutputName ftm-desktop `
+            -ExeName ftm-desktop.exe `
+            -IconPath .\desktop\icon.png
+
+      - name: Upload MSIX
+        uses: actions/upload-artifact@v4
+        with:
+          name: msix-ftm-desktop
+          path: desktop/build/msix/*.msix
+          retention-days: 14
+
+      - name: Upload Windows exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: ftm-desktop-windows-exe
+          path: desktop/build/bin/ftm-desktop-windows.exe
+          retention-days: 14

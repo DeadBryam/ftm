@@ -176,7 +176,7 @@ Missing binaries are downloaded when you start a tunnel that needs them. SSH pro
 
 ## Development
 
-Go 1.22+ and Bun. Desktop builds also need [Wails](https://wails.io).
+Go 1.25+ and Bun. Desktop uses [Wails v3](https://v3.wails.io) (CGO + platform webview; no separate `wails` CLI required for builds).
 
 ```bash
 make build-full   # web assets + bin/ftm with the UI embedded
@@ -187,7 +187,7 @@ make test-race    # go test -race ./...
 make vet          # go vet ./...
 make fmt          # gofmt -w, then verify nothing is left unformatted
 make install      # web + binary → $BINDIR (default $(go env GOPATH)/bin)
-make desktop      # Wails app (no package)
+make desktop      # Wails v3 desktop shell → desktop/build/bin/ftm-desktop
 make help         # full target list
 ```
 

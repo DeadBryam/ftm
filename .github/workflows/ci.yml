@@ -2,7 +2,7 @@ name: CI
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  GO_VERSION: '1.22'
+  GO_VERSION: '1.25'
   BUN_VERSION: '1.3'
 
 on:
@@ -42,9 +42,9 @@ jobs:
         run: go vet $(go list ./... | grep -v '/desktop')
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.64.8
+          version: v2.12.2
           args: --timeout=5m ./cmd/... ./internal/...
 
       - name: Test
