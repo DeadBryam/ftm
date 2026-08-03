@@ -68,7 +68,7 @@ func (l *ListView) twoColumn() string {
 		Render("v" + version.Version + "  ws:" + fmt.Sprintf("%d", l.Sessions))
 
 	b.WriteString(title)
-	b.WriteString(strings.Repeat(" ", l.Width-lipgloss.Width(title)-lipgloss.Width(versionStr)-ui.HeaderMargin))
+	b.WriteString(ui.Repeat(" ", l.Width-lipgloss.Width(title)-lipgloss.Width(versionStr)-ui.HeaderMargin))
 	b.WriteString(versionStr)
 	b.WriteString("\n")
 
@@ -93,12 +93,12 @@ func (l *ListView) twoColumn() string {
 		Render(i18n.T("selected_tunnel"))
 
 	b.WriteString(leftHeader)
-	b.WriteString(strings.Repeat(" ", leftWidth-lipgloss.Width(leftHeader)+3))
+	b.WriteString(ui.Repeat(" ", leftWidth-lipgloss.Width(leftHeader)+3))
 	b.WriteString(rightHeader)
 	b.WriteString("\n")
 
 	dividerStyle := lipgloss.NewStyle().Foreground(bronze)
-	b.WriteString(dividerStyle.Render(strings.Repeat("─", l.Width-2)))
+	b.WriteString(dividerStyle.Render(ui.Repeat("─", l.Width-2)))
 	b.WriteString("\n")
 
 	listContent := l.renderTunnelList(leftWidth - 2)
@@ -158,7 +158,7 @@ func (l *ListView) singleColumn() string {
 		Render("v" + version.Version + "  ws:" + fmt.Sprintf("%d", l.Sessions))
 
 	b.WriteString(title)
-	b.WriteString(strings.Repeat(" ", l.Width-lipgloss.Width(title)-lipgloss.Width(versionStr)-ui.HeaderMargin))
+	b.WriteString(ui.Repeat(" ", l.Width-lipgloss.Width(title)-lipgloss.Width(versionStr)-ui.HeaderMargin))
 	b.WriteString(versionStr)
 	b.WriteString("\n")
 
