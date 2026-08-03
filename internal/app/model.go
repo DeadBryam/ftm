@@ -3,7 +3,7 @@ package app
 import (
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/i18n"
@@ -18,25 +18,49 @@ type (
 	tickMsg struct{}
 )
 
+const (
+	refreshInterval = time.Second
+	messageTimeout  = 3 * time.Second
+)
+
 func (m *Model) Init() tea.Cmd {
 	return tea.Batch(
+		tea.RequestBackgroundColor,
 		tickCmd(),
+		m.waitForStatus(),
 		m.checkDownloadProgress(),
 		checkUpdateCmd(),
 	)
 }
 
 func tickCmd() tea.Cmd {
-	return tea.Every(100*time.Millisecond, func(t time.Time) tea.Msg {
+	return tea.Every(refreshInterval, func(t time.Time) tea.Msg {
 		return tickMsg{}
 	})
+}
+
+func (m *Model) waitForStatus() tea.Cmd {
+	return func() tea.Msg {
+		status, ok := <-m.statusUpdates
+		if !ok {
+			return nil
+		}
+		return statusUpdateMsg{tunnelID: status.ID, status: status}
+	}
+}
+
+func (m *Model) publishStatus(status config.TunnelStatus) {
+	select {
+	case m.statusUpdates <- status:
+	default:
+	}
 }
 
 type downloadProgressMsg providers.DownloadProgress
 
 func (m *Model) showMessage(msg string) {
 	m.Message = msg
-	m.MessageTimer = 30
+	m.messageUntil = time.Now().Add(messageTimeout)
 }
 
 func (m *Model) startTunnel(item TunnelItem) tea.Cmd {
@@ -49,8 +73,7 @@ func (m *Model) startTunnel(item TunnelItem) tea.Cmd {
 			return m.installProvider(item.Tunnel.Provider)()
 		}
 
-		err := m.App.Manager.Start(item.Tunnel, func(status config.TunnelStatus) {
-		})
+		err := m.App.Manager.Start(item.Tunnel, m.publishStatus)
 
 		if err != nil {
 			return statusUpdateMsg{

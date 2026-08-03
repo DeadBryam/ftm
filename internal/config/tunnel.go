@@ -11,6 +11,17 @@ const (
 	ProviderBore         Provider = "bore"
 )
 
+func AllProviders() []Provider {
+	return []Provider{
+		ProviderCloudflared,
+		ProviderTunnelmole,
+		ProviderLocalhostRun,
+		ProviderServeo,
+		ProviderPinggy,
+		ProviderBore,
+	}
+}
+
 type TunnelState string
 
 const (

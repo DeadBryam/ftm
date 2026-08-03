@@ -3,13 +3,12 @@ package app
 import (
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 )
 
-func (m *Model) handleLogsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) handleLogsKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.LogViewport, cmd = m.LogViewport.Update(msg)
-	m.updateLogViewport()
 	return m, cmd
 }
 
@@ -18,8 +17,11 @@ func (m *Model) updateLogViewport() {
 		return
 	}
 
-	logs := m.App.Manager.GetLogs(m.SelectedTunnel)
-	content := strings.Join(logs, "\n")
-	m.LogViewport.SetContent(content)
-	m.LogViewport.GotoBottom()
+	following := m.LogViewport.AtBottom()
+
+	m.LogViewport.SetContent(strings.Join(m.App.Manager.GetLogs(m.SelectedTunnel), "\n"))
+
+	if following {
+		m.LogViewport.GotoBottom()
+	}
 }

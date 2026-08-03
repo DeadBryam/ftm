@@ -1,32 +1,43 @@
 package app
 
 import (
+	tea "charm.land/bubbletea/v2"
+
+	"github.com/sthbryan/ftm/internal/app/ui"
 	"github.com/sthbryan/ftm/internal/app/ui/views"
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/i18n"
 )
 
-func (m *Model) View() string {
+func (m *Model) View() tea.View {
+	var content string
+	var cursor *tea.Cursor
 	if m.Width == 0 || m.Height == 0 {
-		return i18n.T("loading")
+		content = i18n.T("loading")
+	} else {
+		switch m.State {
+		case viewList:
+			content = m.viewList()
+		case viewLogs:
+			content = ui.Overlay(m.viewList(), m.viewLogs(), m.Width, m.Height)
+		case viewNewTunnel, viewEditTunnel:
+			content, cursor = m.overlayTunnelEditor()
+		case viewDownloading:
+			content = m.viewDownloading()
+		case viewSettings:
+			content = ui.Overlay(m.viewList(), m.viewSettings(), m.Width, m.Height)
+		case viewConfirm:
+			content = ui.Overlay(m.viewList(), m.viewConfirm(), m.Width, m.Height)
+		default:
+			content = m.viewList()
+		}
 	}
 
-	switch m.State {
-	case viewList:
-		return m.viewList()
-	case viewLogs:
-		return m.viewLogs()
-	case viewAddForm:
-		return m.viewAddForm(false)
-	case viewEditForm:
-		return m.viewAddForm(true)
-	case viewDownloading:
-		return m.viewDownloading()
-	case viewSettings:
-		return m.viewSettings()
-	default:
-		return m.viewList()
-	}
+	v := tea.NewView(ui.Fill(content, m.Width, m.Height))
+	v.Cursor = cursor
+	v.AltScreen = true
+	v.MouseMode = tea.MouseModeCellMotion
+	return v
 }
 
 func (m *Model) viewList() string {
@@ -43,25 +54,35 @@ func (m *Model) viewList() string {
 	view.Dashboard = m.App.WebServer.URL()
 	view.Sessions = m.App.WebServer.ClientCount()
 	view.TwoColumnLimit = TwoColumnThreshold
+	view.Shortcuts = m.Keys.listShortcuts()
 	if m.UpdateAvailable != nil {
 		view.UpdateBadge = i18n.TF("update_tui_badge", m.UpdateAvailable.LatestVersion)
 	}
 
-	return view.Render()
+	rendered := view.Render()
+	m.listTop = view.ListTop
+	m.listFirst = view.FirstItem
+
+	return rendered
 }
 
 func (m *Model) collectTunnelData() []views.TunnelViewData {
 	data := make([]views.TunnelViewData, 0, len(m.Items))
-	for _, item := range m.Items {
+	for i, item := range m.Items {
 		if ti, ok := item.(TunnelItem); ok {
+			var logs []string
+			if i == m.Cursor {
+				logs = m.App.Manager.GetLogs(ti.Tunnel.ID)
+			}
+
 			data = append(data, views.TunnelViewData{
 				Name:        ti.Tunnel.Name,
 				Provider:    string(ti.Tunnel.Provider),
 				LocalPort:   ti.Tunnel.LocalPort,
 				StatusState: statusStateIndex(ti.Status.State),
-				StatusMsg:   statusMsg(ti.Status.State),
 				PublicURL:   ti.Status.PublicURL,
 				ErrorMsg:    ti.Status.ErrorMessage,
+				Logs:        logs,
 			})
 		}
 	}
@@ -87,23 +108,6 @@ func statusStateIndex(state config.TunnelState) int {
 	}
 }
 
-func statusMsg(state config.TunnelState) string {
-	switch state {
-	case config.TunnelStateStarting:
-		return i18n.T("starting")
-	case config.TunnelStateConnecting:
-		return i18n.T("connecting")
-	case config.TunnelStateOnline:
-		return i18n.T("online")
-	case config.TunnelStateError:
-		return i18n.T("error")
-	case config.TunnelStateTimeout:
-		return i18n.T("timeout")
-	default:
-		return i18n.T("offline")
-	}
-}
-
 func (m *Model) viewEmptyState() string {
 	view := views.NewEmptyState()
 	view.Height = m.Height
@@ -115,18 +119,17 @@ func (m *Model) viewEmptyState() string {
 }
 
 func (m *Model) viewLogs() string {
-	view := views.NewLogsView()
-	view.Width = m.Width
-	view.TunnelName = m.getTunnelName(m.SelectedTunnel)
+	width, height := views.LogsBox(m.Width, m.Height)
 
-	logs := m.App.Manager.GetLogs(m.SelectedTunnel)
-	var content string
-	for _, log := range logs {
-		content += log + "\n"
-	}
-	view.Content = content
-
+	m.LogViewport.SetWidth(ui.PanelInner(width))
+	m.LogViewport.SetHeight(height - ui.PanelChrome - 1)
 	m.updateLogViewport()
+
+	view := views.NewLogsView()
+	view.Width = width
+	view.Height = height
+	view.TunnelName = m.getTunnelName(m.SelectedTunnel)
+	view.Content = m.LogViewport.View()
 
 	return view.Render()
 }
@@ -144,16 +147,36 @@ func (m *Model) getTunnelName(id string) string {
 	return ""
 }
 
-func (m *Model) viewAddForm(isEdit bool) string {
-	view := views.NewFormView()
-	view.Width = m.Width
-	view.Focus = m.FormFocus
-	view.IsEditMode = isEdit
-	view.Name = m.FormValues.Name
-	view.Provider = m.FormValues.Provider
-	view.Port = m.FormValues.Port
+func (m *Model) overlayTunnelEditor() (string, *tea.Cursor) {
+	view := views.NewTunnelEditor()
+	view.Providers = providerNames()
+	view.Focus = m.EditorFocus
+	view.IsEditMode = m.State == viewEditTunnel
+	view.Name = m.Draft.Name
+	view.Provider = m.Draft.Provider
+	view.Port = m.Draft.Port
 
-	return view.Render()
+	editor := view.Render()
+	content := ui.Overlay(m.viewList(), editor, m.Width, m.Height)
+
+	if !view.HasCursor {
+		return content, nil
+	}
+
+	x, y := ui.OverlayOrigin(editor, m.Width, m.Height)
+
+	return content, tea.NewCursor(x+view.CursorColumn, y+view.CursorRow)
+}
+
+func providerNames() []string {
+	all := config.AllProviders()
+
+	names := make([]string, 0, len(all))
+	for _, provider := range all {
+		names = append(names, i18n.ProviderText(string(provider)))
+	}
+
+	return names
 }
 
 func (m *Model) viewDownloading() string {
@@ -169,9 +192,17 @@ func (m *Model) viewDownloading() string {
 	return view.Render(progressView)
 }
 
+func (m *Model) viewConfirm() string {
+	view := views.NewConfirmView()
+	view.Danger = true
+	view.Title = i18n.T("confirm_delete_title")
+	view.Message = i18n.TF("confirm_delete_body", m.pendingDeleteName)
+
+	return view.Render()
+}
+
 func (m *Model) viewSettings() string {
 	view := views.NewSettingsView()
-	view.Width = m.Width
 	if m.SettingsView != nil {
 		view.NotificationsEnabled = m.SettingsView.NotificationsEnabled
 		view.NotificationSound = m.SettingsView.NotificationSound

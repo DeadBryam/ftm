@@ -1,15 +1,15 @@
 package app
 
 import (
-	"github.com/charmbracelet/bubbles/key"
-	tea "github.com/charmbracelet/bubbletea"
+	"charm.land/bubbles/v2/key"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/sthbryan/ftm/internal/app/ui/views"
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/i18n"
 )
 
-func (m *Model) handleSettingsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) handleSettingsKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	if m.SettingsView == nil {
 		m.State = viewList
 		return m, nil

@@ -3,35 +3,59 @@ package components
 import (
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
 	"github.com/sthbryan/ftm/internal/app/ui"
-	"github.com/sthbryan/ftm/internal/i18n"
 )
 
-type HelpBar struct{}
+type Shortcut struct {
+	Keys  string
+	Label string
+}
+
+type HelpBar struct {
+	Shortcuts []Shortcut
+	Width     int
+}
 
 func NewHelpBar() *HelpBar {
 	return &HelpBar{}
 }
 
+const helpSeparator = "  •  "
+
 func (h *HelpBar) Render() string {
-	shortcuts := []string{
-		i18n.T("navigation_hint"),
-		"a " + i18n.T("create"),
-		"e " + i18n.T("edit"),
-		"d " + i18n.T("delete"),
-		"s " + i18n.T("settings"),
-		"l " + i18n.T("logs"),
-		"w " + i18n.T("web"),
-		"o " + i18n.T("config"),
-		"q " + i18n.T("close"),
+	if len(h.Shortcuts) == 0 {
+		return ""
 	}
 
-	firstLine := strings.Join(shortcuts[:5], "  •  ")
-	secondLine := strings.Join(shortcuts[5:], "  •  ")
-	content := firstLine + "\n" + secondLine
+	keyStyle := lipgloss.NewStyle().Foreground(ui.ThemeDefault.Gold)
+	labelStyle := lipgloss.NewStyle().Foreground(ui.ThemeDefault.TextDim)
+	separator := labelStyle.Render(helpSeparator)
 
-	return lipgloss.NewStyle().
-		Foreground(ui.ThemeDefault.TextDim).
-		Render(content)
+	entries := make([]string, 0, len(h.Shortcuts))
+	for _, s := range h.Shortcuts {
+		entries = append(entries, keyStyle.Render(s.Keys)+" "+labelStyle.Render(s.Label))
+	}
+
+	var b strings.Builder
+	lineWidth := 0
+
+	for i, entry := range entries {
+		entryWidth := lipgloss.Width(entry)
+
+		switch {
+		case i == 0:
+			lineWidth = entryWidth
+		case h.Width > 0 && lineWidth+lipgloss.Width(separator)+entryWidth > h.Width:
+			b.WriteString("\n")
+			lineWidth = entryWidth
+		default:
+			b.WriteString(separator)
+			lineWidth += lipgloss.Width(separator) + entryWidth
+		}
+
+		b.WriteString(entry)
+	}
+
+	return b.String()
 }

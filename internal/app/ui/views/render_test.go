@@ -9,7 +9,6 @@ func sampleItems() []TunnelViewData {
 			Provider:    "cloudflared",
 			LocalPort:   30000,
 			StatusState: 3,
-			StatusMsg:   "online",
 			PublicURL:   "https://random-words-here.trycloudflare.com",
 		},
 		{
@@ -17,7 +16,6 @@ func sampleItems() []TunnelViewData {
 			Provider:    "pinggy",
 			LocalPort:   30001,
 			StatusState: 4,
-			StatusMsg:   "error",
 			ErrorMsg:    "connection refused",
 		},
 	}

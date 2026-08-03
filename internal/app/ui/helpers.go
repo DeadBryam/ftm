@@ -3,10 +3,9 @@ package ui
 import (
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
+	"github.com/mattn/go-runewidth"
 )
-
-const HeaderMargin = 4
 
 func Repeat(s string, count int) string {
 	if count <= 0 {
@@ -20,6 +19,19 @@ func Clamp(v, min int) int {
 		return min
 	}
 	return v
+}
+
+func Truncate(s string, width int) string {
+	if width <= 0 {
+		return ""
+	}
+	if runewidth.StringWidth(s) <= width {
+		return s
+	}
+	if width <= 1 {
+		return runewidth.Truncate(s, width, "")
+	}
+	return runewidth.Truncate(s, width, "…")
 }
 
 func Center(s string, width int) string {

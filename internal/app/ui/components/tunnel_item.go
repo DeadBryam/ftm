@@ -2,9 +2,10 @@ package components
 
 import (
 	"fmt"
+	"image/color"
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
 	"github.com/sthbryan/ftm/internal/app/ui"
 	"github.com/sthbryan/ftm/internal/i18n"
 )
@@ -15,13 +16,39 @@ type TunnelItem struct {
 	Provider    string
 	LocalPort   int
 	StatusState int
-	StatusMsg   string
 	Width       int
+	MetaWidth   int
+}
+
+func MetaText(provider string, localPort int) string {
+	return fmt.Sprintf("%s:%d", provider, localPort)
+}
+
+func FitMetaColumn(rowWidth int, metas []string) int {
+	widest := 0
+	for _, meta := range metas {
+		if w := lipgloss.Width(meta); w > widest {
+			widest = w
+		}
+	}
+
+	fixed := widestLabel(StatusBadge) + widestLabel(StatusLabel) + 3*columnGap
+	if rowWidth-2*horizontalPadding-1-fixed-widest < minNameWidth {
+		return 0
+	}
+
+	return widest
 }
 
 func NewTunnelItem() *TunnelItem {
 	return &TunnelItem{}
 }
+
+const (
+	minNameWidth      = 8
+	horizontalPadding = 1
+	columnGap         = 2
+)
 
 const (
 	TunnelStateOffline    = 0
@@ -32,6 +59,16 @@ const (
 	TunnelStateTimeout    = 5
 	TunnelStateStopped    = 6
 )
+
+var allStates = []int{
+	TunnelStateOffline,
+	TunnelStateStarting,
+	TunnelStateConnecting,
+	TunnelStateOnline,
+	TunnelStateError,
+	TunnelStateTimeout,
+	TunnelStateStopped,
+}
 
 func StatusBadge(state int) string {
 	switch state {
@@ -63,88 +100,135 @@ func StatusLabel(state int) string {
 	}
 }
 
-func (t *TunnelItem) Render() string {
-	var bgColor lipgloss.Color
+func widestLabel(label func(int) string) int {
+	widest := 0
+	for _, state := range allStates {
+		if w := lipgloss.Width(label(state)); w > widest {
+			widest = w
+		}
+	}
+	return widest
+}
 
+func StatusColor(state int) color.Color {
+	switch state {
+	case TunnelStateOnline:
+		return ui.ThemeDefault.Success
+	case TunnelStateError, TunnelStateTimeout:
+		return ui.ThemeDefault.Danger
+	case TunnelStateStarting, TunnelStateConnecting:
+		return ui.ThemeDefault.Gold
+	default:
+		return ui.ThemeDefault.TextDim
+	}
+}
+
+func (t *TunnelItem) background() color.Color {
 	switch t.StatusState {
 	case TunnelStateStarting, TunnelStateConnecting:
-		bgColor = ui.ThemeDefault.Connecting
+		return ui.ThemeDefault.Connecting
 	case TunnelStateOnline:
-		bgColor = ui.ThemeDefault.Online
+		return ui.ThemeDefault.Online
 	case TunnelStateError, TunnelStateTimeout:
-		bgColor = ui.ThemeDefault.Error
+		return ui.ThemeDefault.Error
 	case TunnelStateStopped:
-		bgColor = ui.ThemeDefault.Stopped
+		return ui.ThemeDefault.Stopped
 	default:
-		bgColor = ui.ThemeDefault.Offline
+		return ui.ThemeDefault.Offline
+	}
+}
+
+type column struct {
+	text  string
+	width int
+	style lipgloss.Style
+}
+
+func (t *TunnelItem) Render() string {
+	background := t.background()
+
+	cell := lipgloss.NewStyle().Background(background)
+
+	inner := t.Width - 2*horizontalPadding - 1
+	if inner < minNameWidth {
+		inner = minNameWidth
 	}
 
-	var parts []string
-
-	if t.Selected {
-		parts = append(parts, lipgloss.NewStyle().
-			Foreground(ui.ThemeDefault.Gold).
-			Background(bgColor).
-			Render("▶"))
-	} else {
-		parts = append(parts, lipgloss.NewStyle().
-			Background(bgColor).
-			Render("  "))
+	trailing := []column{
+		{
+			text:  StatusLabel(t.StatusState),
+			width: widestLabel(StatusLabel),
+			style: cell.Foreground(StatusColor(t.StatusState)),
+		},
 	}
 
-	parts = append(parts, t.statusBadge(bgColor))
-	parts = append(parts, t.name(bgColor))
-	parts = append(parts, t.statusText(bgColor))
-	parts = append(parts, t.meta(bgColor))
+	if t.MetaWidth > 0 {
+		trailing = append(trailing, column{
+			text:  MetaText(t.Provider, t.LocalPort),
+			width: t.MetaWidth,
+			style: cell.Foreground(ui.ThemeDefault.TextDim).Align(lipgloss.Right),
+		})
+	}
 
-	content := strings.Join(parts, lipgloss.NewStyle().Background(bgColor).Render(" "))
+	leading := []column{
+		{
+			text:  StatusBadge(t.StatusState),
+			width: widestLabel(StatusBadge),
+			style: cell.Foreground(StatusColor(t.StatusState)).Bold(true),
+		},
+	}
+
+	nameWidth := t.nameWidth(inner, leading, trailing)
+	for nameWidth < minNameWidth && len(trailing) > 0 {
+		trailing = trailing[:len(trailing)-1]
+		nameWidth = t.nameWidth(inner, leading, trailing)
+	}
+
+	name := column{
+		text:  ui.Truncate(t.Name, nameWidth),
+		width: nameWidth,
+		style: cell.Foreground(ui.ThemeDefault.Text).Bold(t.Selected),
+	}
+
+	columns := make([]column, 0, len(leading)+1+len(trailing))
+	columns = append(columns, leading...)
+	columns = append(columns, name)
+	columns = append(columns, trailing...)
+
+	rendered := make([]string, 0, len(columns))
+	for _, c := range columns {
+		rendered = append(rendered, c.style.Width(c.width).Render(c.text))
+	}
 
 	itemStyle := lipgloss.NewStyle().
-		Background(bgColor).
+		Background(background).
 		Width(t.Width).
-		Padding(0, 1)
+		MaxHeight(1).
+		Padding(0, horizontalPadding)
 
 	if t.Selected {
-		itemStyle = itemStyle.BorderStyle(lipgloss.Border{
-			Left: "█",
-		}).BorderLeft(true).BorderForeground(ui.ThemeDefault.Gold)
+		itemStyle = itemStyle.
+			BorderStyle(lipgloss.Border{Left: "▌"}).
+			BorderLeft(true).
+			BorderForeground(ui.ThemeDefault.Gold).
+			BorderBackground(background)
+	} else {
+		itemStyle = itemStyle.PaddingLeft(horizontalPadding + 1)
 	}
 
-	return itemStyle.Render(content)
+	return itemStyle.Render(strings.Join(rendered, cell.Render(strings.Repeat(" ", columnGap))))
 }
 
-func (t *TunnelItem) statusBadge(bgColor lipgloss.Color) string {
-	return lipgloss.NewStyle().
-		Background(bgColor).
-		Render(StatusBadge(t.StatusState))
-}
-
-func (t *TunnelItem) name(bgColor lipgloss.Color) string {
-	name := t.Name
-	if len(name) > 18 {
-		name = name[:15] + "..."
+func (t *TunnelItem) nameWidth(inner int, leading, trailing []column) int {
+	used := 0
+	for _, c := range leading {
+		used += c.width
+	}
+	for _, c := range trailing {
+		used += c.width
 	}
 
-	return lipgloss.NewStyle().
-		Bold(t.Selected).
-		Foreground(ui.ThemeDefault.Text).
-		Background(bgColor).
-		Render(name)
-}
+	gaps := (len(leading) + len(trailing)) * columnGap
 
-func (t *TunnelItem) statusText(bgColor lipgloss.Color) string {
-	return lipgloss.NewStyle().
-		Foreground(ui.ThemeDefault.Text).
-		Background(bgColor).
-		Padding(0, 1).
-		Render(t.StatusMsg)
-}
-
-func (t *TunnelItem) meta(bgColor lipgloss.Color) string {
-	meta := fmt.Sprintf("%s: %d", t.Provider, t.LocalPort)
-
-	return lipgloss.NewStyle().
-		Foreground(ui.ThemeDefault.TextDim).
-		Background(bgColor).
-		Render(meta)
+	return inner - used - gaps
 }

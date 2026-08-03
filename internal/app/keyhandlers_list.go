@@ -2,17 +2,17 @@ package app
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/charmbracelet/bubbles/key"
-	tea "github.com/charmbracelet/bubbletea"
+	"charm.land/bubbles/v2/key"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/sthbryan/ftm/internal/clipboard"
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/i18n"
+	"github.com/sthbryan/ftm/internal/notifications"
 )
 
-func (m *Model) handleListKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) handleListKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	switch {
 	case key.Matches(msg, m.Keys.Up):
 		m.moveCursorUp()
@@ -40,10 +40,10 @@ func (m *Model) handleListKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.openConfigDir()
 
 	case key.Matches(msg, m.Keys.Add):
-		m.startAddForm()
+		m.startNewTunnel()
 
 	case key.Matches(msg, m.Keys.Edit):
-		return m.startEditForm()
+		return m.startEditTunnel()
 
 	case key.Matches(msg, m.Keys.Delete):
 		return m.handleListDelete()
@@ -94,25 +94,25 @@ func (m *Model) handleListCopy() {
 	}
 }
 
-func (m *Model) startAddForm() {
-	m.State = viewAddForm
-	m.FormFocus = 0
-	m.FormValues = FormData{
+func (m *Model) startNewTunnel() {
+	m.State = viewNewTunnel
+	m.EditorFocus = 0
+	m.Draft = TunnelDraft{
 		Provider: string(config.ProviderCloudflared),
 		Port:     "30000",
 	}
 }
 
-func (m *Model) startEditForm() (tea.Model, tea.Cmd) {
+func (m *Model) startEditTunnel() (tea.Model, tea.Cmd) {
 	if item, ok := m.selectedItem(); ok {
 		if item.Status.State != config.TunnelStateStopped {
 			m.showMessage(i18n.T("error_tunnel_running"))
 			return m, nil
 		}
-		m.State = viewEditForm
+		m.State = viewEditTunnel
 		m.editingTunnelID = item.Tunnel.ID
-		m.FormFocus = 0
-		m.FormValues = FormData{
+		m.EditorFocus = 0
+		m.Draft = TunnelDraft{
 			ID:       item.Tunnel.ID,
 			Name:     item.Tunnel.Name,
 			Provider: string(item.Tunnel.Provider),
@@ -124,16 +124,38 @@ func (m *Model) startEditForm() (tea.Model, tea.Cmd) {
 
 func (m *Model) handleListDelete() (tea.Model, tea.Cmd) {
 	if item, ok := m.selectedItem(); ok {
-		m.App.Manager.Stop(item.Tunnel.ID)
-		m.App.Config.RemoveTunnel(item.Tunnel.ID)
-		m.App.SaveConfig()
-		m.refreshItems()
-		if m.Cursor >= len(m.Items) && m.Cursor > 0 {
-			m.Cursor--
-		}
-		m.showMessage(i18n.T("tunnel_deleted"))
+		m.pendingDeleteID = item.Tunnel.ID
+		m.pendingDeleteName = item.Tunnel.Name
+		m.State = viewConfirm
 	}
 	return m, nil
+}
+
+func (m *Model) confirmDelete() (tea.Model, tea.Cmd) {
+	id := m.pendingDeleteID
+	m.cancelDelete()
+
+	if id == "" {
+		return m, nil
+	}
+
+	m.App.Manager.Stop(id)
+	m.App.Config.RemoveTunnel(id)
+	m.App.SaveConfig()
+	m.refreshItems()
+
+	if m.Cursor >= len(m.Items) && m.Cursor > 0 {
+		m.Cursor--
+	}
+	m.showMessage(i18n.T("tunnel_deleted"))
+
+	return m, nil
+}
+
+func (m *Model) cancelDelete() {
+	m.pendingDeleteID = ""
+	m.pendingDeleteName = ""
+	m.State = viewList
 }
 
 func (m *Model) copyTunnelURL(item TunnelItem) {
@@ -171,6 +193,6 @@ func (m *Model) handleListUpdate() (tea.Model, tea.Cmd) {
 
 func (m *Model) playBeep() {
 	if m.App.Config.NotificationSound {
-		fmt.Fprint(os.Stdout, Bell)
+		notifications.PlaySound(notifications.SoundInfo)
 	}
 }

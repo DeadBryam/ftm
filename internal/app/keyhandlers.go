@@ -1,11 +1,30 @@
 package app
 
 import (
-	"github.com/charmbracelet/bubbles/key"
-	tea "github.com/charmbracelet/bubbletea"
+	"charm.land/bubbles/v2/key"
+	tea "charm.land/bubbletea/v2"
 )
 
-func (m *Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) entersText() bool {
+	return m.State == viewNewTunnel || m.State == viewEditTunnel
+}
+
+func (m *Model) handleKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
+	if key.Matches(msg, m.Keys.ForceQuit) {
+		return m, tea.Quit
+	}
+
+	if m.entersText() {
+		if key.Matches(msg, m.Keys.Back) {
+			return m.handleBack()
+		}
+		return m.handleEditorKey(msg)
+	}
+
+	if m.State == viewConfirm {
+		return m.handleConfirmKey(msg)
+	}
+
 	switch {
 	case key.Matches(msg, m.Keys.Quit):
 		return m.handleQuit()
@@ -23,8 +42,6 @@ func (m *Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.handleListKey(msg)
 	case viewLogs:
 		return m.handleLogsKey(msg)
-	case viewAddForm, viewEditForm:
-		return m.handleFormKey(msg)
 	case viewDownloading:
 		return m.handleDownloadingKey(msg)
 	case viewSettings:
@@ -35,17 +52,18 @@ func (m *Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) handleQuit() (tea.Model, tea.Cmd) {
-	if m.State == viewSettings {
-		m.saveSettings()
+	if m.State != viewList {
+		return m.handleBack()
 	}
-	if m.State == viewList {
-		return m, tea.Quit
-	}
-	m.State = viewList
-	return m, nil
+	return m, tea.Quit
 }
 
 func (m *Model) handleBack() (tea.Model, tea.Cmd) {
+	if m.State == viewConfirm {
+		m.cancelDelete()
+		return m, nil
+	}
+
 	if m.State == viewSettings {
 		m.saveSettings()
 	}
@@ -56,22 +74,25 @@ func (m *Model) handleBack() (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m *Model) handleDownloadingKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) handleConfirmKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
+	if key.Matches(msg, m.Keys.Back) {
+		m.cancelDelete()
+		return m, nil
+	}
+
+	switch msg.String() {
+	case "y", "Y", "enter":
+		return m.confirmDelete()
+	case "n", "N", "q":
+		m.cancelDelete()
+	}
+
+	return m, nil
+}
+
+func (m *Model) handleDownloadingKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	if key.Matches(msg, m.Keys.Back) || key.Matches(msg, m.Keys.Quit) {
 		m.State = viewList
 	}
 	return m, nil
-}
-
-func (k KeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Help, k.Quit}
-}
-
-func (k KeyMap) FullHelp() [][]key.Binding {
-	return [][]key.Binding{
-		{k.Up, k.Down, k.Enter},
-		{k.Toggle, k.Logs, k.Copy, k.Web},
-		{k.Add, k.Delete, k.Config},
-		{k.Back, k.Help, k.Quit},
-	}
 }

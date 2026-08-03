@@ -1,10 +1,12 @@
 package app
 
 import (
-	"github.com/charmbracelet/bubbles/help"
-	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/progress"
+	"charm.land/bubbles/v2/help"
+	"charm.land/bubbles/v2/list"
+	"charm.land/bubbles/v2/progress"
+	"charm.land/bubbles/v2/viewport"
 
+	"github.com/sthbryan/ftm/internal/app/ui"
 	"github.com/sthbryan/ftm/internal/config"
 )
 
@@ -13,19 +15,24 @@ func NewModel(app *App) *Model {
 	h.ShowAll = true
 
 	p := progress.New(
-		progress.WithGradient("#c9a227", "#8b7355"),
+		progress.WithColors(ui.ThemeDefault.Gold, ui.ThemeDefault.Bronze),
 		progress.WithWidth(40),
 		progress.WithoutPercentage(),
 	)
 
+	logViewport := viewport.New()
+	logViewport.SoftWrap = true
+
 	m := &Model{
-		App:         app,
-		Keys:        DefaultKeys,
-		Help:        h,
-		State:       viewList,
-		Cursor:      0,
-		ProgressBar: p,
-		FormValues: FormData{
+		App:           app,
+		statusUpdates: make(chan config.TunnelStatus, 64),
+		Keys:          DefaultKeys,
+		Help:          h,
+		State:         viewList,
+		Cursor:        0,
+		LogViewport:   logViewport,
+		ProgressBar:   p,
+		Draft: TunnelDraft{
 			Provider: string(config.ProviderCloudflared),
 			Port:     "30000",
 		},

@@ -1,15 +1,14 @@
 package views
 
 import (
-	"strings"
-
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
 	"github.com/sthbryan/ftm/internal/app/ui"
 	"github.com/sthbryan/ftm/internal/i18n"
 )
 
 type LogsView struct {
 	Width      int
+	Height     int
 	TunnelName string
 	Content    string
 }
@@ -18,36 +17,35 @@ func NewLogsView() *LogsView {
 	return &LogsView{}
 }
 
+const (
+	logsWidthRatio  = 0.8
+	logsHeightRatio = 0.75
+)
+
+func LogsBox(width, height int) (int, int) {
+	return ui.Clamp(int(float64(width)*logsWidthRatio), 20),
+		ui.Clamp(int(float64(height)*logsHeightRatio), minBodyHeight+2)
+}
+
 func (l *LogsView) Render() string {
-	var b strings.Builder
+	t := ui.ThemeDefault
 
-	gold := ui.ThemeDefault.Gold
-	bronze := ui.ThemeDefault.Bronze
-	text := ui.ThemeDefault.Text
-	textDim := ui.ThemeDefault.TextDim
+	footer := lipgloss.NewStyle().
+		Foreground(t.TextDim).
+		Width(l.Width).
+		Align(lipgloss.Center).
+		Render(i18n.T("logs_nav_hint"))
 
-	header := lipgloss.NewStyle().
-		Foreground(gold).
-		Bold(true).
-		Render(i18n.T("tunnel_logs"))
+	title := i18n.T("tunnel_logs")
+	if l.TunnelName != "" {
+		title += "  •  " + l.TunnelName
+	}
 
-	b.WriteString(header)
-	b.WriteString("\n\n")
+	body := lipgloss.NewStyle().
+		Foreground(t.Text).
+		Render(l.Content)
 
-	nameStyle := lipgloss.NewStyle().Foreground(text).Bold(true)
-	b.WriteString(nameStyle.Render(l.TunnelName))
-	b.WriteString("\n")
+	panel := ui.Panel(title, body, l.Width, l.Height-lipgloss.Height(footer), t.Gold)
 
-	dividerStyle := lipgloss.NewStyle().Foreground(bronze)
-	b.WriteString(dividerStyle.Render(ui.Repeat("─", l.Width-2)))
-	b.WriteString("\n")
-
-	b.WriteString(l.Content)
-	b.WriteString("\n")
-
-	b.WriteString(lipgloss.NewStyle().
-		Foreground(textDim).
-		Render(i18n.T("logs_nav_hint")))
-
-	return b.String()
+	return panel + "\n" + footer
 }

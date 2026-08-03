@@ -12,13 +12,13 @@
 
 <p align="center">
   <a href="#install">Install</a>
-  ·
+  •
   <a href="#sixty-seconds">Quick start</a>
-  ·
+  •
   <a href="#interfaces">Interfaces</a>
-  ·
+  •
   <a href="#providers">Providers</a>
-  ·
+  •
   <a href="https://github.com/sthbryan/ftm/releases/latest">Releases</a>
 </p>
 
@@ -48,13 +48,16 @@ Full-screen terminal UI. Navigate connections, open logs, copy the public URL, j
 | Key | Action |
 |-----|--------|
 | `↑` / `↓` | Navigate |
-| `s` | Start / stop |
+| `enter` / `t` | Start / stop |
 | `l` | Logs |
 | `c` | Copy URL |
 | `w` | Open web dashboard |
 | `o` | Open config |
-| `a` / `d` | Add / delete |
-| `q` | Quit |
+| `a` / `e` / `d` | Add / edit / delete |
+| `s` | Settings |
+| `?` | Full shortcut list |
+| `esc` | Back to the connection list |
+| `q` | Back, or quit from the list |
 
 **Web** — always on when ftm runs  
 Dashboard at `http://localhost:40500` (port auto-detects if busy). Themes, live status, manage tunnels from the browser.
@@ -148,7 +151,7 @@ xattr -d com.apple.quarantine ftm-desktop-macos.app
 ```bash
 ftm                  # TUI; dashboard at http://localhost:40500
 # In the TUI: a → add a tunnel → pick a provider → Foundry port (usually 30000)
-# s → start · c → copy public URL · share with players
+# s → start • c → copy public URL • share with players
 ```
 
 Web-only session:
@@ -211,5 +214,5 @@ cd web-svelte && bun run dev
 ---
 
 <p align="center">
-  <sub>MIT License · © 2026 Bryan Villafuerte</sub>
+  <sub>MIT License • © 2026 Bryan Villafuerte</sub>
 </p>
