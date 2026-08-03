@@ -98,6 +98,10 @@ func (a *App) Run() error {
 		a.createDefaultTunnels()
 	}
 
+	if file := redirectLog(); file != nil {
+		defer file.Close()
+	}
+
 	if err := a.StartWebServer(); err != nil {
 		return fmt.Errorf("failed to start web server: %w", err)
 	}

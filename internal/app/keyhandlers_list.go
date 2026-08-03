@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"os"
 
 	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
@@ -10,6 +9,7 @@ import (
 	"github.com/sthbryan/ftm/internal/clipboard"
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/i18n"
+	"github.com/sthbryan/ftm/internal/notifications"
 )
 
 func (m *Model) handleListKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
@@ -193,6 +193,6 @@ func (m *Model) handleListUpdate() (tea.Model, tea.Cmd) {
 
 func (m *Model) playBeep() {
 	if m.App.Config.NotificationSound {
-		fmt.Fprint(os.Stdout, "\a")
+		notifications.PlaySound(notifications.SoundInfo)
 	}
 }
