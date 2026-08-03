@@ -8,7 +8,6 @@ import (
 	"charm.land/bubbles/v2/key"
 )
 
-// bindings returns every binding in the map, by field name.
 func bindings(k KeyMap) map[string]key.Binding {
 	out := make(map[string]key.Binding)
 
@@ -23,12 +22,7 @@ func bindings(k KeyMap) map[string]key.Binding {
 	return out
 }
 
-// No key may drive two actions. "l" used to be bound to both Logs and an unused
-// Right/"next", and Esc to both Back and Quit -- and because Quit was matched
-// first, Esc closed the app instead of going back.
 func TestNoKeyIsBoundTwice(t *testing.T) {
-	// ForceQuit is deliberately a subset of Quit: it is the same interrupt,
-	// kept separate so it still applies while a text field has focus.
 	exempt := map[string]bool{"ForceQuit": true}
 
 	owner := make(map[string]string)
@@ -56,8 +50,6 @@ func TestEscapeGoesBackAndDoesNotQuit(t *testing.T) {
 	}
 }
 
-// Every binding needs help text, or it silently vanishes from the help view.
-// Quit used to carry two WithHelp calls, the second quietly replacing the first.
 func TestEveryBindingHasHelp(t *testing.T) {
 	for name, binding := range bindings(DefaultKeys) {
 		help := binding.Help()
@@ -70,8 +62,6 @@ func TestEveryBindingHasHelp(t *testing.T) {
 	}
 }
 
-// The help bar is built from the bindings, so a rebound key cannot leave it
-// advertising a shortcut that no longer works.
 func TestHelpBarKeysComeFromTheBindings(t *testing.T) {
 	shortcuts := DefaultKeys.listShortcuts()
 	if len(shortcuts) == 0 {
@@ -92,7 +82,6 @@ func TestHelpBarKeysComeFromTheBindings(t *testing.T) {
 		byLabel[s.Label] = s.Keys
 	}
 
-	// The logs entry must show whatever Logs is actually bound to.
 	wantLogs := DefaultKeys.Logs.Help().Key
 	found := false
 	for _, keys := range byLabel {
@@ -106,7 +95,6 @@ func TestHelpBarKeysComeFromTheBindings(t *testing.T) {
 	}
 }
 
-// Letters are shortcuts in the list but literal input in a form.
 func TestLetterShortcutsExistForTheList(t *testing.T) {
 	for _, binding := range []key.Binding{
 		DefaultKeys.Logs, DefaultKeys.Copy, DefaultKeys.Add,

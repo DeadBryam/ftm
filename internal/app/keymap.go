@@ -7,12 +7,6 @@ import (
 	"github.com/sthbryan/ftm/internal/i18n"
 )
 
-// KeyMap is the single source of truth for keyboard shortcuts.
-//
-// The help bar and the README used to hardcode their own lists, and all three
-// disagreed: the README documented "s" for start/stop and "l" for logs, while
-// the code bound "s" to settings, and "l" to both logs and an unused "next"
-// action.
 type KeyMap struct {
 	Up       key.Binding
 	Down     key.Binding
@@ -33,8 +27,6 @@ type KeyMap struct {
 	Help     key.Binding
 	Quit     key.Binding
 
-	// ForceQuit is the interrupt, and is the only shortcut that still applies
-	// while a text field has focus.
 	ForceQuit key.Binding
 }
 
@@ -47,8 +39,6 @@ var DefaultKeys = KeyMap{
 		key.WithKeys("down", "j"),
 		key.WithHelp("↓/j", "down"),
 	),
-	// Arrows only: "h"/"l" would collide with the logs shortcut, which is what
-	// the previous map did.
 	Left: key.NewBinding(
 		key.WithKeys("left"),
 		key.WithHelp("←", "previous"),
@@ -101,8 +91,6 @@ var DefaultKeys = KeyMap{
 		key.WithKeys("u"),
 		key.WithHelp("u", "update"),
 	),
-	// Esc belongs to Back alone. It used to be bound to Quit as well, and
-	// because Quit is matched first, Esc closed the app from the list view.
 	Back: key.NewBinding(
 		key.WithKeys("esc"),
 		key.WithHelp("esc", "back"),
@@ -135,13 +123,8 @@ func (k KeyMap) FullHelp() [][]key.Binding {
 	}
 }
 
-// listShortcuts is what the help bar under the tunnel list shows. The labels
-// are translated; the keys come from the bindings above so the two cannot drift
-// apart.
 func (k KeyMap) listShortcuts() []components.Shortcut {
 	return []components.Shortcut{
-		// Navigation spans two bindings, so it is the one entry whose keys are
-		// written out rather than taken from a single binding.
 		{Keys: "↑↓/kj", Label: i18n.T("navigate")},
 		{Keys: k.Enter.Help().Key + "/" + k.Toggle.Help().Key, Label: i18n.T("start_stop")},
 		{Keys: k.Logs.Help().Key, Label: i18n.T("logs")},

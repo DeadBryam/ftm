@@ -52,8 +52,8 @@ func (m *Model) handleKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) handleQuit() (tea.Model, tea.Cmd) {
-	if m.State == viewSettings {
-		m.saveSettings()
+	if m.State != viewList {
+		return m.handleBack()
 	}
 	return m, tea.Quit
 }

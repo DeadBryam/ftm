@@ -7,17 +7,11 @@ import (
 	"github.com/sthbryan/ftm/internal/app/ui"
 )
 
-// Shortcut is one entry in the help bar.
 type Shortcut struct {
 	Keys  string
 	Label string
 }
 
-// HelpBar renders the shortcut hints under the tunnel list.
-//
-// Entries are supplied by the caller rather than hardcoded here: they come from
-// the KeyMap, so a rebound key updates the hint automatically instead of
-// leaving the bar advertising a shortcut that no longer works.
 type HelpBar struct {
 	Shortcuts []Shortcut
 	Width     int
@@ -43,8 +37,6 @@ func (h *HelpBar) Render() string {
 		entries = append(entries, keyStyle.Render(s.Keys)+" "+labelStyle.Render(s.Label))
 	}
 
-	// Wrapped to the available width rather than split down the middle, so a
-	// narrow terminal does not push half the bar off-screen.
 	var b strings.Builder
 	lineWidth := 0
 
