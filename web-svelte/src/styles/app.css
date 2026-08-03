@@ -1,25 +1,72 @@
 @import "tailwindcss";
 @import "./themes.css";
+@import "@fontsource/inter/300.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/crimson-pro/400.css";
+@import "@fontsource/crimson-pro/500.css";
+@import "@fontsource/crimson-pro/600.css";
+@import "@fontsource/crimson-pro/700.css";
+
+@theme {
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-serif: "Crimson Pro", Georgia, serif;
+  --radius-panel: 1rem;
+  --radius-card: 1.25rem;
+  --app-max-width: 72rem;
+}
+
+html {
+  height: 100%;
+}
 
 body {
-  font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+  min-height: 100%;
+  margin: 0;
+  font-family: var(--font-sans);
   background-color: var(--color-bg);
   color: var(--color-text);
   transition: background-color 0.3s, color 0.3s;
-  margin: 0;
-}
-
-html, body {
-  overflow: hidden;
 }
 
 * {
   box-sizing: border-box;
 }
 
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+@keyframes ftm-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ftm-enter {
+    animation: ftm-enter 0.35s ease-out both;
+  }
+  .ftm-enter-delay-1 {
+    animation-delay: 0.05s;
+  }
+  .ftm-enter-delay-2 {
+    animation-delay: 0.1s;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
