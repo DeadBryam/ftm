@@ -181,3 +181,25 @@ func TestCentredViewsFillTheTerminal(t *testing.T) {
 		}
 	}
 }
+
+func TestEveryRowUsesTheSameColumns(t *testing.T) {
+	items := []TunnelViewData{
+		{Name: "Foundry VTT (Default)", Provider: "cloudflared", LocalPort: 30000, StatusState: 6},
+		{Name: "Mesa", Provider: "bore", LocalPort: 30001, StatusState: 6},
+		{Name: "Sesión uno", Provider: "localtunnel", LocalPort: 30002, StatusState: 6},
+	}
+
+	for _, width := range []int{60, 80, 120, 160} {
+		v := listWith(items, width, 20, 0)
+		v.Render()
+
+		rows := strings.Split(v.renderTunnelList(width-4), "\n")
+
+		showsMeta := strings.Contains(rows[0], ":30000")
+		for i, row := range rows[1:] {
+			if strings.Contains(row, ":3000") != showsMeta {
+				t.Errorf("width %d: row %d disagrees with row 0 about showing the provider", width, i+1)
+			}
+		}
+	}
+}

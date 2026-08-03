@@ -183,6 +183,8 @@ func (l *ListView) renderTunnelList(width int) string {
 	l.FirstItem = first
 	last := first + count
 
+	metaWidth := components.FitMetaColumn(width, l.metaColumn())
+
 	if first > 0 {
 		b.WriteString(l.scrollHint(width, i18n.TF("more_above", first)))
 		b.WriteString("\n")
@@ -198,6 +200,7 @@ func (l *ListView) renderTunnelList(width int) string {
 			LocalPort:   item.LocalPort,
 			StatusState: item.StatusState,
 			Width:       width,
+			MetaWidth:   metaWidth,
 		}
 		b.WriteString(tunnelItem.Render())
 		if i < last-1 {
@@ -211,6 +214,14 @@ func (l *ListView) renderTunnelList(width int) string {
 	}
 
 	return b.String()
+}
+
+func (l *ListView) metaColumn() []string {
+	metas := make([]string, 0, len(l.Items))
+	for _, item := range l.Items {
+		metas = append(metas, components.MetaText(item.Provider, item.LocalPort))
+	}
+	return metas
 }
 
 func (l *ListView) scrollHint(width int, text string) string {

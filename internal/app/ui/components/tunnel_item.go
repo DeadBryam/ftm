@@ -17,6 +17,27 @@ type TunnelItem struct {
 	LocalPort   int
 	StatusState int
 	Width       int
+	MetaWidth   int
+}
+
+func MetaText(provider string, localPort int) string {
+	return fmt.Sprintf("%s:%d", provider, localPort)
+}
+
+func FitMetaColumn(rowWidth int, metas []string) int {
+	widest := 0
+	for _, meta := range metas {
+		if w := lipgloss.Width(meta); w > widest {
+			widest = w
+		}
+	}
+
+	fixed := widestLabel(StatusBadge) + widestLabel(StatusLabel) + 3*columnGap
+	if rowWidth-2*horizontalPadding-1-fixed-widest < minNameWidth {
+		return 0
+	}
+
+	return widest
 }
 
 func NewTunnelItem() *TunnelItem {
@@ -139,11 +160,14 @@ func (t *TunnelItem) Render() string {
 			width: widestLabel(StatusLabel),
 			style: cell.Foreground(StatusColor(t.StatusState)),
 		},
-		{
-			text:  fmt.Sprintf("%s:%d", t.Provider, t.LocalPort),
-			width: lipgloss.Width(fmt.Sprintf("%s:%d", t.Provider, t.LocalPort)),
+	}
+
+	if t.MetaWidth > 0 {
+		trailing = append(trailing, column{
+			text:  MetaText(t.Provider, t.LocalPort),
+			width: t.MetaWidth,
 			style: cell.Foreground(ui.ThemeDefault.TextDim).Align(lipgloss.Right),
-		},
+		})
 	}
 
 	leading := []column{
