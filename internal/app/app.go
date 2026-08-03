@@ -133,15 +133,16 @@ func (a *App) OpenDashboard() error {
 	if a.WebServer == nil {
 		return fmt.Errorf("web server not started")
 	}
+
 	url := a.WebServer.URL()
 
 	switch runtime.GOOS {
 	case "darwin":
-		return exec.Command("open", url).Start()
+		return startAndReap(exec.Command("open", url))
 	case "windows":
-		return exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+		return startAndReap(exec.Command("rundll32", "url.dll,FileProtocolHandler", url))
 	default:
-		return exec.Command("xdg-open", url).Start()
+		return startAndReap(exec.Command("xdg-open", url))
 	}
 }
 
@@ -150,12 +151,27 @@ func (a *App) OpenConfigDir() error {
 
 	switch runtime.GOOS {
 	case "darwin":
-		return exec.Command("open", path).Start()
+		return startAndReap(exec.Command("open", path))
 	case "windows":
-		return exec.Command("explorer", path).Start()
+		return startAndReap(exec.Command("explorer", path))
 	default:
-		return exec.Command("xdg-open", path).Start()
+		return startAndReap(exec.Command("xdg-open", path))
 	}
+}
+
+var onReaped = func(*exec.Cmd) {}
+
+func startAndReap(cmd *exec.Cmd) error {
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	go func() {
+		_ = cmd.Wait()
+		onReaped(cmd)
+	}()
+
+	return nil
 }
 
 func (a *App) createDefaultTunnels() {
