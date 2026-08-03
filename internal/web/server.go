@@ -3,8 +3,10 @@ package web
 import (
 	"context"
 	"embed"
+	"errors"
 	"fmt"
 	"io/fs"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -14,6 +16,14 @@ import (
 
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/process"
+)
+
+// The dashboard exposes an unauthenticated control API, so it is bound to the
+// loopback interface only. Do not change this to ":port" without adding auth.
+const (
+	listenHost = "127.0.0.1"
+	portMin    = 40500
+	portMax    = 40550
 )
 
 //go:embed static/*
@@ -46,40 +56,56 @@ func NewServer(manager *process.Manager, cfg *config.Config) *Server {
 	return s
 }
 
-func (s *Server) findPort() int {
+// listen binds the dashboard socket, preferring the configured port and falling
+// back to a scan of the default range. Binding here rather than probing first
+// means the returned listener is the one we serve on, with no window for another
+// process to take the port in between.
+func (s *Server) listen() (net.Listener, error) {
 	if s.config.WebPort > 0 {
-		return s.config.WebPort
-	}
-	for port := 40500; port <= 40550; port++ {
-		ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+		ln, err := net.Listen("tcp", fmt.Sprintf("%s:%d", listenHost, s.config.WebPort))
 		if err == nil {
-			ln.Close()
-			return port
+			return ln, nil
+		}
+		log.Printf("web: port %d unavailable (%v), scanning %d-%d", s.config.WebPort, err, portMin, portMax)
+	}
+
+	for port := portMin; port <= portMax; port++ {
+		ln, err := net.Listen("tcp", fmt.Sprintf("%s:%d", listenHost, port))
+		if err == nil {
+			return ln, nil
 		}
 	}
-	return 0
+
+	return nil, fmt.Errorf("no available port in range %d-%d", portMin, portMax)
 }
 
 func (s *Server) Start() error {
-	port := s.findPort()
-	if port == 0 {
-		return fmt.Errorf("no available port found")
+	ln, err := s.listen()
+	if err != nil {
+		return err
 	}
-	s.port = port
-	s.config.WebPort = port
+
+	addr, ok := ln.Addr().(*net.TCPAddr)
+	if !ok {
+		ln.Close()
+		return fmt.Errorf("unexpected listener address %T", ln.Addr())
+	}
+
+	s.port = addr.Port
+	s.config.WebPort = s.port
 	s.config.Save()
 
-	mux := s.setupRoutes()
-
-	s.httpServer = &http.Server{
-		Addr:    fmt.Sprintf(":%d", port),
-		Handler: mux,
-	}
+	s.httpServer = &http.Server{Handler: s.setupRoutes()}
 
 	s.updateSvc.Start(s.updateCtx)
 	go s.installProgressLoop()
 	go s.statusUpdateLoop()
-	go s.httpServer.ListenAndServe()
+	go func() {
+		if err := s.httpServer.Serve(ln); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Printf("web: server stopped: %v", err)
+		}
+	}()
+
 	return nil
 }
 
