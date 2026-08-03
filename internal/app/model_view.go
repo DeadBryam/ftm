@@ -1,9 +1,11 @@
 package app
 
 import (
-	"github.com/charmbracelet/bubbles/help"
-	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/progress"
+	"charm.land/bubbles/v2/help"
+	"charm.land/bubbles/v2/list"
+	"charm.land/bubbles/v2/progress"
+	"charm.land/bubbles/v2/viewport"
+	"charm.land/lipgloss/v2"
 
 	"github.com/sthbryan/ftm/internal/config"
 )
@@ -13,7 +15,7 @@ func NewModel(app *App) *Model {
 	h.ShowAll = true
 
 	p := progress.New(
-		progress.WithGradient("#c9a227", "#8b7355"),
+		progress.WithColors(lipgloss.Color("#c9a227"), lipgloss.Color("#8b7355")),
 		progress.WithWidth(40),
 		progress.WithoutPercentage(),
 	)
@@ -24,6 +26,7 @@ func NewModel(app *App) *Model {
 		Help:        h,
 		State:       viewList,
 		Cursor:      0,
+		LogViewport: viewport.New(),
 		ProgressBar: p,
 		FormValues: FormData{
 			Provider: string(config.ProviderCloudflared),

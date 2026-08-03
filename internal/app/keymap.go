@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/charmbracelet/bubbles/key"
+	"charm.land/bubbles/v2/key"
 
 	"github.com/sthbryan/ftm/internal/app/ui/components"
 	"github.com/sthbryan/ftm/internal/i18n"
