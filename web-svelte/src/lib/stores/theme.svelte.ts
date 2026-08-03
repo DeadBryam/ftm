@@ -7,6 +7,8 @@ const THEMES = [
   'catppuccin-latte',
   'gruvbox',
   'gruvbox-light',
+  'tokyo-night',
+  'tokyo-night-day',
   'rose-pine',
   'rose-pine-dawn',
 ] as const;

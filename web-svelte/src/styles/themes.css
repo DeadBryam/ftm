@@ -7,6 +7,8 @@
 @import './themes/_gruvbox-light.css';
 @import './themes/_rose-pine.css';
 @import './themes/_rose-pine-dawn.css';
+@import './themes/_tokyo-night.css';
+@import './themes/_tokyo-night-day.css';
 
 @theme {
   --color-bg: var(--color-bg);
