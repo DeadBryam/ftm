@@ -1,7 +1,6 @@
 package views
 
 import (
-	"fmt"
 	"strings"
 
 	"charm.land/lipgloss/v2"
@@ -11,6 +10,7 @@ import (
 
 type FormView struct {
 	Width      int
+	Height     int
 	Focus      int
 	IsEditMode bool
 	Name       string
@@ -22,157 +22,95 @@ func NewFormView() *FormView {
 	return &FormView{}
 }
 
+const (
+	formWidth   = 54
+	submitFocus = 4
+)
+
 func (f *FormView) Render() string {
 	t := ui.ThemeDefault
-	inputWidth := 25
-	labelWidth := 17
-	totalWidth := labelWidth + 2 + inputWidth
+	inner := ui.PanelInner(formWidth)
 
-	newTunnelText := i18n.T("new_tunnel")
-	editTunnelText := i18n.T("edit_tunnel")
-	newTunnelDesc := i18n.T("new_tunnel_desc")
-	editTunnelDesc := i18n.T("edit_tunnel_desc")
-	nameLabel := i18n.T("name_label")
-	nameHint := i18n.T("tunnel_name_hint")
-	providerLabel := i18n.T("provider_label")
-	providerHint := i18n.T("provider_hint")
-	portLabel := i18n.T("local_port")
-	portHint := i18n.T("port_hint")
-	navHint := i18n.T("form_nav_hint")
-
-	header := newTunnelText
-	subheader := newTunnelDesc
+	title, subtitle := i18n.T("new_tunnel"), i18n.T("new_tunnel_desc")
 	if f.IsEditMode {
-		header = editTunnelText
-		subheader = editTunnelDesc
+		title, subtitle = i18n.T("edit_tunnel"), i18n.T("edit_tunnel_desc")
 	}
 
-	headerStyle := lipgloss.NewStyle().
-		Foreground(t.Gold).
-		Bold(true).
-		Render(header)
+	dim := lipgloss.NewStyle().Foreground(t.TextDim).Width(inner)
 
-	subheaderStyle := lipgloss.NewStyle().
-		Foreground(t.TextDim).
-		Render(subheader)
+	body := strings.Join([]string{
+		dim.Render(subtitle),
+		"",
+		f.field(inner, 0, i18n.T("name_label"), i18n.T("tunnel_name_hint"), i18n.T("type_hint"), f.Name),
+		"",
+		f.field(inner, 1, i18n.T("provider_label"), i18n.T("provider_hint"), i18n.T("arrow_hint"), f.Provider),
+		"",
+		f.field(inner, 2, i18n.T("local_port"), i18n.T("port_hint"), i18n.T("numbers_hint"), f.Port),
+		"",
+		lipgloss.NewStyle().Width(inner).Align(lipgloss.Center).Render(f.submitButton()),
+		"",
+		dim.Align(lipgloss.Center).Render(i18n.T("form_nav_hint")),
+	}, "\n")
 
-	if f.Focus == 0 {
-		nameLabel = "▸ " + nameLabel
-		nameHint = i18n.T("type_hint")
-	}
-	if f.Focus == 1 {
-		providerLabel = "▸ " + providerLabel
-		providerHint = i18n.T("arrow_hint")
-	}
-	if f.Focus == 2 {
-		portLabel = "▸ " + portLabel
-		portHint = i18n.T("numbers_hint")
-	}
+	panel := ui.Panel(title, body, formWidth, lipgloss.Height(body)+ui.PanelChrome, t.Gold)
 
-	lines := []string{
-		headerStyle,
-		"",
-		subheaderStyle,
-		"",
-		f.fieldWithLabel(nameLabel, nameHint, f.Name, 0, t, inputWidth, labelWidth),
-		"",
-		f.fieldWithLabel(providerLabel, providerHint, f.Provider, 1, t, inputWidth, labelWidth),
-		"",
-		f.fieldWithLabel(portLabel, portHint, f.Port, 2, t, inputWidth, labelWidth),
-		"",
-		f.submitButton(t, inputWidth),
-		"",
-		lipgloss.NewStyle().Foreground(t.TextDim).Render(navHint),
-	}
-
-	content := strings.Join(lines, "\n")
-	return centerBlock(content, f.Width, totalWidth)
+	return ui.Overlay("", panel, f.Width, f.Height)
 }
 
-func (f *FormView) fieldWithLabel(label, hint, value string, field int, t *ui.Theme, inputWidth, labelWidth int) string {
+func (f *FormView) field(inner, index int, label, hint, focusedHint, value string) string {
+	t := ui.ThemeDefault
+	focused := f.Focus == index
+
 	if value == "" {
-		value = "..."
-	}
-	if field == 1 && f.Focus == 1 {
-		value = "‹ " + value + " ›"
+		value = "…"
 	}
 
-	labelStyle := f.labelStyle(t, field, labelWidth)
-	inputStyle := f.inputStyle(t, field, inputWidth)
-	hintStyle := lipgloss.NewStyle().Foreground(t.Bronze)
+	labelStyle := lipgloss.NewStyle().Foreground(t.TextDim)
+	border, foreground := t.Bronze, t.TextDim
 
-	return fmt.Sprintf("%s\n%s\n%s",
-		labelStyle.Render(label+":"),
-		inputStyle.Render(value),
-		hintStyle.Render(hint),
-	)
+	if focused {
+		label = "▸ " + label
+		hint = focusedHint
+		labelStyle = labelStyle.Foreground(t.Gold).Bold(true)
+		border, foreground = t.Gold, t.Text
+
+		if index == 1 {
+			value = "‹ " + value + " ›"
+		}
+	}
+
+	input := lipgloss.NewStyle().
+		Width(inner).
+		Padding(0, 1).
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(border).
+		Foreground(foreground).
+		Render(value)
+
+	return strings.Join([]string{
+		labelStyle.Render(label),
+		input,
+		lipgloss.NewStyle().Foreground(t.Bronze).Render(hint),
+	}, "\n")
 }
 
-func (f *FormView) submitButton(t *ui.Theme, inputWidth int) string {
-	btnText := i18n.T("submit_new")
+func (f *FormView) submitButton() string {
+	t := ui.ThemeDefault
+
+	label := i18n.T("submit_new")
 	if f.IsEditMode {
-		btnText = i18n.T("submit_edit")
+		label = i18n.T("submit_edit")
 	}
 
-	background, foreground, border := t.Button, t.ButtonText, t.Bronze
-	if f.Focus == 4 {
-		background, foreground, border = t.ButtonActive, t.ButtonActiveText, t.Gold
+	background, foreground := t.Button, t.ButtonText
+	if f.Focus == submitFocus {
+		background, foreground = t.ButtonActive, t.ButtonActiveText
 	}
 
 	return lipgloss.NewStyle().
 		Background(background).
 		Foreground(foreground).
 		Bold(true).
-		Align(lipgloss.Center).
-		Padding(0, 2).
-		BorderStyle(lipgloss.RoundedBorder()).
-		BorderForeground(border).
-		Width(inputWidth).
-		Render(btnText)
-}
-
-func (f *FormView) labelStyle(t *ui.Theme, field, width int) lipgloss.Style {
-	style := lipgloss.NewStyle().Width(width).Foreground(t.TextDim)
-
-	if f.Focus == field {
-		style = style.Bold(true).Foreground(t.Gold)
-	}
-
-	return style
-}
-
-func (f *FormView) inputStyle(t *ui.Theme, field, width int) lipgloss.Style {
-	style := lipgloss.NewStyle().
-		Width(width).
-		Padding(0, 1).
-		BorderStyle(lipgloss.RoundedBorder())
-
-	if f.Focus == field {
-		style = style.
-			BorderForeground(t.Gold).
-			Foreground(t.Text)
-	} else {
-		style = style.
-			BorderForeground(t.Bronze).
-			Foreground(t.TextDim)
-	}
-
-	return style
-}
-
-func centerBlock(content string, screenWidth, blockWidth int) string {
-	lines := strings.Split(content, "\n")
-	var result []string
-
-	indent := (screenWidth - blockWidth) / 2
-	if indent < 0 {
-		indent = 0
-	}
-	prefix := strings.Repeat(" ", indent)
-
-	for _, line := range lines {
-		result = append(result, prefix+line)
-	}
-
-	return strings.Join(result, "\n")
+		Padding(0, 4).
+		Render(label)
 }

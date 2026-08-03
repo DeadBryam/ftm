@@ -280,3 +280,5 @@ update_applying: "Descargando e instalando actualización... ftm se reiniciará.
 update_web_banner: "Actualización disponible: v{latest}"
 update_web_button: "Actualizar"
 update_web_notes: "Notas del release"
+toggle_on: "SÍ"
+toggle_off: "NO"

@@ -10,6 +10,7 @@ import (
 
 type LogsView struct {
 	Width      int
+	Height     int
 	TunnelName string
 	Content    string
 }
@@ -19,35 +20,22 @@ func NewLogsView() *LogsView {
 }
 
 func (l *LogsView) Render() string {
-	var b strings.Builder
+	t := ui.ThemeDefault
 
-	gold := ui.ThemeDefault.Gold
-	bronze := ui.ThemeDefault.Bronze
-	text := ui.ThemeDefault.Text
-	textDim := ui.ThemeDefault.TextDim
+	footer := lipgloss.NewStyle().
+		Foreground(t.TextDim).
+		Render(i18n.T("logs_nav_hint"))
 
-	header := lipgloss.NewStyle().
-		Foreground(gold).
-		Bold(true).
-		Render(i18n.T("tunnel_logs"))
+	bodyHeight := ui.Clamp(l.Height-lipgloss.Height(footer)-1, minBodyHeight)
 
-	b.WriteString(header)
-	b.WriteString("\n\n")
+	content := lipgloss.NewStyle().
+		Foreground(t.Text).
+		Render(ui.TailLines(strings.TrimRight(l.Content, "\n"), bodyHeight-ui.PanelChrome))
 
-	nameStyle := lipgloss.NewStyle().Foreground(text).Bold(true)
-	b.WriteString(nameStyle.Render(l.TunnelName))
-	b.WriteString("\n")
+	title := i18n.T("tunnel_logs")
+	if l.TunnelName != "" {
+		title += "  ·  " + l.TunnelName
+	}
 
-	dividerStyle := lipgloss.NewStyle().Foreground(bronze)
-	b.WriteString(dividerStyle.Render(ui.Repeat("─", l.Width-2)))
-	b.WriteString("\n")
-
-	b.WriteString(l.Content)
-	b.WriteString("\n")
-
-	b.WriteString(lipgloss.NewStyle().
-		Foreground(textDim).
-		Render(i18n.T("logs_nav_hint")))
-
-	return b.String()
+	return ui.Panel(title, content, l.Width, bodyHeight, t.Gold) + "\n" + footer
 }

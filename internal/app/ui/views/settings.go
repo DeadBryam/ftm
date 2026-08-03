@@ -10,6 +10,7 @@ import (
 
 type SettingsView struct {
 	Width                int
+	Height               int
 	NotificationsEnabled bool
 	NotificationSound    bool
 	Language             string
@@ -23,95 +24,91 @@ func NewSettingsView() *SettingsView {
 	}
 }
 
+const settingsWidth = 56
+
 func (s *SettingsView) Render() string {
 	t := ui.ThemeDefault
-	var b strings.Builder
+	inner := ui.PanelInner(settingsWidth)
 
-	header := lipgloss.NewStyle().
-		Foreground(t.Gold).
-		Bold(true).
-		Render(i18n.T("settings_title"))
+	body := strings.Join([]string{
+		s.toggle(inner, i18n.T("enable_notifications"), s.NotificationsEnabled, s.Focused == 0),
+		s.toggle(inner, i18n.T("notification_sound"), s.NotificationSound, s.Focused == 1),
+		"",
+		s.languages(inner),
+		"",
+		lipgloss.NewStyle().
+			Foreground(t.TextDim).
+			Width(inner).
+			Align(lipgloss.Center).
+			Render(i18n.T("settings_nav_hint")),
+	}, "\n")
 
-	b.WriteString(header)
-	b.WriteString("\n")
-	b.WriteString(strings.Repeat("─", 30))
-	b.WriteString("\n\n")
+	panel := ui.Panel(i18n.T("settings_title"), body, settingsWidth, lipgloss.Height(body)+ui.PanelChrome, t.Gold)
 
-	b.WriteString(s.renderToggle(
-		i18n.T("enable_notifications"),
-		s.NotificationsEnabled,
-		s.Focused == 0,
-		t,
-	))
-	b.WriteString("\n")
-
-	b.WriteString(s.renderToggle(
-		i18n.T("notification_sound"),
-		s.NotificationSound,
-		s.Focused == 1,
-		t,
-	))
-	b.WriteString("\n\n")
-
-	b.WriteString(s.renderLanguageSelector(t))
-
-	b.WriteString("\n\n")
-	b.WriteString(lipgloss.NewStyle().
-		Foreground(t.TextDim).
-		Render(i18n.T("settings_nav_hint")))
-
-	return b.String()
+	return ui.Overlay("", panel, s.Width, s.Height)
 }
 
-func (s *SettingsView) renderLanguageSelector(t *ui.Theme) string {
-	var b strings.Builder
-
-	label := i18n.T("language") + ":"
-
-	if s.Focused == 2 {
-		b.WriteString(lipgloss.NewStyle().Foreground(t.Gold).Render("▸ "))
-	} else {
-		b.WriteString("  ")
-	}
-
-	b.WriteString(label)
-	b.WriteString(" ")
-
-	for _, lang := range i18n.SupportedLanguages() {
-		langName := i18n.LanguageName(lang)
-		if lang == s.Language {
-			b.WriteString(lipgloss.NewStyle().Foreground(t.Gold).Bold(true).Render("[" + langName + "]"))
-		} else {
-			b.WriteString(lipgloss.NewStyle().Foreground(t.TextDim).Render("[" + langName + "]"))
-		}
-		b.WriteString(" ")
-	}
-
-	return b.String()
-}
-
-func (s *SettingsView) renderToggle(label string, enabled bool, focused bool, t *ui.Theme) string {
-	var b strings.Builder
-
+func (s *SettingsView) marker(focused bool) string {
 	if focused {
-		b.WriteString(lipgloss.NewStyle().Foreground(t.Gold).Render("▸ "))
-	} else {
-		b.WriteString("  ")
+		return lipgloss.NewStyle().Foreground(ui.ThemeDefault.Gold).Bold(true).Render("▸ ")
 	}
+	return "  "
+}
 
-	icon := "[ ]"
+func (s *SettingsView) toggle(width int, label string, enabled, focused bool) string {
+	t := ui.ThemeDefault
+
+	state := lipgloss.NewStyle().
+		Background(t.Button).
+		Foreground(t.ButtonText).
+		Padding(0, 1).
+		Render(i18n.T("toggle_off"))
+
 	if enabled {
-		icon = "[✓]"
+		state = lipgloss.NewStyle().
+			Background(t.Success).
+			Foreground(t.ButtonActiveText).
+			Bold(true).
+			Padding(0, 1).
+			Render(i18n.T("toggle_on"))
 	}
 
-	iconStyle := lipgloss.NewStyle().Foreground(t.Success).Bold(true)
+	labelStyle := lipgloss.NewStyle().Foreground(t.Text)
 	if focused {
-		iconStyle = iconStyle.Underline(true)
+		labelStyle = labelStyle.Foreground(t.Gold).Bold(true)
 	}
 
-	b.WriteString(iconStyle.Render(icon))
-	b.WriteString(" ")
-	b.WriteString(label)
+	marker := s.marker(focused)
+	gap := ui.Clamp(width-lipgloss.Width(marker)-lipgloss.Width(label)-lipgloss.Width(state), 1)
 
-	return b.String()
+	return marker + labelStyle.Render(label) + ui.Repeat(" ", gap) + state
+}
+
+func (s *SettingsView) languages(width int) string {
+	t := ui.ThemeDefault
+
+	options := make([]string, 0, 4)
+	for _, lang := range i18n.SupportedLanguages() {
+		style := lipgloss.NewStyle().Foreground(t.TextDim)
+		if lang == s.Language {
+			style = lipgloss.NewStyle().
+				Background(t.ButtonActive).
+				Foreground(t.ButtonActiveText).
+				Bold(true)
+		}
+		options = append(options, style.Padding(0, 1).Render(i18n.LanguageName(lang)))
+	}
+
+	labelStyle := lipgloss.NewStyle().Foreground(t.Text)
+	if s.Focused == 2 {
+		labelStyle = labelStyle.Foreground(t.Gold).Bold(true)
+	}
+
+	label := i18n.T("language")
+	values := strings.Join(options, " ")
+
+	marker := s.marker(s.Focused == 2)
+	gap := ui.Clamp(width-lipgloss.Width(marker)-lipgloss.Width(label)-lipgloss.Width(values), 1)
+
+	return marker + labelStyle.Render(label) + ui.Repeat(" ", gap) + values
 }

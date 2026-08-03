@@ -13,7 +13,6 @@ func manyItems(n int) []TunnelViewData {
 			Provider:    "cloudflared",
 			LocalPort:   30000 + i,
 			StatusState: 3,
-			StatusMsg:   "online",
 		})
 	}
 	return items
@@ -129,6 +128,56 @@ func TestTwoColumnDetailPanelDoesNotOverflow(t *testing.T) {
 
 		if lines := strings.Count(out, "\n") + 1; lines > height {
 			t.Errorf("height %d: rendered %d lines", height, lines)
+		}
+	}
+}
+
+func TestLogsViewNeverRendersTallerThanTheTerminal(t *testing.T) {
+	var content strings.Builder
+	for i := 0; i < 500; i++ {
+		content.WriteString("2026-08-03 12:00:00 starting tunnel\n")
+	}
+
+	for _, height := range []int{8, 16, 24, 40} {
+		v := NewLogsView()
+		v.Width, v.Height = 100, height
+		v.TunnelName = "Foundry VTT"
+		v.Content = content.String()
+
+		if lines := strings.Count(v.Render(), "\n") + 1; lines > height {
+			t.Errorf("height %d: rendered %d lines", height, lines)
+		}
+	}
+}
+
+func TestLogsViewShowsTheNewestLines(t *testing.T) {
+	v := NewLogsView()
+	v.Width, v.Height = 100, 12
+	v.Content = "first line\nmiddle line\nnewest line\n"
+
+	out := v.Render()
+	if !strings.Contains(out, "newest line") {
+		t.Error("the newest log line is not visible")
+	}
+}
+
+func TestCentredViewsFillTheTerminal(t *testing.T) {
+	const width, height = 100, 30
+
+	form := NewFormView()
+	form.Width, form.Height = width, height
+
+	empty := NewEmptyState()
+	empty.Width, empty.Height = width, height
+
+	settings := NewSettingsView()
+	settings.Width, settings.Height = width, height
+
+	for name, out := range map[string]string{
+		"form": form.Render(), "empty state": empty.Render(), "settings": settings.Render(),
+	} {
+		if lines := strings.Count(out, "\n") + 1; lines != height {
+			t.Errorf("%s: rendered %d lines, want %d", name, lines, height)
 		}
 	}
 }
