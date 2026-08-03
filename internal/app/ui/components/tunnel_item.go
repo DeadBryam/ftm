@@ -24,7 +24,10 @@ func NewTunnelItem() *TunnelItem {
 	return &TunnelItem{}
 }
 
-const nameWidth = 18
+const (
+	minNameWidth      = 8
+	horizontalPadding = 2
+)
 
 const (
 	TunnelStateOffline    = 0
@@ -95,16 +98,34 @@ func (t *TunnelItem) Render() string {
 			Render("  "))
 	}
 
-	parts = append(parts, t.statusBadge(bgColor))
-	parts = append(parts, t.name(bgColor))
-	parts = append(parts, t.statusText(bgColor))
-	parts = append(parts, t.meta(bgColor))
+	sep := lipgloss.NewStyle().Background(bgColor).Render(" ")
 
-	content := strings.Join(parts, lipgloss.NewStyle().Background(bgColor).Render(" "))
+	badge := t.statusBadge(bgColor)
+	status := t.statusText(bgColor)
+	meta := t.meta(bgColor)
+
+	fixed := lipgloss.Width(parts[0]) + lipgloss.Width(badge) + lipgloss.Width(status) + 3*lipgloss.Width(sep)
+	available := t.Width - horizontalPadding - fixed
+
+	if available-lipgloss.Width(meta)-lipgloss.Width(sep) >= minNameWidth {
+		available -= lipgloss.Width(meta) + lipgloss.Width(sep)
+	} else {
+		meta = ""
+	}
+
+	parts = append(parts, badge)
+	parts = append(parts, t.name(bgColor, available))
+	parts = append(parts, status)
+	if meta != "" {
+		parts = append(parts, meta)
+	}
+
+	content := strings.Join(parts, sep)
 
 	itemStyle := lipgloss.NewStyle().
 		Background(bgColor).
 		Width(t.Width).
+		MaxHeight(1).
 		Padding(0, 1)
 
 	if t.Selected {
@@ -122,8 +143,8 @@ func (t *TunnelItem) statusBadge(bgColor color.Color) string {
 		Render(StatusBadge(t.StatusState))
 }
 
-func (t *TunnelItem) name(bgColor color.Color) string {
-	name := ui.Truncate(t.Name, nameWidth)
+func (t *TunnelItem) name(bgColor color.Color, width int) string {
+	name := ui.Truncate(t.Name, width)
 
 	return lipgloss.NewStyle().
 		Bold(t.Selected).
