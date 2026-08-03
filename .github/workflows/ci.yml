@@ -42,9 +42,9 @@ jobs:
         run: go vet $(go list ./... | grep -v '/desktop')
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.64.8
+          version: v2.12.2
           args: --timeout=5m ./cmd/... ./internal/...
 
       - name: Test
