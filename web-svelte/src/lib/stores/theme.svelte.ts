@@ -3,6 +3,7 @@ const THEMES = [
   'foundry-light',
   'nord',
   'catppuccin-mocha',
+  'catppuccin-latte',
   'gruvbox',
   'rose-pine',
 ] as const;
