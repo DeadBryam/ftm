@@ -9,6 +9,7 @@ import (
 )
 
 type TunnelEditor struct {
+	Providers  []string
 	Focus      int
 	IsEditMode bool
 	Name       string
@@ -41,7 +42,7 @@ func (f *TunnelEditor) Render() string {
 		"",
 		f.field(inner, 0, i18n.T("name_label"), i18n.T("tunnel_name_hint"), i18n.T("type_hint"), f.Name),
 		"",
-		f.field(inner, 1, i18n.T("provider_label"), i18n.T("provider_hint"), i18n.T("arrow_hint"), f.Provider),
+		f.field(inner, 1, i18n.T("provider_label"), f.providerHint(inner), i18n.T("arrow_hint"), f.Provider),
 		"",
 		f.field(inner, 2, i18n.T("local_port"), i18n.T("port_hint"), i18n.T("numbers_hint"), f.Port),
 		"",
@@ -51,6 +52,14 @@ func (f *TunnelEditor) Render() string {
 	}, "\n")
 
 	return ui.Panel(title, body, editorWidth, lipgloss.Height(body)+ui.PanelChrome, t.Gold)
+}
+
+func (f *TunnelEditor) providerHint(width int) string {
+	if len(f.Providers) == 0 {
+		return i18n.T("provider_hint")
+	}
+
+	return ui.Truncate(strings.Join(f.Providers, " · "), width)
 }
 
 func (f *TunnelEditor) field(inner, index int, label, hint, focusedHint, value string) string {

@@ -149,6 +149,7 @@ func (m *Model) getTunnelName(id string) string {
 
 func (m *Model) viewTunnelEditor(isEdit bool) string {
 	view := views.NewTunnelEditor()
+	view.Providers = providerNames()
 	view.Focus = m.EditorFocus
 	view.IsEditMode = isEdit
 	view.Name = m.Draft.Name
@@ -156,6 +157,17 @@ func (m *Model) viewTunnelEditor(isEdit bool) string {
 	view.Port = m.Draft.Port
 
 	return view.Render()
+}
+
+func providerNames() []string {
+	all := config.AllProviders()
+
+	names := make([]string, 0, len(all))
+	for _, provider := range all {
+		names = append(names, i18n.ProviderText(string(provider)))
+	}
+
+	return names
 }
 
 func (m *Model) viewDownloading() string {

@@ -1,9 +1,13 @@
 package app
 
 import (
+	"strings"
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/sthbryan/ftm/internal/config"
+	"github.com/sthbryan/ftm/internal/process"
 )
 
 func editorWith(t *testing.T, focus int) *Model {
@@ -70,5 +74,49 @@ func TestArrowsStillChangeTheProvider(t *testing.T) {
 	}
 	if m.EditorFocus != 1 {
 		t.Errorf("changing the provider moved the focus to %d", m.EditorFocus)
+	}
+}
+
+func TestFirstArrowMovesEvenFromAnUnknownProvider(t *testing.T) {
+	m := editorWith(t, 1)
+	m.Draft.Provider = "localtunnel"
+
+	m.handleKey(tea.KeyPressMsg{Code: tea.KeyRight})
+
+	if m.Draft.Provider == "localtunnel" {
+		t.Fatal("the first press was swallowed rewriting the provider")
+	}
+	if m.Draft.Provider != string(config.AllProviders()[1]) {
+		t.Errorf("provider = %q, want the second in the list", m.Draft.Provider)
+	}
+}
+
+func TestProviderSelectorReachesEveryProvider(t *testing.T) {
+	m := editorWith(t, 1)
+	m.Draft.Provider = string(config.AllProviders()[0])
+
+	seen := map[string]bool{}
+	for range config.AllProviders() {
+		seen[m.Draft.Provider] = true
+		m.handleKey(tea.KeyPressMsg{Code: tea.KeyRight})
+	}
+
+	for _, provider := range config.AllProviders() {
+		if !seen[string(provider)] {
+			t.Errorf("%q is never reachable in the editor", provider)
+		}
+	}
+}
+
+func TestEveryOfferedProviderCanActuallyStart(t *testing.T) {
+	manager := process.NewManager()
+
+	for _, provider := range config.AllProviders() {
+		if err := manager.Start(config.TunnelConfig{ID: "x", Provider: provider}, nil); err != nil {
+			if strings.Contains(err.Error(), "unknown provider") {
+				t.Errorf("the editor offers %q but the manager cannot start it", provider)
+			}
+		}
+		manager.Stop("x")
 	}
 }

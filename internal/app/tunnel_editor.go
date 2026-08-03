@@ -58,27 +58,14 @@ func (m *Model) handleProviderNav(dir string) {
 		return
 	}
 
-	providers := []config.Provider{
-		config.ProviderCloudflared,
-		config.ProviderTunnelmole,
-		config.ProviderLocalhostRun,
-		config.ProviderServeo,
-		config.ProviderPinggy,
-		config.ProviderBore,
-	}
+	providers := config.AllProviders()
 
-	current := config.Provider(m.Draft.Provider)
-	idx := -1
+	idx := 0
 	for i, p := range providers {
-		if p == current {
+		if p == config.Provider(m.Draft.Provider) {
 			idx = i
 			break
 		}
-	}
-
-	if idx == -1 {
-		m.Draft.Provider = string(config.ProviderCloudflared)
-		return
 	}
 
 	if dir == "right" {
