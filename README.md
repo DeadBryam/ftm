@@ -48,13 +48,16 @@ Full-screen terminal UI. Navigate connections, open logs, copy the public URL, j
 | Key | Action |
 |-----|--------|
 | `↑` / `↓` | Navigate |
-| `s` | Start / stop |
+| `enter` / `t` | Start / stop |
 | `l` | Logs |
 | `c` | Copy URL |
 | `w` | Open web dashboard |
 | `o` | Open config |
-| `a` / `d` | Add / delete |
-| `q` | Quit |
+| `a` / `e` / `d` | Add / edit / delete |
+| `s` | Settings |
+| `?` | Full shortcut list |
+| `esc` | Back to the connection list |
+| `q` | Back, or quit from the list |
 
 **Web** — always on when ftm runs  
 Dashboard at `http://localhost:40500` (port auto-detects if busy). Themes, live status, manage tunnels from the browser.
