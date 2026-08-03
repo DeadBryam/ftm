@@ -7,8 +7,11 @@ export const api = ky.create({
     'Content-Type': 'application/json',
   },
   retry: {
-    limit: 3,
-    methods: ['get', 'post', 'put', 'delete', 'patch'],
+    // Reads only. Retrying a write means a failed "start tunnel" fires the
+    // provider up to three times, and a retried delete can remove a tunnel the
+    // user recreated in between. Only GET is safe to repeat.
+    limit: 2,
+    methods: ['get'],
     statusCodes: [408, 413, 429, 500, 502, 503, 504],
     backoffLimit: 10000,
   },
