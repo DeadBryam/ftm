@@ -18,8 +18,6 @@ import (
 	"github.com/sthbryan/ftm/internal/process"
 )
 
-// The dashboard exposes an unauthenticated control API, so it is bound to the
-// loopback interface only. Do not change this to ":port" without adding auth.
 const (
 	listenHost = "127.0.0.1"
 	portMin    = 40500
@@ -56,10 +54,6 @@ func NewServer(manager *process.Manager, cfg *config.Config) *Server {
 	return s
 }
 
-// listen binds the dashboard socket, preferring the configured port and falling
-// back to a scan of the default range. Binding here rather than probing first
-// means the returned listener is the one we serve on, with no window for another
-// process to take the port in between.
 func (s *Server) listen() (net.Listener, error) {
 	if s.config.WebPort > 0 {
 		ln, err := net.Listen("tcp", fmt.Sprintf("%s:%d", listenHost, s.config.WebPort))

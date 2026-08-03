@@ -75,14 +75,8 @@ func main() {
 
 	url := application.WebServer.URL()
 	fmt.Printf("🎲 Foundry Tunnel Manager v%s\n", version.Version)
-	// Print, not Printf: the translated string is data, and a stray % in a
-	// locale would be read as a format verb.
 	fmt.Print(i18n.TF("dashboard_url", url))
 
-	// Without this the tunnels outlive ftm: the process used to block on an
-	// empty select and die on Ctrl+C without ever tearing down the providers it
-	// had spawned, leaving the user's world exposed by a tunnel they believed
-	// they had closed.
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
@@ -99,7 +93,6 @@ func main() {
 		return
 	}
 
-	// In TUI mode bubbletea handles Ctrl+C itself, so this covers SIGTERM.
 	go func() {
 		<-stop
 		application.Shutdown()

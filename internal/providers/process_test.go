@@ -43,8 +43,6 @@ func TestStartProcessReportsExit(t *testing.T) {
 	}
 }
 
-// A provider that dies on its own has to be observable, or the UI keeps
-// claiming the tunnel is online.
 func TestStartProcessReportsFailure(t *testing.T) {
 	proc := startSleeper(t, "exit 3")
 
@@ -81,15 +79,11 @@ func TestStopTerminatesProcess(t *testing.T) {
 	}
 }
 
-// The real bug this guards: ssh and cloudflared spawn helpers of their own, and
-// killing only the direct child left those alive with the tunnel still up.
 func TestStopKillsGrandchildren(t *testing.T) {
-	// The shell writes its grandchild's pid, then waits. Killing only the
-	// shell would leave the grandchild sleeping.
+
 	pidFile := t.TempDir() + "/grandchild.pid"
 	proc := startSleeper(t, "sh -c 'sleep 60 & echo $! > "+pidFile+"; wait' ")
 
-	// Give the inner shell a moment to spawn and record the grandchild.
 	deadline := time.Now().Add(5 * time.Second)
 	var pid string
 	for time.Now().Before(deadline) {
@@ -105,16 +99,14 @@ func TestStopKillsGrandchildren(t *testing.T) {
 
 	proc.Stop()
 
-	// kill -0 reports whether the pid still exists.
 	deadline = time.Now().Add(5 * time.Second)
 	for time.Now().Before(deadline) {
 		if exec.Command("kill", "-0", pid).Run() != nil {
-			return // gone, as intended
+			return
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
 
-	// Do not leave a stray process behind if the assertion fails.
 	_ = exec.Command("kill", "-9", pid).Run()
 	t.Fatalf("grandchild %s survived Stop(); the process tree was not torn down", pid)
 }
@@ -123,7 +115,7 @@ func TestStopIsIdempotent(t *testing.T) {
 	proc := startSleeper(t, "sleep 60")
 
 	proc.Stop()
-	proc.Stop() // must not panic or block
+	proc.Stop()
 
 	select {
 	case <-proc.Exited():

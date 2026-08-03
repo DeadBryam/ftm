@@ -15,7 +15,7 @@ export function useUpdate() {
         info = await updateApi.get();
         error = null;
       } catch {
-        // silent: no update info or offline
+        error = "Failed to check for updates";
       }
     },
 

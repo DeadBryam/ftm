@@ -56,12 +56,6 @@ func (m *Manager) SetStatusChannel(ch chan config.TunnelStatus) {
 	m.StatusChannel = ch
 }
 
-// SetProviderExpiration records how long each provider keeps a tunnel alive, in
-// minutes, with 0 meaning "does not expire".
-//
-// Without this the ExpiresAt field is never populated, which is why the web
-// dashboard's expiry warnings never fired: the frontend has had the countdown
-// logic all along, but nothing ever sent it a deadline.
 func (m *Manager) SetProviderExpiration(minutes map[string]int) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -72,8 +66,6 @@ func (m *Manager) SetProviderExpiration(minutes map[string]int) {
 	}
 }
 
-// expiresAtLocked returns the deadline for a tunnel started at startedAt, in
-// Unix milliseconds, or 0 if the provider does not expire.
 func (m *Manager) expiresAtLocked(provider config.Provider, startedAt time.Time) int64 {
 	mins, ok := m.providerExpiration[string(provider)]
 	if !ok || mins <= 0 {
@@ -82,13 +74,6 @@ func (m *Manager) expiresAtLocked(provider config.Provider, startedAt time.Time)
 	return startedAt.Add(time.Duration(mins) * time.Minute).UnixMilli()
 }
 
-// callStatusUpdate publishes a status change to whoever is listening.
-//
-// Every caller holds m.mu, so this must not block. The channel is buffered, but
-// a blocking send would freeze the entire Manager behind the mutex if the
-// consumer ever stalled or was never started -- taking the TUI down with it,
-// since it shares the same lock. Dropping is the safe failure mode here: each
-// message carries the full status, and clients resync over /api/tunnels.
 func (m *Manager) callStatusUpdate(status config.TunnelStatus) {
 	if m.StatusChannel == nil {
 		return
@@ -221,10 +206,6 @@ func (m *Manager) Start(tunnel config.TunnelConfig, onUpdate func(config.TunnelS
 	return nil
 }
 
-// publishLocked notifies listeners of mp's current status.
-//
-// The caller must hold m.mu. That is safe because callStatusUpdate never
-// blocks; see its comment.
 func (m *Manager) publishLocked(mp *ManagedProcess) {
 	if mp.OnUpdate != nil {
 		mp.OnUpdate(mp.Status)
@@ -232,13 +213,6 @@ func (m *Manager) publishLocked(mp *ManagedProcess) {
 	m.callStatusUpdate(mp.Status)
 }
 
-// watchExit reports the outcome when a provider exits on its own.
-//
-// Nothing used to notice this at all: if cloudflared crashed, the UI kept
-// showing the tunnel as online indefinitely and the child was never reaped.
-//
-// A deliberate Stop removes the tunnel from the map before tearing the process
-// down, so this stays quiet for those and only speaks up for real failures.
 func (m *Manager) watchExit(tunnelID string, proc *providers.Process) {
 	<-proc.Exited()
 
@@ -249,10 +223,6 @@ func (m *Manager) watchExit(tunnelID string, proc *providers.Process) {
 		return
 	}
 
-	// The entry is kept with a nil Process rather than deleted, so the terminal
-	// state survives: GetStatus is what /api/tunnels reads, and dropping the
-	// entry meant a crashed tunnel reported "error" over the WebSocket and then
-	// plain "stopped" with no message as soon as the page was reloaded.
 	mp.Process = nil
 	mp.closeLogSubscribers()
 
@@ -274,23 +244,14 @@ func (m *Manager) watchExit(tunnelID string, proc *providers.Process) {
 }
 
 const (
-	// connectingAfter is how long a tunnel may sit in "starting" before it is
-	// shown as "connecting", and giveUpAfter how much longer it gets to
-	// produce a URL before being declared timed out.
 	connectingAfter = 5 * time.Second
 	giveUpAfter     = 25 * time.Second
 )
 
-// startupTimeoutMonitor gives up on a tunnel that never produces a URL.
-//
-// Every step re-checks that the process it was started for is still the one
-// registered. Previously this just slept and then mutated whatever it found:
-// stopping a tunnel and starting it again inside the 30s window let the stale
-// monitor mark the *new* process as timed out.
 func (m *Manager) startupTimeoutMonitor(tunnelID string, proc *providers.Process) {
 	select {
 	case <-proc.Exited():
-		return // watchExit reports this
+		return
 	case <-time.After(connectingAfter):
 	}
 
@@ -323,9 +284,6 @@ func (m *Manager) startupTimeoutMonitor(tunnelID string, proc *providers.Process
 		return
 	}
 
-	// Detached from the process before teardown so watchExit stays quiet about
-	// this exit, while the entry itself is kept so the timeout is still
-	// readable from /api/tunnels.
 	mp.Process = nil
 	mp.closeLogSubscribers()
 
@@ -341,12 +299,6 @@ func (m *Manager) startupTimeoutMonitor(tunnelID string, proc *providers.Process
 	proc.Stop()
 }
 
-// Stop terminates a tunnel and waits for its process to actually be gone.
-//
-// The tunnel is removed from the map up front so watchExit treats the exit as
-// deliberate, and the teardown itself happens with m.mu released: Process.Stop
-// blocks until the process dies, and holding the lock across that would stall
-// every other Manager operation, TUI included.
 func (m *Manager) Stop(tunnelID string) error {
 	m.mu.Lock()
 
@@ -447,11 +399,6 @@ func (m *Manager) IsRunning(tunnelID string) bool {
 	return ok && (mp.Status.State == config.TunnelStateOnline || mp.Status.State == config.TunnelStateConnecting || mp.Status.State == config.TunnelStateStarting)
 }
 
-// StopAll terminates every tunnel and waits for them all to be gone.
-//
-// Waiting is the point: this runs on shutdown, and returning early left the
-// provider processes running after ftm exited, with the user's world still
-// exposed by a tunnel they thought they had closed.
 func (m *Manager) StopAll() {
 	m.mu.Lock()
 	procs := make([]*providers.Process, 0, len(m.processes))
@@ -464,8 +411,6 @@ func (m *Manager) StopAll() {
 	m.processes = make(map[string]*ManagedProcess)
 	m.mu.Unlock()
 
-	// In parallel: each Stop waits out its own process, and on shutdown those
-	// waits should not be serialised.
 	var wg sync.WaitGroup
 	for _, proc := range procs {
 		wg.Add(1)

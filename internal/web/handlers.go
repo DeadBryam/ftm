@@ -65,9 +65,6 @@ func (h *Handlers) Route(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// setCORS writes the CORS headers for an allowed request and reports whether
-// the request may proceed. A wildcard origin would let any site the user visits
-// drive the API, so the allowed origin is echoed back instead.
 func (h *Handlers) setCORS(w http.ResponseWriter, r *http.Request) bool {
 	origin, ok := allowedOrigin(r)
 	if !ok {

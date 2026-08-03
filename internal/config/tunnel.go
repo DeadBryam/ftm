@@ -44,10 +44,7 @@ type TunnelStatus struct {
 	LogLines     []string
 	Players      int
 	MaxPlayers   int
-
-	// ExpiresAt is when the provider will drop this tunnel, in Unix
-	// milliseconds, or 0 for providers that do not expire.
-	ExpiresAt int64
+	ExpiresAt    int64
 }
 
 func (tc *TunnelConfig) Status() TunnelStatus {

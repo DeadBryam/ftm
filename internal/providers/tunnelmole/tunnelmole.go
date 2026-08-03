@@ -124,8 +124,6 @@ func (p *TunnelmoleProvider) Start(ctx context.Context, tunnel config.TunnelConf
 		return nil, fmt.Errorf("%w: %s", fmt.Errorf("rosetta required"), errRosettaNeeded)
 	}
 
-	// StartProcess already cancelled the context on the failed attempt, so the
-	// retry needs a fresh one or the translated process is killed immediately.
 	ctx, cancel = context.WithCancel(baseCtx)
 
 	cmd = exec.CommandContext(ctx, "/Library/Apple/usr/libexec/oah", append([]string{"-r", binary}, args...)...)

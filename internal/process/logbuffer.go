@@ -35,10 +35,6 @@ func (lb *LogBuffer) Write(p []byte) (n int, err error) {
 	notify := lb.OnNewLine
 	lb.mu.Unlock()
 
-	// Published outside the lock and in sequence. This used to be
-	// `go lb.OnNewLine(line)` per line, which handed the lines to subscribers
-	// in whatever order the goroutines happened to get scheduled, so live logs
-	// in the web UI arrived shuffled.
 	if notify != nil {
 		for _, line := range added {
 			notify(line)

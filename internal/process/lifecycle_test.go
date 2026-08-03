@@ -12,8 +12,6 @@ import (
 	"github.com/sthbryan/ftm/internal/providers"
 )
 
-// scriptProvider runs an arbitrary shell script as the "tunnel", so tests can
-// make a provider crash, linger, or print a URL on demand.
 type scriptProvider struct {
 	script string
 }
@@ -62,7 +60,6 @@ func tunnelFixture() config.TunnelConfig {
 	}
 }
 
-// waitForState drains updates until the wanted state shows up.
 func waitForState(t *testing.T, updates <-chan config.TunnelStatus, want config.TunnelState) config.TunnelStatus {
 	t.Helper()
 
@@ -79,8 +76,6 @@ func waitForState(t *testing.T, updates <-chan config.TunnelStatus, want config.
 	}
 }
 
-// The bug: nothing waited on the process, so a provider that died kept being
-// reported as online forever.
 func TestManagerReportsCrashedProvider(t *testing.T) {
 	m, updates := newScriptManager(t, "echo https://example.trycloudflare.com; sleep 0.2; exit 7")
 
@@ -100,8 +95,6 @@ func TestManagerReportsCrashedProvider(t *testing.T) {
 		t.Error("crashed tunnel is still reported as running")
 	}
 
-	// The terminal state has to survive for /api/tunnels, which reads
-	// GetStatus: a reload used to show a bare "stopped" with no message.
 	persisted, ok := m.GetStatus("t1")
 	if !ok {
 		t.Fatal("crashed tunnel has no status left for the REST API to report")
@@ -124,7 +117,6 @@ func TestManagerReportsCleanExitAsStopped(t *testing.T) {
 	waitForState(t, updates, config.TunnelStateStopped)
 }
 
-// A deliberate Stop must not be reported as a crash.
 func TestManagerStopIsNotReportedAsError(t *testing.T) {
 	m, updates := newScriptManager(t, "sleep 60")
 
@@ -137,7 +129,6 @@ func TestManagerStopIsNotReportedAsError(t *testing.T) {
 
 	waitForState(t, updates, config.TunnelStateStopped)
 
-	// Nothing may follow claiming the tunnel failed.
 	deadline := time.After(time.Second)
 	for {
 		select {
@@ -151,8 +142,6 @@ func TestManagerStopIsNotReportedAsError(t *testing.T) {
 	}
 }
 
-// Stop has to return only once the process is really gone, otherwise quitting
-// leaves tunnels running.
 func TestManagerStopWaitsForExit(t *testing.T) {
 	m, _ := newScriptManager(t, "sleep 60")
 
@@ -208,8 +197,6 @@ func TestManagerStopAllWaitsForEveryProcess(t *testing.T) {
 	}
 }
 
-// Stopping and restarting inside the startup window used to let the old
-// monitor time out the new process.
 func TestManagerRestartIsNotTimedOutByTheOldMonitor(t *testing.T) {
 	m, updates := newScriptManager(t, "sleep 60")
 
@@ -223,7 +210,6 @@ func TestManagerRestartIsNotTimedOutByTheOldMonitor(t *testing.T) {
 		t.Fatalf("second Start failed: %v", err)
 	}
 
-	// The first monitor's "connecting" step lands ~5s in; give it room to fire.
 	deadline := time.After(9 * time.Second)
 	for {
 		select {
@@ -241,8 +227,6 @@ func TestManagerRestartIsNotTimedOutByTheOldMonitor(t *testing.T) {
 	}
 }
 
-// The web dashboard has always had expiry-countdown logic, but nothing ever
-// sent it a deadline, so the warnings never fired.
 func TestManagerPublishesExpiryForExpiringProviders(t *testing.T) {
 	m, updates := newScriptManager(t, "sleep 5")
 	m.SetProviderExpiration(map[string]int{string(config.ProviderCloudflared): 60})

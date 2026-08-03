@@ -8,8 +8,6 @@ import (
 	"syscall"
 )
 
-// configureProcessGroup puts the child in a new process group, so that a Ctrl+C
-// delivered to ftm's own console is not broadcast to the tunnel as well.
 func configureProcessGroup(cmd *exec.Cmd) {
 	if cmd.SysProcAttr == nil {
 		cmd.SysProcAttr = &syscall.SysProcAttr{}
@@ -17,11 +15,6 @@ func configureProcessGroup(cmd *exec.Cmd) {
 	cmd.SysProcAttr.CreationFlags |= syscall.CREATE_NEW_PROCESS_GROUP
 }
 
-// taskkill ends the process tree rooted at the child.
-//
-// Windows has no signals, and Process.Kill reaches only the direct child, so an
-// ssh.exe or cloudflared.exe helper would otherwise survive and keep the tunnel
-// open. /T includes descendants; /F makes it non-negotiable.
 func taskkill(cmd *exec.Cmd, force bool) {
 	if cmd == nil || cmd.Process == nil {
 		return

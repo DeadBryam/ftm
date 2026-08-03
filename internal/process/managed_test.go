@@ -11,8 +11,6 @@ import (
 	"github.com/sthbryan/ftm/internal/providers"
 )
 
-// fakeProvider reports a URL for any line containing one, mimicking the real
-// providers closely enough to exercise the writer's line splitting.
 type fakeProvider struct{}
 
 func (fakeProvider) Name() string       { return "Fake" }
@@ -57,8 +55,6 @@ func TestURLCaptureFindsURLInCompleteLine(t *testing.T) {
 	}
 }
 
-// Provider output arrives in arbitrary chunks, so a URL can be split across two
-// writes. The tail has to be buffered until its newline shows up.
 func TestURLCaptureJoinsSplitWrites(t *testing.T) {
 	got := collectURLs(t, []string{"tunnel ready at https://abc.tryclo", "udflare.com\n"})
 
@@ -133,8 +129,6 @@ func TestLogBufferSkipsBlankLines(t *testing.T) {
 	}
 }
 
-// Live log subscribers must see lines in the order the process wrote them.
-// Publishing each line from its own goroutine shuffled them.
 func TestLogBufferPublishesLinesInOrder(t *testing.T) {
 	lb := NewLogBuffer()
 
@@ -159,19 +153,17 @@ func TestLogBufferPublishesLinesInOrder(t *testing.T) {
 	}
 }
 
-// A subscriber that blocks must not deadlock the writer against lb.mu.
 func TestLogBufferWriteDoesNotHoldLockDuringPublish(t *testing.T) {
 	lb := NewLogBuffer()
 	lb.OnNewLine = func(string) {
-		// Reading the buffer from inside the callback deadlocks if Write still
-		// holds the lock while publishing.
+
 		lb.GetLines()
 	}
 
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		lb.Write([]byte("line\n")) //nolint:errcheck // the write cannot fail
+		lb.Write([]byte("line\n")) //nolint:errcheck
 	}()
 
 	select {
@@ -181,8 +173,6 @@ func TestLogBufferWriteDoesNotHoldLockDuringPublish(t *testing.T) {
 	}
 }
 
-// GetLines must hand back a copy: the TUI renders the result while the process
-// keeps writing, and a shared slice would race.
 func TestLogBufferGetLinesReturnsCopy(t *testing.T) {
 	lb := NewLogBuffer()
 	if _, err := lb.Write([]byte("original\n")); err != nil {

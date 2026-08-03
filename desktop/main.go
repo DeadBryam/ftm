@@ -66,8 +66,6 @@ func main() {
 		},
 		OnShutdown: func(ctx context.Context) {
 			log.Println("App shutting down...")
-			// Closing the window has to take the tunnels down with it,
-			// otherwise the provider processes outlive the app.
 			application.Shutdown()
 		},
 		Bind:             []interface{}{},

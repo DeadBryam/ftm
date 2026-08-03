@@ -113,10 +113,6 @@ func (a *App) Run() error {
 	return err
 }
 
-// StartWebServer is idempotent: both main and Run call it, and starting a
-// second server would leave the first one orphaned on its own port, still
-// serving a dashboard that no longer receives status updates because the
-// Manager only publishes to the most recent status channel.
 func (a *App) StartWebServer() error {
 	if a.WebServer != nil {
 		return nil
@@ -187,12 +183,9 @@ func (a *App) shouldUseNativeNotifications() bool {
 	return a.WebServer.ClientCount() == 0
 }
 
-// Shutdown stops the tunnels and the web server. It is safe to call more than
-// once, since both the signal handler and the normal exit path invoke it.
 func (a *App) Shutdown() {
 	a.shutdownOnce.Do(func() {
-		// Tunnels first: Manager.StopAll waits for each provider process to
-		// actually exit, which is the whole point of shutting down.
+
 		if a.Manager != nil {
 			a.Manager.StopAll()
 		}
