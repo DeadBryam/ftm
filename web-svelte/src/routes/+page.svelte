@@ -107,7 +107,7 @@
       />
     </div>
 
-    <div class="max-md:order-2 md:order-1 md:self-start">
+    <div class="max-md:order-2 md:order-1 md:flex md:h-full md:min-h-0 md:flex-col">
       <button
         type="button"
         class="mb-2 flex w-full items-center justify-between rounded-panel border border-border bg-card px-3 py-2 text-left text-sm font-medium text-text-heading md:hidden"
@@ -123,16 +123,17 @@
         />
       </button>
 
-      <div class={cn(!formOpen && "max-md:hidden")}>
+      <div class={cn("flex min-h-0 flex-1 flex-col", !formOpen && "max-md:hidden")}>
         {#if editingTunnelId}
           <ConnectionForm
             mode="edit"
             tunnelId={editingTunnelId}
             onCancel={handleEditCancel}
             onSaved={handleEditSaved}
+            class="flex-1 min-h-0"
           />
         {:else}
-          <ConnectionForm mode="create" />
+          <ConnectionForm mode="create" class="flex-1 min-h-0" />
         {/if}
       </div>
     </div>
