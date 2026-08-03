@@ -127,11 +127,13 @@
 
 <section
   class={cn(
-    "ftm-enter rounded-panel border border-border bg-card p-3.5",
+    "ftm-enter relative flex min-h-0 flex-col overflow-hidden rounded-panel border border-border bg-card",
     className,
   )}
 >
-  <div class="ftm-enter ftm-enter-delay-1 mb-3 flex items-center justify-between">
+  <div class="panel-pattern pointer-events-none absolute inset-0 opacity-30" aria-hidden="true"></div>
+
+  <div class="ftm-enter ftm-enter-delay-1 relative z-10 flex shrink-0 items-center justify-between border-b border-border-light px-3.5 py-2.5">
     <h2 class="m-0 text-sm font-semibold text-text-heading">
       {isEdit ? t("edit_connection") : t("new_connection")}
     </h2>
@@ -147,7 +149,7 @@
     {/if}
   </div>
 
-  <div class="ftm-enter ftm-enter-delay-2">
+  <div class="ftm-enter ftm-enter-delay-2 relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto p-3.5">
     {#if providerStore.error}
       <p class="mb-2 rounded-control border border-status-error/40 bg-status-error/10 px-2.5 py-1.5 text-xs text-status-error">
         {providerStore.error}
@@ -229,5 +231,27 @@
         {/if}
       </div>
     </form>
+
+    {#if !isEdit}
+      <div class="mt-4 rounded-control border border-border-light bg-bg/40 p-3 text-xs leading-relaxed text-text-muted">
+        <p class="m-0 mb-1.5 font-semibold text-text-heading">
+          {t("form_tips_title")}
+        </p>
+        <ul class="m-0 list-none space-y-1 p-0">
+          <li class="flex gap-2">
+            <span class="text-primary">·</span>
+            <span>{t("form_tips_port")}</span>
+          </li>
+          <li class="flex gap-2">
+            <span class="text-primary">·</span>
+            <span>{t("form_tips_provider")}</span>
+          </li>
+          <li class="flex gap-2">
+            <span class="text-primary">·</span>
+            <span>{t("form_tips_name")}</span>
+          </li>
+        </ul>
+      </div>
+    {/if}
   </div>
 </section>
