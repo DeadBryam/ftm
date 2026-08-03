@@ -2,6 +2,7 @@ const THEMES = [
   'foundry-dark',
   'foundry-light',
   'nord',
+  'nord-light',
   'catppuccin-mocha',
   'catppuccin-latte',
   'gruvbox',
