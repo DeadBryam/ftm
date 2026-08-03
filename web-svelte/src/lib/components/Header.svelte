@@ -7,23 +7,29 @@
   let isSettings = $derived($page.url.pathname === '/settings');
 </script>
 
-<header class="flex justify-between items-center mb-6 pb-5 border-b flex-shrink-0 z-10 border-border">
-  <div class="flex items-center gap-4">
-    <img src="/favicon.png" alt={t('app_name')} class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-cover" />
-    <div class="text">
-      <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold m-0 mb-1 tracking-tight text-text-heading">{t('app_name')}</h1>
-      <p class="text-xs sm:text-sm m-0 font-medium text-text-muted">{t('app_tagline')}</p>
+<header class="z-10 mb-3 flex shrink-0 items-center justify-between border-b border-border pb-3">
+  <div class="flex min-w-0 items-center gap-3">
+    <img
+      src="/favicon.png"
+      alt={t('app_name')}
+      class="h-9 w-9 shrink-0 rounded-[var(--radius-control)] object-cover sm:h-10 sm:w-10"
+    />
+    <div class="min-w-0">
+      <h1 class="m-0 font-serif text-xl font-bold tracking-tight text-text-heading sm:text-2xl">
+        {t('app_name')}
+      </h1>
+      <p class="m-0 truncate text-xs font-medium text-text-muted">{t('app_tagline')}</p>
     </div>
   </div>
-  
+
   <a
     href="/settings"
     class={cn(
-      "p-2 rounded-lg transition-colors",
+      "rounded-[var(--radius-control)] p-2 transition-colors",
       isSettings ? "bg-primary/20 text-primary" : "hover:bg-secondary"
     )}
     aria-label={t('settings')}
   >
-    <Settings size={20} />
+    <Settings size={18} />
   </a>
 </header>

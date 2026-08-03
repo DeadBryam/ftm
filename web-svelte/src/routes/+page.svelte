@@ -95,22 +95,22 @@
 
   <main
     class={cn(
-      "grid min-h-0 flex-1 gap-5",
-      "max-md:grid-cols-1 max-md:content-start",
-      "md:grid-cols-[minmax(0,20rem)_1fr] lg:grid-cols-[minmax(0,22rem)_1fr]",
+      "grid min-h-0 flex-1 gap-[var(--app-gap)]",
+      "max-md:grid-cols-1 max-md:content-start max-md:overflow-y-auto",
+      "md:grid-cols-[minmax(0,17.5rem)_1fr] lg:grid-cols-[minmax(0,19rem)_1fr]",
     )}
   >
-    <div class="min-h-0 max-md:order-1 md:order-2 md:min-h-0">
+    <div class="flex min-h-0 max-md:order-1 md:order-2 md:min-h-0">
       <ConnectionsPanel
         onAction={handleAction}
         onCreateFirst={handleCreateFirst}
       />
     </div>
 
-    <div class="max-md:order-2 md:order-1">
+    <div class="max-md:order-2 md:order-1 md:self-start">
       <button
         type="button"
-        class="mb-3 flex w-full items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-left text-sm font-medium text-text-heading md:hidden"
+        class="mb-2 flex w-full items-center justify-between rounded-[var(--radius-panel)] border border-border bg-card px-3 py-2 text-left text-sm font-medium text-text-heading md:hidden"
         onclick={() => (formOpen = !formOpen)}
         aria-expanded={formOpen}
       >

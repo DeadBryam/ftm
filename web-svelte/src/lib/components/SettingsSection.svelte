@@ -7,7 +7,7 @@
   let { title, children }: Props = $props();
 </script>
 
-<section class="p-6 rounded-2xl bg-card border border-border space-y-4">
-  <h2 class="text-sm uppercase tracking-wider text-text-muted font-medium">{title}</h2>
+<section class="space-y-3 rounded-[var(--radius-panel)] border border-border bg-card p-4">
+  <h2 class="text-xs font-medium uppercase tracking-wider text-text-muted">{title}</h2>
   {@render children()}
 </section>

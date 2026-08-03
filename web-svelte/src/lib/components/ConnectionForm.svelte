@@ -127,19 +127,19 @@
 
 <section
   class={cn(
-    "ftm-enter rounded-[var(--radius-panel)] border border-border bg-card p-5",
+    "ftm-enter rounded-[var(--radius-panel)] border border-border bg-card p-3.5",
     className,
   )}
 >
-  <div class="ftm-enter ftm-enter-delay-1 mb-5 flex items-center justify-between">
-    <h2 class="m-0 flex items-center gap-2 text-base font-semibold text-text-heading">
+  <div class="ftm-enter ftm-enter-delay-1 mb-3 flex items-center justify-between">
+    <h2 class="m-0 text-sm font-semibold text-text-heading">
       {isEdit ? t("edit_connection") : t("new_connection")}
     </h2>
     {#if isEdit && onCancel}
       <button
         type="button"
         onclick={onCancel}
-        class="cursor-pointer rounded-xl border-none bg-transparent p-1 text-text-muted transition-colors hover:bg-hover hover:text-text"
+        class="cursor-pointer rounded-[var(--radius-control)] border-none bg-transparent p-1 text-text-muted transition-colors hover:bg-hover hover:text-text"
         aria-label={t("cancel")}
       >
         ×
@@ -149,14 +149,14 @@
 
   <div class="ftm-enter ftm-enter-delay-2">
     {#if providerStore.error}
-      <p class="mb-3 rounded-lg border border-status-error/40 bg-status-error/10 px-3 py-2 text-xs text-status-error">
+      <p class="mb-2 rounded-[var(--radius-control)] border border-status-error/40 bg-status-error/10 px-2.5 py-1.5 text-xs text-status-error">
         {providerStore.error}
       </p>
     {/if}
 
     <form onsubmit={handleSubmit}>
-      <div class="mb-4">
-        <label for="conn-name" class="mb-1.5 block text-xs font-medium text-text-muted">
+      <div class="mb-2.5">
+        <label for="conn-name" class="mb-1 block text-xs font-medium text-text-muted">
           {isEdit ? t("connection_name_label") : t("tunnel_name")}
         </label>
         <input
@@ -166,13 +166,13 @@
           placeholder={isEdit ? t("name_placeholder") : t("tunnel_name_hint")}
           required
           autocomplete="off"
-          class="h-9 w-full rounded-xl border border-border bg-input-bg px-3 py-2 text-sm text-text transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+          class="h-8 w-full rounded-[var(--radius-control)] border border-border bg-input-bg px-2.5 py-1.5 text-sm text-text transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
         />
       </div>
 
-      <div class="grid grid-cols-2 gap-4">
-        <div class="mb-4">
-          <label for="conn-port" class="mb-1.5 block text-xs font-medium text-text-muted">
+      <div class="grid grid-cols-2 gap-2.5">
+        <div class="mb-2.5">
+          <label for="conn-port" class="mb-1 block text-xs font-medium text-text-muted">
             {isEdit ? t("port") : t("local_port")}
           </label>
           <input
@@ -182,11 +182,11 @@
             min="1"
             max="65535"
             required
-            class="h-9 w-full rounded-xl border border-border bg-input-bg px-3 py-2 text-sm text-text transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+            class="h-8 w-full rounded-[var(--radius-control)] border border-border bg-input-bg px-2.5 py-1.5 text-sm text-text transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
           />
         </div>
-        <div class="mb-4">
-          <label for="conn-provider" class="mb-1.5 block text-xs font-medium text-text-muted">
+        <div class="mb-2.5">
+          <label for="conn-provider" class="mb-1 block text-xs font-medium text-text-muted">
             {isEdit ? t("provider_label") : t("select_provider")}
           </label>
           <Dropdown
@@ -201,24 +201,24 @@
         </div>
       </div>
 
-      <div class={cn("mt-5", isEdit && "flex gap-3")}>
+      <div class={cn("mt-3", isEdit && "flex gap-2")}>
         {#if isEdit}
           <Button
             variant="default"
-            size="lg"
+            size="md"
             type="button"
             onclick={onCancel}
             class="flex-1"
           >
             {t("cancel")}
           </Button>
-          <Button variant="primary" size="lg" type="submit" class="flex-1" disabled={submitting}>
+          <Button variant="primary" size="md" type="submit" class="flex-1" disabled={submitting}>
             {t("save")}
           </Button>
         {:else}
           <Button
             variant="primary"
-            size="lg"
+            size="md"
             type="submit"
             class="w-full"
             icon={Plus}

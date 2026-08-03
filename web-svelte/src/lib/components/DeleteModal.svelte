@@ -47,7 +47,7 @@
       aria-labelledby="modal-title"
       tabindex="-1"
       class={cn(
-        "w-[90%] max-w-md rounded-2xl bg-card p-6 shadow-2xl outline-none ftm-enter ftm-enter-delay-1",
+        "w-[90%] max-w-md rounded-[var(--radius-panel)] bg-card p-4 shadow-xl outline-none ftm-enter ftm-enter-delay-1",
       )}
       onclick={(e) => e.stopPropagation()}
     >

@@ -27,7 +27,7 @@
 
 {#if update.info?.hasUpdate}
   <div
-    class="flex flex-wrap items-center gap-3 px-4 py-3 mb-5 rounded-lg border border-primary/30 bg-primary/10 text-sm"
+    class="mb-3 flex flex-wrap items-center gap-2 rounded-[var(--radius-panel)] border border-primary/30 bg-primary/10 px-3 py-2 text-sm"
   >
     <div class="flex items-center gap-3 flex-wrap">
       <span class="font-semibold text-primary">
@@ -60,7 +60,7 @@
 
 {#if update.error}
   <div
-    class="flex items-center gap-3 px-4 py-3 mb-5 rounded-lg border border-red-300 bg-red-50 text-sm text-red-700"
+    class="mb-3 flex items-center gap-2 rounded-[var(--radius-panel)] border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700"
   >
     {t('update_apply_failed', { 0: update.error })}
   </div>

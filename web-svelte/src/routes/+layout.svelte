@@ -26,22 +26,22 @@
 </script>
 
 <div
-  class="mx-auto flex min-h-dvh w-full max-w-[var(--app-max-width)] flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-10"
+  class="mx-auto flex h-dvh w-full max-w-[var(--app-max-width)] flex-col overflow-hidden px-[var(--app-pad-x)] py-[var(--app-pad-y)] sm:px-5"
 >
   {#if i18n.ready}
     {@render children()}
   {:else}
-    <div class="flex flex-1 flex-col gap-6" aria-busy="true" aria-live="polite">
-      <div class="flex items-center gap-4 border-b border-border pb-5">
-        <div class="h-12 w-12 animate-pulse rounded-xl bg-border"></div>
-        <div class="flex flex-1 flex-col gap-2">
-          <div class="h-7 w-48 max-w-full animate-pulse rounded-md bg-border"></div>
-          <div class="h-4 w-64 max-w-full animate-pulse rounded-md bg-border/70"></div>
+    <div class="flex min-h-0 flex-1 flex-col gap-3" aria-busy="true" aria-live="polite">
+      <div class="flex items-center gap-3 border-b border-border pb-3">
+        <div class="h-9 w-9 animate-pulse rounded-[var(--radius-control)] bg-border"></div>
+        <div class="flex flex-1 flex-col gap-1.5">
+          <div class="h-5 w-40 max-w-full animate-pulse rounded-sm bg-border"></div>
+          <div class="h-3 w-56 max-w-full animate-pulse rounded-sm bg-border/70"></div>
         </div>
       </div>
-      <div class="grid flex-1 gap-5 lg:grid-cols-[minmax(0,22rem)_1fr]">
-        <div class="h-64 animate-pulse rounded-[var(--radius-panel)] bg-card border border-border"></div>
-        <div class="h-64 animate-pulse rounded-[var(--radius-card)] bg-card border border-border"></div>
+      <div class="grid min-h-0 flex-1 gap-[var(--app-gap)] md:grid-cols-[minmax(0,18rem)_1fr]">
+        <div class="min-h-0 rounded-[var(--radius-panel)] border border-border bg-card"></div>
+        <div class="min-h-0 rounded-[var(--radius-card)] border border-border bg-card"></div>
       </div>
     </div>
   {/if}

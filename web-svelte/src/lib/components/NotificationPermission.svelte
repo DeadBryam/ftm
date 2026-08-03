@@ -19,7 +19,7 @@
 {#if show}
   <div
     class={cn(
-      "ftm-enter fixed bottom-4 right-4 z-50 max-w-[320px] rounded-xl border border-border bg-card p-5 shadow-lg",
+      "ftm-enter fixed bottom-3 right-3 z-50 max-w-[300px] rounded-[var(--radius-panel)] border border-border bg-card p-3.5 shadow-lg",
     )}
   >
     <div class="flex flex-col gap-2">

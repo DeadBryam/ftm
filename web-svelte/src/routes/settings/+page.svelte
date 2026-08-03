@@ -74,31 +74,31 @@
   }
 </script>
 
-<div class="w-full flex-1">
-  <div class="mb-8 flex items-center gap-4">
+<div class="flex min-h-0 w-full flex-1 flex-col overflow-y-auto">
+  <div class="mb-4 flex items-center gap-2">
     <a
       href="/"
-      class="p-2 rounded-lg hover:bg-secondary transition-colors"
+      class="rounded-[var(--radius-control)] p-1.5 hover:bg-secondary transition-colors"
       aria-label={t('go_back')}
     >
-      <ChevronLeft size={20} />
+      <ChevronLeft size={18} />
     </a>
-    <h1 class="text-2xl font-semibold">{t("web_settings_title")}</h1>
+    <h1 class="text-lg font-semibold">{t("web_settings_title")}</h1>
     {#if saving}
       <div
-        class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin ml-auto"
+        class="ml-auto h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
       ></div>
     {/if}
   </div>
 
   {#if !settingsStore.loaded || !i18n.ready}
-    <div class="flex justify-center py-12">
+    <div class="flex justify-center py-8">
       <div
-        class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"
+        class="h-7 w-7 animate-spin rounded-full border-2 border-primary border-t-transparent"
       ></div>
     </div>
   {:else}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 gap-[var(--app-gap)] lg:grid-cols-2">
       <SettingsSection title={t("notifications_section")}>
         {#snippet children()}
           <div class="space-y-3">

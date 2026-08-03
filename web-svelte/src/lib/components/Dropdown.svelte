@@ -86,7 +86,7 @@
     aria-expanded={isOpen}
     aria-haspopup="true"
     class={cn(
-      "dropdown-trigger flex h-9 min-h-9 flex-1 cursor-pointer items-center gap-1.5 rounded-xl border px-3 py-2 text-xs",
+      "dropdown-trigger flex h-8 min-h-8 flex-1 cursor-pointer items-center gap-1.5 rounded-[var(--radius-control)] border px-2.5 py-1.5 text-xs",
       "border-border bg-card text-text hover:bg-hover",
     )}
   >
@@ -95,8 +95,8 @@
     {:else}
       <span class="flex-1 text-left text-sm">{label}</span>
       <ChevronDown
-        size={16}
-        class={cn("transition-transform duration-200", isOpen && "rotate-180")}
+        size={14}
+        class={cn("transition-transform duration-150", isOpen && "rotate-180")}
       />
     {/if}
   </button>
@@ -108,7 +108,7 @@
     aria-hidden={!isOpen}
     aria-orientation="vertical"
     class={cn(
-      "dropdown-menu absolute z-[9999] max-h-[300px] min-w-[150px] overflow-y-auto rounded-2xl border border-border bg-card p-1",
+      "dropdown-menu absolute z-[9999] max-h-[280px] min-w-[140px] overflow-y-auto rounded-[var(--radius-panel)] border border-border bg-card p-0.5",
       "origin-top transition-[opacity,transform] duration-150 ease-out",
       menuPosition,
       isOpen
@@ -118,7 +118,7 @@
   >
     {#each options as option}
       {#if option.label === "separator"}
-        <div class="mx-2 my-1 h-px bg-border"></div>
+        <div class="mx-1.5 my-0.5 h-px bg-border"></div>
       {:else}
         <button
           type="button"
@@ -129,7 +129,7 @@
             onSelect?.(option);
           }}
           class={cn(
-            "flex w-full cursor-pointer items-center gap-2 rounded-xl border-none bg-transparent px-3 py-2 text-left text-xs text-text",
+            "flex w-full cursor-pointer items-center gap-2 rounded-[var(--radius-control)] border-none bg-transparent px-2.5 py-1.5 text-left text-xs text-text",
             "hover:bg-hover disabled:cursor-not-allowed disabled:opacity-50",
             option.danger && "text-red-500 hover:bg-red-500/10",
           )}
