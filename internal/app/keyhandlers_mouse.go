@@ -2,36 +2,48 @@ package app
 
 import (
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/sthbryan/ftm/internal/app/ui/views"
 )
+
+func (m *Model) itemAt(row int) (int, bool) {
+	if views.ItemHeight <= 0 {
+		return 0, false
+	}
+
+	offset := row - m.listTop
+	if offset < 0 {
+		return 0, false
+	}
+
+	index := offset / views.ItemHeight
+	if index >= len(m.Items) {
+		return 0, false
+	}
+
+	return index, true
+}
 
 func (m *Model) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 	if m.State != viewList {
 		return m, nil
 	}
 
-	mouse := msg.Mouse()
-	itemHeight := 3
-	headerHeight := 4
-	clickedIdx := (mouse.Y - headerHeight) / itemHeight
-
 	switch msg := msg.(type) {
 	case tea.MouseClickMsg:
-		if msg.Button == tea.MouseLeft {
-			if clickedIdx >= 0 && clickedIdx < len(m.Items) {
-				m.Cursor = clickedIdx
-			}
+		if msg.Button != tea.MouseLeft {
+			break
+		}
+		if index, ok := m.itemAt(msg.Mouse().Y); ok {
+			m.Cursor = index
 		}
 
 	case tea.MouseWheelMsg:
 		switch msg.Button {
 		case tea.MouseWheelUp:
-			if m.Cursor > 0 {
-				m.Cursor--
-			}
+			m.moveCursorUp()
 		case tea.MouseWheelDown:
-			if m.Cursor < len(m.Items)-1 {
-				m.Cursor++
-			}
+			m.moveCursorDown()
 		}
 	}
 

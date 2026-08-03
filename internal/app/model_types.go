@@ -57,6 +57,7 @@ type Model struct {
 	ProgressBar         progress.Model
 	SettingsView        *views.SettingsView
 	UpdateAvailable     *updater.Info
+	listTop             int
 }
 
 type FormData struct {

@@ -32,7 +32,11 @@ type ListView struct {
 	TwoColumnLimit int
 	UpdateBadge    string
 	Shortcuts      []components.Shortcut
+
+	ListTop int
 }
+
+const ItemHeight = 1
 
 func NewListView() *ListView {
 	return &ListView{
@@ -101,6 +105,11 @@ func (l *ListView) twoColumn() string {
 	dividerStyle := lipgloss.NewStyle().Foreground(bronze)
 	b.WriteString(dividerStyle.Render(ui.Repeat("─", l.Width-2)))
 	b.WriteString("\n")
+
+	l.ListTop = 4
+	if l.UpdateBadge != "" {
+		l.ListTop++
+	}
 
 	listContent := l.renderTunnelList(leftWidth - 2)
 	detailContent := l.renderDetailPanel(rightWidth - 2)
@@ -173,10 +182,16 @@ func (l *ListView) singleColumn() string {
 	}
 	b.WriteString("\n")
 
+	l.ListTop = 2
+	if l.UpdateBadge != "" {
+		l.ListTop++
+	}
+
 	if l.Dashboard != "" {
 		urlStyle := lipgloss.NewStyle().Foreground(gold)
 		b.WriteString(urlStyle.Render(i18n.T("dashboard_label") + " " + l.Dashboard + " " + i18n.T("press_w_hint")))
 		b.WriteString("\n\n")
+		l.ListTop += 2
 	}
 
 	b.WriteString(l.renderTunnelList(l.Width - 2))

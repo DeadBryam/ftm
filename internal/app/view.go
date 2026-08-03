@@ -33,7 +33,7 @@ func (m *Model) View() tea.View {
 
 	v := tea.NewView(content)
 	v.AltScreen = true
-	v.MouseMode = tea.MouseModeAllMotion
+	v.MouseMode = tea.MouseModeCellMotion
 	return v
 }
 
@@ -56,7 +56,10 @@ func (m *Model) viewList() string {
 		view.UpdateBadge = i18n.TF("update_tui_badge", m.UpdateAvailable.LatestVersion)
 	}
 
-	return view.Render()
+	rendered := view.Render()
+	m.listTop = view.ListTop
+
+	return rendered
 }
 
 func (m *Model) collectTunnelData() []views.TunnelViewData {
