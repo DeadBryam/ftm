@@ -19,6 +19,8 @@
 @import './themes/_ayu-light.css';
 @import './themes/_everforest.css';
 @import './themes/_everforest-light.css';
+@import './themes/_solarized.css';
+@import './themes/_solarized-light.css';
 
 @theme {
   --color-bg: var(--color-bg);
