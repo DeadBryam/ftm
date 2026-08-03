@@ -15,6 +15,8 @@
 @import './themes/_kanagawa-lotus.css';
 @import './themes/_one-dark.css';
 @import './themes/_one-light.css';
+@import './themes/_ayu.css';
+@import './themes/_ayu-light.css';
 
 @theme {
   --color-bg: var(--color-bg);

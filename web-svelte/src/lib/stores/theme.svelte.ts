@@ -15,6 +15,8 @@ const THEMES = [
   'kanagawa-lotus',
   'one-dark',
   'one-light',
+  'ayu',
+  'ayu-light',
   'rose-pine',
   'rose-pine-dawn',
 ] as const;
