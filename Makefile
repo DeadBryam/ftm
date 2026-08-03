@@ -73,53 +73,29 @@ build-windows-amd64:
 	@mkdir -p $(BUILD_DIR)
 	GOOS=windows GOARCH=amd64 CGO_ENABLED=$(CGO_ENABLED) go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-windows-amd64.exe $(PKG)
 
-# Desktop (Wails)
+# Desktop (Wails v3) — needs CGO + platform webview libs. Builds for the host OS.
+DESKTOP_OUT := $(DESKTOP_DIR)/build/bin
+DESKTOP_BIN := ftm-desktop
+ifeq ($(OS),Windows_NT)
+DESKTOP_BIN := ftm-desktop.exe
+endif
+
 .PHONY: desktop-dev
 desktop-dev: web
-	@echo "Building desktop (dev, no package)..."
-	cd $(DESKTOP_DIR) && wails build -s -nopackage -devtools
+	@echo "Building desktop (dev)..."
+	@mkdir -p $(DESKTOP_OUT)
+	CGO_ENABLED=1 go build -o $(DESKTOP_OUT)/$(DESKTOP_BIN) ./desktop
 
 .PHONY: desktop
 desktop: web
-	@echo "Building desktop..."
-	cd $(DESKTOP_DIR) && wails build -s -nopackage
+	@echo "Building desktop (production tags)..."
+	@mkdir -p $(DESKTOP_OUT)
+	CGO_ENABLED=1 go build -tags production -ldflags "-s -w" -o $(DESKTOP_OUT)/$(DESKTOP_BIN) ./desktop
 
 .PHONY: desktop-package
-desktop-package: web
-	@echo "Building desktop package..."
-	cd $(DESKTOP_DIR) && wails build -s
-
-.PHONY: desktop-darwin-universal
-desktop-darwin-universal: web
-	@echo "Building desktop for darwin/universal..."
-	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform darwin/universal
-
-.PHONY: desktop-darwin-arm64
-desktop-darwin-arm64: web
-	@echo "Building desktop for darwin/arm64..."
-	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform darwin/arm64
-
-.PHONY: desktop-darwin-amd64
-desktop-darwin-amd64: web
-	@echo "Building desktop for darwin/amd64..."
-	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform darwin/amd64
-
-.PHONY: desktop-linux-amd64
-desktop-linux-amd64: web
-	@echo "Building desktop for linux/amd64..."
-	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform linux/amd64
-
-.PHONY: desktop-windows-amd64
-desktop-windows-amd64: web
-	@echo "Building desktop for windows/amd64..."
-	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform windows/amd64
-
-.PHONY: desktop-all
-desktop-all: web
-	@echo "Building desktop for all platforms..."
-	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform darwin/universal
-	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform linux/amd64
-	cd $(DESKTOP_DIR) && wails build -s -nopackage -platform windows/amd64
+desktop-package: desktop
+	@echo "Desktop binary: $(DESKTOP_OUT)/$(DESKTOP_BIN)"
+	@echo "(Store/MSIX packaging: scripts/package-msix.ps1 on Windows)"
 
 # Run without installing
 .PHONY: run
@@ -188,15 +164,9 @@ help:
 	@echo "  web                       - Build Svelte UI into internal/web/static (+ desktop dist)"
 	@echo "  build-full                - Build web UI then the Go binary"
 	@echo "  build-all                 - Build CLI for all platforms (darwin/amd64, darwin/arm64, linux/amd64, linux/arm64, windows/amd64)"
-	@echo "  desktop                   - Build desktop app (Wails, no package)"
-	@echo "  desktop-dev               - Build desktop with devtools"
-	@echo "  desktop-package           - Build packaged desktop app"
-	@echo "  desktop-all               - Build desktop for darwin/universal, linux/amd64, windows/amd64"
-	@echo "  desktop-darwin-universal  - Desktop darwin/universal"
-	@echo "  desktop-darwin-arm64      - Desktop darwin/arm64"
-	@echo "  desktop-darwin-amd64      - Desktop darwin/amd64"
-	@echo "  desktop-linux-amd64       - Desktop linux/amd64"
-	@echo "  desktop-windows-amd64     - Desktop windows/amd64"
+	@echo "  desktop                   - Build desktop app (Wails v3, production, host OS)"
+	@echo "  desktop-dev               - Build desktop without production tags"
+	@echo "  desktop-package           - Alias of desktop (binary in desktop/build/bin)"
 	@echo "  run / dev                 - go run the CLI"
 	@echo "  test                      - Run go tests"
 	@echo "  test-race                 - Run tests with -race detector"
