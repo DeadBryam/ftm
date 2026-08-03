@@ -108,10 +108,24 @@ func (a *App) Run() error {
 	return err
 }
 
+// StartWebServer is idempotent: both main and Run call it, and starting a
+// second server would leave the first one orphaned on its own port, still
+// serving a dashboard that no longer receives status updates because the
+// Manager only publishes to the most recent status channel.
 func (a *App) StartWebServer() error {
+	if a.WebServer != nil {
+		return nil
+	}
+
 	a.WebServer = web.NewServer(a.Manager, a.Config)
 	a.Manager.SetStatusChannel(a.WebServer.StatusChannel)
-	return a.WebServer.Start()
+
+	if err := a.WebServer.Start(); err != nil {
+		a.WebServer = nil
+		return err
+	}
+
+	return nil
 }
 
 func (a *App) OpenDashboard() error {
