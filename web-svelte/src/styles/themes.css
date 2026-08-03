@@ -17,6 +17,8 @@
 @import './themes/_one-light.css';
 @import './themes/_ayu.css';
 @import './themes/_ayu-light.css';
+@import './themes/_everforest.css';
+@import './themes/_everforest-light.css';
 
 @theme {
   --color-bg: var(--color-bg);
