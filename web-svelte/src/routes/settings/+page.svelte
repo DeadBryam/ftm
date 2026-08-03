@@ -11,10 +11,9 @@
     Volume2,
     VolumeX,
     ChevronLeft,
-    Check,
+    Languages,
   } from "lucide-svelte";
-  import SettingsSection from "$lib/components/SettingsSection.svelte";
-  import SettingRow from "$lib/components/SettingRow.svelte";
+  import SettingsToggle from "$lib/components/SettingsToggle.svelte";
   import ThemeSelector from "$lib/components/ThemeSelector.svelte";
   import { themeFamilies } from "$lib/data/themes";
   import { cn } from "$lib/utils/cn";
@@ -27,7 +26,14 @@
   let saving = $state(false);
   let version = $state("");
 
-  const languageOptions = $derived([LANGUAGE_AUTO, ...i18n.available]);
+  const languageOptions = $derived([
+    { id: LANGUAGE_AUTO, label: t("lang_auto"), native: t("lang_auto_native") },
+    ...i18n.available.filter((l) => l !== LANGUAGE_AUTO).map((l) => ({
+      id: l,
+      label: t(`lang_${l}`),
+      native: l === "en" ? "English" : l === "es" ? "Español" : l,
+    })),
+  ]);
 
   onMount(async () => {
     theme.init();
@@ -46,7 +52,6 @@
         await settingsStore.update({ notifications_enabled: "rejected" });
         return;
       }
-
       await notifications.requestPermission();
       await settingsStore.load();
     } finally {
@@ -75,10 +80,15 @@
       saving = false;
     }
   }
+
+  const notifActive = $derived(
+    settingsStore.settings.notifications_enabled === "granted",
+  );
+  const soundActive = $derived(!!settingsStore.settings.notification_sound);
 </script>
 
-<div class="flex min-h-0 w-full flex-1 flex-col overflow-y-auto">
-  <div class="mb-4 flex items-center gap-2">
+<div class="mx-auto flex w-full max-w-3xl min-h-0 flex-1 flex-col">
+  <div class="mb-6 flex items-center gap-2 px-1">
     <a
       href="/"
       class="cursor-pointer rounded-control p-1.5 transition-colors hover:bg-secondary"
@@ -86,119 +96,204 @@
     >
       <ChevronLeft size={18} />
     </a>
-    <h1 class="text-lg font-semibold">{t("web_settings_title")}</h1>
+    <h1 class="font-serif text-xl font-bold tracking-tight text-text-heading">
+      {t("web_settings_title")}
+    </h1>
     {#if saving}
       <div
         class="ml-auto h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
+        aria-hidden="true"
       ></div>
     {/if}
   </div>
 
-  {#if !settingsStore.loaded || !i18n.ready}
-    <div class="flex justify-center py-8">
-      <div
-        class="h-7 w-7 animate-spin rounded-full border-2 border-primary border-t-transparent"
-      ></div>
-    </div>
-  {:else}
-    <div class="grid grid-cols-1 gap-app lg:grid-cols-2 lg:items-start">
-      <div class="flex flex-col gap-app">
-        <SettingsSection title={t("notifications_section")}>
-          {#snippet children()}
-            <div class="space-y-1">
-              <SettingRow
-                icon={BellOff}
-                iconActive={Bell}
-                active={settingsStore.settings.notifications_enabled ===
-                  "granted"}
-                label={t("enable_notifications_web")}
+  <div class="min-h-0 flex-1 overflow-y-auto pb-2">
+    {#if !settingsStore.loaded || !i18n.ready}
+      <div class="flex justify-center py-8">
+        <div
+          class="h-7 w-7 animate-spin rounded-full border-2 border-primary border-t-transparent"
+        ></div>
+      </div>
+    {:else}
+      <section
+        class="overflow-hidden rounded-card border border-border bg-card"
+      >
+        <header class="flex items-baseline justify-between gap-3 px-5 pt-5 pb-3">
+          <h2
+            class="font-serif text-base font-semibold tracking-tight text-text-heading"
+          >
+            {t("preferences_section")}
+          </h2>
+          <span class="text-xs text-text-muted">{t("preferences_hint")}</span>
+        </header>
+
+        <div
+          class="border-t border-border-light"
+          role="presentation"
+          onclick={() =>
+            notifActive
+              ? settingsStore.settings.notifications_enabled === "granted" &&
+                toggleNotifications()
+              : toggleNotifications()
+          }
+        >
+          <div
+            class="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3.5 transition-colors hover:bg-hover"
+          >
+            <div
+              class={cn(
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-control transition-colors",
+                notifActive ? "bg-primary/15 text-primary" : "bg-secondary text-text-muted",
+              )}
+            >
+              {#if notifActive}
+                <Bell size={17} />
+              {:else}
+                <BellOff size={17} />
+              {/if}
+            </div>
+            <div class="min-w-0">
+              <p class="m-0 text-sm font-medium text-text-heading">
+                {t("enable_notifications_web")}
+              </p>
+              <p class="m-0 truncate text-xs text-text-muted">
+                {t("settings_notifications_desc")}
+              </p>
+            </div>
+            <div
+              role="presentation"
+              onclick={(e) => e.stopPropagation()}
+            >
+              <SettingsToggle
                 disabled={saving}
+                checked={notifActive}
                 onchange={toggleNotifications}
               />
-              <SettingRow
-                icon={VolumeX}
-                iconActive={Volume2}
-                active={settingsStore.settings.notification_sound}
-                label={t("sound_effects")}
-                disabled={saving}
-                onchange={toggleSound}
-              />
             </div>
-          {/snippet}
-        </SettingsSection>
+          </div>
 
-        <SettingsSection title={t("language_section")}>
-          {#snippet children()}
+          <div
+            class="border-t border-border-light"
+            role="presentation"
+            onclick={() => toggleSound()}
+          >
+            <div
+              class="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3.5 transition-colors hover:bg-hover"
+            >
+              <div
+                class={cn(
+                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-control transition-colors",
+                  soundActive ? "bg-primary/15 text-primary" : "bg-secondary text-text-muted",
+                )}
+              >
+                {#if soundActive}
+                  <Volume2 size={17} />
+                {:else}
+                  <VolumeX size={17} />
+                {/if}
+              </div>
+              <div class="min-w-0">
+                <p class="m-0 text-sm font-medium text-text-heading">
+                  {t("sound_effects")}
+                </p>
+                <p class="m-0 truncate text-xs text-text-muted">
+                  {t("settings_sound_desc")}
+                </p>
+              </div>
+              <div
+                role="presentation"
+                onclick={(e) => e.stopPropagation()}
+              >
+                <SettingsToggle
+                  disabled={saving}
+                  checked={soundActive}
+                  onchange={toggleSound}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="border-t border-border-light">
+            <div class="grid grid-cols-[auto_1fr] items-center gap-4 px-5 pt-3.5 pb-2">
+              <div
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-secondary text-text-muted"
+              >
+                <Languages size={17} />
+              </div>
+              <div class="min-w-0">
+                <p class="m-0 text-sm font-medium text-text-heading">
+                  {t("language_section")}
+                </p>
+                <p class="m-0 truncate text-xs text-text-muted">
+                  {t("settings_language_desc")}
+                </p>
+              </div>
+            </div>
             <div
               role="radiogroup"
               aria-label={t("language_section")}
-              class="flex flex-col gap-1.5"
+              class="flex flex-wrap gap-1.5 px-5 pb-4"
             >
-              {#each languageOptions as lang}
-                {@const selected = settingsStore.settings.language === lang}
+              {#each languageOptions as opt (opt.id)}
+                {@const selected = settingsStore.settings.language === opt.id}
                 <button
                   type="button"
                   role="radio"
                   aria-checked={selected}
                   disabled={saving}
-                  onclick={() => changeLanguage(lang)}
+                  onclick={() => changeLanguage(opt.id)}
                   class={cn(
-                    "flex w-full cursor-pointer items-center gap-3 rounded-control border px-3 py-2.5 text-left transition-colors",
+                    "cursor-pointer rounded-control border px-3 py-1.5 text-sm transition-all",
                     selected
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-text hover:border-primary/40 hover:bg-hover",
+                      ? "border-primary bg-primary text-btn-text shadow-sm"
+                      : "border-border bg-input-bg text-text hover:border-primary/50 hover:bg-hover",
                     saving && "cursor-not-allowed opacity-60",
                   )}
                 >
-                  <span
-                    class={cn(
-                      "flex h-7 w-7 shrink-0 items-center justify-center rounded-control",
-                      selected ? "bg-primary/20" : "bg-secondary",
-                    )}
-                  >
-                    {#if selected}
-                      <Check size={14} class="text-primary" />
-                    {/if}
-                  </span>
-                  <span class="text-sm font-medium">
-                    {t(`lang_${lang}`)}
-                  </span>
+                  {opt.native}
                 </button>
               {/each}
             </div>
-          {/snippet}
-        </SettingsSection>
-      </div>
+          </div>
+        </div>
+      </section>
 
-      <SettingsSection title={t("appearance_section")}>
-        {#snippet children()}
+      <section
+        class="mt-4 overflow-hidden rounded-card border border-border bg-card"
+      >
+        <header class="flex items-baseline justify-between gap-3 px-5 pt-5 pb-3">
+          <h2
+            class="font-serif text-base font-semibold tracking-tight text-text-heading"
+          >
+            {t("appearance_section")}
+          </h2>
+          <span class="text-xs text-text-muted">
+            {themeFamilies.length} {t("themes_count")}
+          </span>
+        </header>
+
+        <div class="border-t border-border-light px-5 py-4">
           <ThemeSelector families={themeFamilies} />
-        {/snippet}
-      </SettingsSection>
-    </div>
+        </div>
+      </section>
 
-    <section
-      class="relative mt-6 flex shrink-0 items-center gap-4 overflow-hidden rounded-panel border border-border bg-card p-4"
-    >
-      <div class="panel-pattern pointer-events-none absolute inset-0 opacity-30" aria-hidden="true"></div>
-      <img
-        src="/favicon.png"
-        alt={t('app_name')}
-        class="relative z-10 h-12 w-12 shrink-0 rounded-control object-cover"
-      />
-      <div class="relative z-10 min-w-0 flex-1">
-        <p class="m-0 font-serif text-base font-bold tracking-tight text-text-heading">
-          {t('app_name')}
-        </p>
-        <p class="m-0 truncate text-xs text-text-muted">{t('app_tagline')}</p>
-      </div>
-      {#if version}
-        <span
-          class="relative z-10 shrink-0 rounded-control border border-border-light bg-bg/40 px-2 py-0.5 font-mono text-xs text-text-muted"
-        >
-          v{version}
-        </span>
-      {/if}
-    </section>
-  {/if}
+      <footer
+        class="mt-4 flex items-center justify-between gap-3 px-1 text-xs text-text-muted"
+      >
+        <div class="flex min-w-0 items-center gap-2">
+          <img
+            src="/favicon.png"
+            alt={t("app_name")}
+            class="h-5 w-5 shrink-0 rounded-control object-cover opacity-80"
+          />
+          <span class="truncate font-medium text-text">{t("app_name")}</span>
+          <span class="hidden sm:inline">·</span>
+          <span class="hidden truncate sm:inline">{t("app_tagline")}</span>
+        </div>
+        {#if version}
+          <span class="shrink-0 font-mono opacity-70">v{version}</span>
+        {/if}
+      </footer>
+    {/if}
+  </div>
 </div>
