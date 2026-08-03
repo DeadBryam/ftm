@@ -25,8 +25,8 @@
 
   let saving = $state(false);
 
-  // "auto" is a preference rather than a catalogue, so it is offered alongside
-  // the translated languages instead of coming back from the API.
+  
+  
   const languageOptions = $derived([LANGUAGE_AUTO, ...i18n.available]);
 
   onMount(async () => {
@@ -64,8 +64,8 @@
   async function changeLanguage(lang: string) {
     saving = true;
     try {
-      // Persist first: "auto" resolves server-side, so the catalogue can only
-      // be fetched correctly once the server knows the new preference.
+      
+      
       await settingsStore.update({ language: lang });
       await i18n.setLanguage(lang);
     } finally {
@@ -74,8 +74,8 @@
   }
 </script>
 
-<div class="max-w-4xl mx-auto py-8">
-  <div class="flex items-center gap-4 mb-8">
+<div class="w-full flex-1">
+  <div class="mb-8 flex items-center gap-4">
     <a
       href="/"
       class="p-2 rounded-lg hover:bg-secondary transition-colors"
