@@ -25,14 +25,25 @@
   });
 </script>
 
-<div class="max-w-[1000px] mx-auto p-10 min-h-dvh flex max-md:max-h-dvh">
-  <!--
-    Held until the catalogue arrives. Rendering first meant the opening frame
-    showed raw keys -- "port", "start", "connections" -- which then flipped to
-    real text. `ready` is set even if the request fails, so this cannot hang.
-  -->
+<div
+  class="mx-auto flex min-h-dvh w-full max-w-[var(--app-max-width)] flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-10"
+>
   {#if i18n.ready}
     {@render children()}
+  {:else}
+    <div class="flex flex-1 flex-col gap-6" aria-busy="true" aria-live="polite">
+      <div class="flex items-center gap-4 border-b border-border pb-5">
+        <div class="h-12 w-12 animate-pulse rounded-xl bg-border"></div>
+        <div class="flex flex-1 flex-col gap-2">
+          <div class="h-7 w-48 max-w-full animate-pulse rounded-md bg-border"></div>
+          <div class="h-4 w-64 max-w-full animate-pulse rounded-md bg-border/70"></div>
+        </div>
+      </div>
+      <div class="grid flex-1 gap-5 lg:grid-cols-[minmax(0,22rem)_1fr]">
+        <div class="h-64 animate-pulse rounded-[var(--radius-panel)] bg-card border border-border"></div>
+        <div class="h-64 animate-pulse rounded-[var(--radius-card)] bg-card border border-border"></div>
+      </div>
+    </div>
   {/if}
 </div>
 
