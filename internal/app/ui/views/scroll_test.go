@@ -3,6 +3,8 @@ package views
 import (
 	"strings"
 	"testing"
+
+	"charm.land/lipgloss/v2"
 )
 
 func manyItems(n int) []TunnelViewData {
@@ -161,23 +163,30 @@ func TestLogsViewShowsTheNewestLines(t *testing.T) {
 	}
 }
 
-func TestCentredViewsFillTheTerminal(t *testing.T) {
-	const width, height = 100, 30
+func TestFloatingViewsAreNarrowerThanTheTerminal(t *testing.T) {
+	const width = 100
 
-	form := NewFormView()
-	form.Width, form.Height = width, height
+	for name, out := range map[string]string{
+		"form":     NewFormView().Render(),
+		"settings": NewSettingsView().Render(),
+	} {
+		for i, line := range strings.Split(out, "\n") {
+			if w := lipgloss.Width(line); w >= width {
+				t.Errorf("%s: line %d is %d cells wide, too wide to float", name, i, w)
+			}
+		}
+	}
+}
+
+func TestEmptyStateFillsTheTerminal(t *testing.T) {
+	const width, height = 100, 30
 
 	empty := NewEmptyState()
 	empty.Width, empty.Height = width, height
 
-	settings := NewSettingsView()
-	settings.Width, settings.Height = width, height
-
-	for name, out := range map[string]string{
-		"form": form.Render(), "empty state": empty.Render(), "settings": settings.Render(),
-	} {
-		if lines := strings.Count(out, "\n") + 1; lines != height {
-			t.Errorf("%s: rendered %d lines, want %d", name, lines, height)
+	for i, line := range strings.Split(empty.Render(), "\n") {
+		if w := lipgloss.Width(line); w != width {
+			t.Errorf("line %d is %d cells wide, want %d", i, w, width)
 		}
 	}
 }

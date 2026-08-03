@@ -9,8 +9,6 @@ import (
 )
 
 type FormView struct {
-	Width      int
-	Height     int
 	Focus      int
 	IsEditMode bool
 	Name       string
@@ -52,9 +50,7 @@ func (f *FormView) Render() string {
 		dim.Align(lipgloss.Center).Render(i18n.T("form_nav_hint")),
 	}, "\n")
 
-	panel := ui.Panel(title, body, formWidth, lipgloss.Height(body)+ui.PanelChrome, t.Gold)
-
-	return ui.Overlay("", panel, f.Width, f.Height)
+	return ui.Panel(title, body, formWidth, lipgloss.Height(body)+ui.PanelChrome, t.Gold)
 }
 
 func (f *FormView) field(inner, index int, label, hint, focusedHint, value string) string {

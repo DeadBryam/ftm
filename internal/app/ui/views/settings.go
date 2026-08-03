@@ -9,8 +9,6 @@ import (
 )
 
 type SettingsView struct {
-	Width                int
-	Height               int
 	NotificationsEnabled bool
 	NotificationSound    bool
 	Language             string
@@ -43,9 +41,7 @@ func (s *SettingsView) Render() string {
 			Render(i18n.T("settings_nav_hint")),
 	}, "\n")
 
-	panel := ui.Panel(i18n.T("settings_title"), body, settingsWidth, lipgloss.Height(body)+ui.PanelChrome, t.Gold)
-
-	return ui.Overlay("", panel, s.Width, s.Height)
+	return ui.Panel(i18n.T("settings_title"), body, settingsWidth, lipgloss.Height(body)+ui.PanelChrome, t.Gold)
 }
 
 func (s *SettingsView) marker(focused bool) string {
