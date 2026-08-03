@@ -5,6 +5,7 @@
   import { t } from "$lib/stores/i18n.svelte";
   import type { ThemeFamily } from "$lib/data/themes";
   import { cn } from "$lib/utils/cn";
+  import { Monitor } from "lucide-svelte";
 
   interface Props {
     families: ThemeFamily[];
@@ -48,26 +49,26 @@
 
   const current = $derived(findCurrent());
   const activeFamily = $derived(familyOfActive());
-  const systemModeLabel = $derived(
-    theme.systemScheme === "dark" ? t("theme_dark") : t("theme_light"),
-  );
-  const modeLabel = $derived(theme.isAuto ? t("theme_auto") : t("theme_manual"));
 </script>
 
 <div
   class={cn(
-    "mb-3 flex items-center justify-between gap-3 rounded-control border px-3 py-2",
+    "mb-4 flex items-center justify-between gap-3 rounded-control border px-3 py-2",
     theme.isAuto
       ? "border-primary/30 bg-primary/5"
       : "border-border-light bg-bg/40",
   )}
 >
   <div class="flex min-w-0 items-center gap-2">
-    <span class="text-sm font-medium text-text-heading">
+    <Monitor
+      size={15}
+      class={cn(
+        "shrink-0",
+        theme.isAuto ? "text-primary" : "text-text-muted",
+      )}
+    />
+    <span class="truncate text-sm font-medium text-text-heading">
       {t("theme_match_system")}
-    </span>
-    <span class="truncate text-xs text-text-muted">
-      {theme.isAuto ? `· ${systemModeLabel}` : `· ${t("theme_manual")}`}
     </span>
   </div>
   <SettingsToggle checked={theme.isAuto} onchange={handleToggleAuto} />
@@ -157,24 +158,5 @@
         </span>
       </div>
     {/each}
-  </div>
-{/if}
-
-{#if current && activeFamily}
-  <div
-    class="mt-4 flex items-center gap-3 rounded-control border border-border-light bg-bg/40 px-3 py-2"
-  >
-    <div
-      class="h-8 w-8 shrink-0 rounded-full shadow-sm"
-      style="background: {current.mode === 'dark' ? current.family.dark.color : current.family.light.color};"
-    ></div>
-    <div class="min-w-0 flex-1">
-      <p class="truncate text-sm font-semibold text-text-heading">
-        {current.family.name}
-      </p>
-      <p class="truncate text-xs text-text-muted">
-        {modeLabel} · {t("current_theme")}
-      </p>
-    </div>
   </div>
 {/if}
