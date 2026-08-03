@@ -4,6 +4,7 @@
   import { useNotifications } from "$lib/stores/notification.svelte";
   import { useTheme } from "$lib/stores/theme.svelte";
   import { t, useI18n, LANGUAGE_AUTO } from "$lib/stores/i18n.svelte";
+  import { statusApi } from "$lib/api/endpoints/status";
   import {
     Bell,
     BellOff,
@@ -24,6 +25,7 @@
   const i18n = useI18n();
 
   let saving = $state(false);
+  let version = $state("");
 
   const languageOptions = $derived([LANGUAGE_AUTO, ...i18n.available]);
 
@@ -31,6 +33,10 @@
     theme.init();
     settingsStore.load();
     await i18n.init();
+    statusApi
+      .get()
+      .then((s) => (version = s.version))
+      .catch(() => {});
   });
 
   async function toggleNotifications() {
@@ -170,5 +176,29 @@
         {/snippet}
       </SettingsSection>
     </div>
+
+    <section
+      class="relative mt-6 flex shrink-0 items-center gap-4 overflow-hidden rounded-panel border border-border bg-card p-4"
+    >
+      <div class="panel-pattern pointer-events-none absolute inset-0 opacity-30" aria-hidden="true"></div>
+      <img
+        src="/favicon.png"
+        alt={t('app_name')}
+        class="relative z-10 h-12 w-12 shrink-0 rounded-control object-cover"
+      />
+      <div class="relative z-10 min-w-0 flex-1">
+        <p class="m-0 font-serif text-base font-bold tracking-tight text-text-heading">
+          {t('app_name')}
+        </p>
+        <p class="m-0 truncate text-xs text-text-muted">{t('app_tagline')}</p>
+      </div>
+      {#if version}
+        <span
+          class="relative z-10 shrink-0 rounded-control border border-border-light bg-bg/40 px-2 py-0.5 font-mono text-xs text-text-muted"
+        >
+          v{version}
+        </span>
+      {/if}
+    </section>
   {/if}
 </div>
