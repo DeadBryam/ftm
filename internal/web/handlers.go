@@ -24,7 +24,10 @@ func NewHandlers(manager *process.Manager, cfg *config.Config, server *Server) *
 }
 
 func (h *Handlers) Route(w http.ResponseWriter, r *http.Request) {
-	h.setCORS(w)
+	if !h.setCORS(w, r) {
+		http.Error(w, "forbidden origin", http.StatusForbidden)
+		return
+	}
 
 	if r.Method == "OPTIONS" {
 		w.WriteHeader(http.StatusOK)
@@ -62,10 +65,23 @@ func (h *Handlers) Route(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handlers) setCORS(w http.ResponseWriter) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "*")
+// setCORS writes the CORS headers for an allowed request and reports whether
+// the request may proceed. A wildcard origin would let any site the user visits
+// drive the API, so the allowed origin is echoed back instead.
+func (h *Handlers) setCORS(w http.ResponseWriter, r *http.Request) bool {
+	origin, ok := allowedOrigin(r)
+	if !ok {
+		return false
+	}
+
+	if origin != "" {
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+		w.Header().Add("Vary", "Origin")
+	}
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	return true
 }
 
 func (h *Handlers) tunnelToMap(t config.TunnelConfig) map[string]interface{} {
