@@ -2,8 +2,10 @@ package app
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"runtime"
+	"sync"
 
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -21,6 +23,8 @@ type App struct {
 	WebServer         *web.Server
 	DownloadProgress  chan providers.DownloadProgress
 	ExpirationMonitor *notifications.ExpirationMonitor
+
+	shutdownOnce sync.Once
 }
 
 func New() (*App, error) {
@@ -183,14 +187,22 @@ func (a *App) shouldUseNativeNotifications() bool {
 	return a.WebServer.ClientCount() == 0
 }
 
+// Shutdown stops the tunnels and the web server. It is safe to call more than
+// once, since both the signal handler and the normal exit path invoke it.
 func (a *App) Shutdown() {
-	if a.WebServer != nil {
-		a.WebServer.Stop()
-	}
-	if a.Manager != nil {
-		a.Manager.StopAll()
-	}
-	if a.ExpirationMonitor != nil {
-		a.ExpirationMonitor.StopAll()
-	}
+	a.shutdownOnce.Do(func() {
+		// Tunnels first: Manager.StopAll waits for each provider process to
+		// actually exit, which is the whole point of shutting down.
+		if a.Manager != nil {
+			a.Manager.StopAll()
+		}
+		if a.WebServer != nil {
+			if err := a.WebServer.Stop(); err != nil {
+				fmt.Fprintf(os.Stderr, "Error stopping web server: %v\n", err)
+			}
+		}
+		if a.ExpirationMonitor != nil {
+			a.ExpirationMonitor.StopAll()
+		}
+	})
 }

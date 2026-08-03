@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/sthbryan/ftm/internal/app"
 	"github.com/sthbryan/ftm/internal/cli"
@@ -77,18 +79,39 @@ func main() {
 	// locale would be read as a format verb.
 	fmt.Print(i18n.TF("dashboard_url", url))
 
-	if *webOnly {
+	// Without this the tunnels outlive ftm: the process used to block on an
+	// empty select and die on Ctrl+C without ever tearing down the providers it
+	// had spawned, leaving the user's world exposed by a tunnel they believed
+	// they had closed.
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	if *webOnly || *server {
 		fmt.Print(i18n.T("press_ctrl_c"))
-		application.OpenDashboard()
-		select {}
-	} else if *server {
-		fmt.Print(i18n.T("press_ctrl_c"))
-		select {}
+		if *webOnly {
+			if err := application.OpenDashboard(); err != nil {
+				fmt.Fprintf(os.Stderr, "Could not open the dashboard: %v\n", err)
+			}
+		}
+
+		<-stop
+		application.Shutdown()
+		return
 	}
+
+	// In TUI mode bubbletea handles Ctrl+C itself, so this covers SIGTERM.
+	go func() {
+		<-stop
+		application.Shutdown()
+		os.Exit(130)
+	}()
 
 	fmt.Print(i18n.T("tui_hint"))
 
-	if err := application.Run(); err != nil {
+	err = application.Run()
+	application.Shutdown()
+
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
