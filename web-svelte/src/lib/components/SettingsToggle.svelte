@@ -1,8 +1,6 @@
 <script lang="ts">
   import { cn } from '$lib/utils/cn';
-  import { translate } from '$lib/i18n';
-
-  let t = $derived($translate);
+  import { t } from '$lib/stores/i18n.svelte';
 
   interface Props {
     checked?: boolean;

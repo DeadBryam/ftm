@@ -1,12 +1,10 @@
 <script lang="ts">
   import { useNotifications } from '$lib/stores/notification.svelte.js';
   import { cn } from '$lib/utils/cn';
-  import { translate } from '$lib/i18n';
+  import { t } from '$lib/stores/i18n.svelte';
     import { animate } from 'motion';
 
   const notifications = useNotifications();
-
-  let t = $derived($translate);
 
   let show = $derived(notifications.status === 'pending');
   let cardRef: HTMLDivElement | undefined = $state();
