@@ -11,6 +11,8 @@
 @import './themes/_tokyo-night-day.css';
 @import './themes/_dracula.css';
 @import './themes/_alucard.css';
+@import './themes/_kanagawa.css';
+@import './themes/_kanagawa-lotus.css';
 
 @theme {
   --color-bg: var(--color-bg);

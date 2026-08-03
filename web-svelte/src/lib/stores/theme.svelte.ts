@@ -11,6 +11,8 @@ const THEMES = [
   'tokyo-night-day',
   'dracula',
   'alucard',
+  'kanagawa',
+  'kanagawa-lotus',
   'rose-pine',
   'rose-pine-dawn',
 ] as const;
