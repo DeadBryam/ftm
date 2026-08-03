@@ -9,13 +9,18 @@ import (
 	"github.com/sthbryan/ftm/internal/i18n"
 )
 
+const (
+	editorStops  = 4
+	editorSubmit = editorStops - 1
+)
+
 func (m *Model) handleEditorKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
-	case "tab":
-		m.EditorFocus = (m.EditorFocus + 1) % 5
+	case "tab", "down":
+		m.moveEditorFocus(1)
 
-	case "shift+tab":
-		m.EditorFocus = (m.EditorFocus - 1 + 5) % 5
+	case "shift+tab", "up":
+		m.moveEditorFocus(-1)
 
 	case "enter":
 		return m.handleEditorEnter()
@@ -34,13 +39,17 @@ func (m *Model) handleEditorKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func (m *Model) moveEditorFocus(delta int) {
+	m.EditorFocus = (m.EditorFocus + delta + editorStops) % editorStops
+}
+
 func (m *Model) handleEditorEnter() (tea.Model, tea.Cmd) {
-	switch m.EditorFocus {
-	case 4:
+	if m.EditorFocus == editorSubmit {
 		m.saveTunnel()
-	default:
-		m.EditorFocus++
+		return m, nil
 	}
+
+	m.moveEditorFocus(1)
 	return m, nil
 }
 

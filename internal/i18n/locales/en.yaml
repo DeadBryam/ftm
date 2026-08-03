@@ -147,7 +147,7 @@ arrow_hint: "← → to change"
 numbers_hint: "numbers only"
 submit_new: "Create Tunnel"
 submit_edit: "Save Changes"
-editor_nav_hint: "TAB: navigate  •  ENTER: submit  •  ESC: cancel"
+editor_nav_hint: "↑↓/tab: move  •  ENTER: submit  •  ESC: cancel"
 
 # Empty states
 no_tunnels: "No tunnels configured"

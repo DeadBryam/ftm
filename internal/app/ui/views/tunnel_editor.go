@@ -22,7 +22,7 @@ func NewTunnelEditor() *TunnelEditor {
 
 const (
 	editorWidth = 54
-	submitFocus = 4
+	submitFocus = 3
 )
 
 func (f *TunnelEditor) Render() string {
