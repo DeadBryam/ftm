@@ -12,13 +12,13 @@
 
 <p align="center">
   <a href="#install">Install</a>
-  ·
+  •
   <a href="#sixty-seconds">Quick start</a>
-  ·
+  •
   <a href="#interfaces">Interfaces</a>
-  ·
+  •
   <a href="#providers">Providers</a>
-  ·
+  •
   <a href="https://github.com/sthbryan/ftm/releases/latest">Releases</a>
 </p>
 
@@ -151,7 +151,7 @@ xattr -d com.apple.quarantine ftm-desktop-macos.app
 ```bash
 ftm                  # TUI; dashboard at http://localhost:40500
 # In the TUI: a → add a tunnel → pick a provider → Foundry port (usually 30000)
-# s → start · c → copy public URL · share with players
+# s → start • c → copy public URL • share with players
 ```
 
 Web-only session:
@@ -214,5 +214,5 @@ cd web-svelte && bun run dev
 ---
 
 <p align="center">
-  <sub>MIT License · © 2026 Bryan Villafuerte</sub>
+  <sub>MIT License • © 2026 Bryan Villafuerte</sub>
 </p>
