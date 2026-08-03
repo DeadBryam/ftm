@@ -58,6 +58,8 @@ type Model struct {
 	SettingsView        *views.SettingsView
 	UpdateAvailable     *updater.Info
 	listTop             int
+	pendingDeleteID     string
+	pendingDeleteName   string
 }
 
 type FormData struct {

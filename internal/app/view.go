@@ -26,6 +26,8 @@ func (m *Model) View() tea.View {
 			content = m.viewDownloading()
 		case viewSettings:
 			content = m.viewSettings()
+		case viewConfirm:
+			content = m.viewConfirm()
 		default:
 			content = m.viewList()
 		}
@@ -179,6 +181,17 @@ func (m *Model) viewDownloading() string {
 	progressView := m.ProgressBar.ViewAs(view.Percent / 100)
 
 	return view.Render(progressView)
+}
+
+func (m *Model) viewConfirm() string {
+	view := views.NewConfirmView()
+	view.Width = m.Width
+	view.Height = m.Height
+	view.Danger = true
+	view.Title = i18n.T("confirm_delete_title")
+	view.Message = i18n.TF("confirm_delete_body", m.pendingDeleteName)
+
+	return view.Render()
 }
 
 func (m *Model) viewSettings() string {

@@ -5,23 +5,24 @@ import (
 	tea "charm.land/bubbletea/v2"
 )
 
-// entersText reports whether the current view has a focused text field, in
-// which case letters have to reach it rather than being read as shortcuts.
 func (m *Model) entersText() bool {
 	return m.State == viewAddForm || m.State == viewEditForm
 }
 
 func (m *Model) handleKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
-	// Typing a tunnel name must not quit the app, so while a field has focus
-	// only Ctrl+C and Esc are handled globally.
+	if key.Matches(msg, m.Keys.ForceQuit) {
+		return m, tea.Quit
+	}
+
 	if m.entersText() {
-		switch {
-		case key.Matches(msg, m.Keys.ForceQuit):
-			return m, tea.Quit
-		case key.Matches(msg, m.Keys.Back):
+		if key.Matches(msg, m.Keys.Back) {
 			return m.handleBack()
 		}
 		return m.handleFormKey(msg)
+	}
+
+	if m.State == viewConfirm {
+		return m.handleConfirmKey(msg)
 	}
 
 	switch {
@@ -58,6 +59,11 @@ func (m *Model) handleQuit() (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) handleBack() (tea.Model, tea.Cmd) {
+	if m.State == viewConfirm {
+		m.cancelDelete()
+		return m, nil
+	}
+
 	if m.State == viewSettings {
 		m.saveSettings()
 	}
@@ -65,6 +71,22 @@ func (m *Model) handleBack() (tea.Model, tea.Cmd) {
 		m.State = viewList
 		m.editingTunnelID = ""
 	}
+	return m, nil
+}
+
+func (m *Model) handleConfirmKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
+	if key.Matches(msg, m.Keys.Back) {
+		m.cancelDelete()
+		return m, nil
+	}
+
+	switch msg.String() {
+	case "y", "Y", "enter":
+		return m.confirmDelete()
+	case "n", "N", "q":
+		m.cancelDelete()
+	}
+
 	return m, nil
 }
 

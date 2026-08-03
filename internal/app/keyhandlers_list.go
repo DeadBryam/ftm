@@ -124,16 +124,38 @@ func (m *Model) startEditForm() (tea.Model, tea.Cmd) {
 
 func (m *Model) handleListDelete() (tea.Model, tea.Cmd) {
 	if item, ok := m.selectedItem(); ok {
-		m.App.Manager.Stop(item.Tunnel.ID)
-		m.App.Config.RemoveTunnel(item.Tunnel.ID)
-		m.App.SaveConfig()
-		m.refreshItems()
-		if m.Cursor >= len(m.Items) && m.Cursor > 0 {
-			m.Cursor--
-		}
-		m.showMessage(i18n.T("tunnel_deleted"))
+		m.pendingDeleteID = item.Tunnel.ID
+		m.pendingDeleteName = item.Tunnel.Name
+		m.State = viewConfirm
 	}
 	return m, nil
+}
+
+func (m *Model) confirmDelete() (tea.Model, tea.Cmd) {
+	id := m.pendingDeleteID
+	m.cancelDelete()
+
+	if id == "" {
+		return m, nil
+	}
+
+	m.App.Manager.Stop(id)
+	m.App.Config.RemoveTunnel(id)
+	m.App.SaveConfig()
+	m.refreshItems()
+
+	if m.Cursor >= len(m.Items) && m.Cursor > 0 {
+		m.Cursor--
+	}
+	m.showMessage(i18n.T("tunnel_deleted"))
+
+	return m, nil
+}
+
+func (m *Model) cancelDelete() {
+	m.pendingDeleteID = ""
+	m.pendingDeleteName = ""
+	m.State = viewList
 }
 
 func (m *Model) copyTunnelURL(item TunnelItem) {
