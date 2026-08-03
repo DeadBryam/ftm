@@ -12,6 +12,7 @@ type Theme struct {
 	Text       color.Color
 	TextDim    color.Color
 	Surface    color.Color
+	Dimmed     color.Color
 	Online     color.Color
 	Offline    color.Color
 	Connecting color.Color
@@ -35,6 +36,7 @@ func BuildTheme(isDark bool) *Theme {
 		Text:       c(lipgloss.Color("#1c1a17"), lipgloss.Color("#ffffff")),
 		TextDim:    c(lipgloss.Color("#6b6660"), lipgloss.Color("#9a9590")),
 		Surface:    c(lipgloss.Color("#f2eee6"), lipgloss.Color("#232019")),
+		Dimmed:     c(lipgloss.Color("#bdb8ae"), lipgloss.Color("#4a453d")),
 		Online:     c(lipgloss.Color("#cfe8da"), lipgloss.Color("#1e3a2f")),
 		Offline:    c(lipgloss.Color("#e8e6e1"), lipgloss.Color("#2a2824")),
 		Connecting: c(lipgloss.Color("#f3e6c2"), lipgloss.Color("#3a3020")),

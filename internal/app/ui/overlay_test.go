@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"charm.land/lipgloss/v2"
+	"github.com/charmbracelet/x/ansi"
 )
 
 func background(width, height int) string {
@@ -62,7 +63,7 @@ func TestOverlayCentresTheForeground(t *testing.T) {
 
 	plain := strings.TrimSuffix(strings.Repeat(strings.Repeat(".", width)+"\n", height), "\n")
 
-	lines := strings.Split(Overlay(plain, "ABC", width, height), "\n")
+	lines := strings.Split(ansi.Strip(Overlay(plain, "ABC", width, height)), "\n")
 
 	row := -1
 	for i, line := range lines {
@@ -85,5 +86,38 @@ func TestOverlayCentresTheForeground(t *testing.T) {
 func TestOverlayWithoutASizeFallsBackToTheForeground(t *testing.T) {
 	if out := Overlay("ignored", "MODAL", 0, 0); out != "MODAL" {
 		t.Errorf("got %q, want the bare foreground", out)
+	}
+}
+
+func TestOverlayDimsWhatItCovers(t *testing.T) {
+	list := lipgloss.NewStyle().
+		Foreground(ThemeDefault.Gold).
+		Background(ThemeDefault.Online).
+		Render("ONLINE")
+
+	out := Overlay(list, "MODAL", 40, 12)
+
+	if strings.Contains(out, "MODAL") && !strings.Contains(out, "ONLINE") {
+		t.Fatal("the background text is gone")
+	}
+	if strings.Count(out, "ONLINE") != 1 {
+		t.Fatal("the background was not composed once")
+	}
+
+	background := ""
+	for _, line := range strings.Split(out, "\n") {
+		if strings.Contains(ansi.Strip(line), "ONLINE") {
+			background = line
+		}
+	}
+
+	if strings.Contains(background, "MODAL") {
+		t.Skip("the modal overlaps the background row")
+	}
+	if background == ansi.Strip(background) {
+		t.Error("the covered row carries no styling at all")
+	}
+	if strings.Contains(background, "1;") {
+		t.Error("the covered row kept its original emphasis instead of being dimmed")
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"charm.land/lipgloss/v2"
+	"github.com/charmbracelet/x/ansi"
 )
 
 func Overlay(background, foreground string, width, height int) string {
@@ -16,12 +17,22 @@ func Overlay(background, foreground string, width, height int) string {
 
 	canvas := lipgloss.NewCanvas(width, height).
 		Compose(lipgloss.NewCompositor(
-			lipgloss.NewLayer(background),
+			lipgloss.NewLayer(Dim(background)),
 			lipgloss.NewLayer(foreground).X(x).Y(y).Z(1),
 		)).
 		Render()
 
 	return Fill(canvas, width, height)
+}
+
+func Dim(content string) string {
+	if content == "" {
+		return content
+	}
+
+	return lipgloss.NewStyle().
+		Foreground(ThemeDefault.Dimmed).
+		Render(ansi.Strip(content))
 }
 
 func Fill(content string, width, height int) string {
