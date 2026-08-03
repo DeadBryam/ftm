@@ -114,25 +114,21 @@ func (f *FormView) submitButton(t *ui.Theme, inputWidth int) string {
 		btnText = i18n.T("submit_edit")
 	}
 
-	btnStyle := lipgloss.NewStyle().
-		Background(t.Bronze).
-		Foreground(t.Text).
-		Bold(true).
-		Padding(0, 6).
-		BorderStyle(lipgloss.RoundedBorder()).
-		BorderForeground(t.Bronze).Width(inputWidth)
-
+	background, foreground, border := t.Button, t.ButtonText, t.Bronze
 	if f.Focus == 4 {
-		btnStyle = lipgloss.NewStyle().
-			Background(t.Gold).
-			Foreground(t.Offline).
-			Bold(true).
-			Padding(0, 6).
-			BorderStyle(lipgloss.RoundedBorder()).
-			BorderForeground(t.Gold).Width(inputWidth)
+		background, foreground, border = t.ButtonActive, t.ButtonActiveText, t.Gold
 	}
 
-	return btnStyle.Render(btnText)
+	return lipgloss.NewStyle().
+		Background(background).
+		Foreground(foreground).
+		Bold(true).
+		Align(lipgloss.Center).
+		Padding(0, 2).
+		BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(border).
+		Width(inputWidth).
+		Render(btnText)
 }
 
 func (f *FormView) labelStyle(t *ui.Theme, field, width int) lipgloss.Style {

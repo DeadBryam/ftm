@@ -101,7 +101,9 @@ func (d *DetailPanel) actions() string {
 		d.StatusState == TunnelStateConnecting
 
 	buttonStyle := lipgloss.NewStyle().
-		Background(ui.ThemeDefault.Bronze).
+		Background(ui.ThemeDefault.Button).
+		Foreground(ui.ThemeDefault.ButtonText).
+		Bold(true).
 		Padding(0, 2)
 
 	if isActive {

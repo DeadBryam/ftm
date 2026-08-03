@@ -59,6 +59,35 @@ func TestThemeKeepsTextReadableOnRowBackgrounds(t *testing.T) {
 	}
 }
 
+func TestButtonsStayLegibleOnBothBackgrounds(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		isDark bool
+	}{
+		{"dark terminal", true},
+		{"light terminal", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			theme := BuildTheme(tc.isDark)
+
+			for _, pair := range []struct {
+				label      string
+				background color.Color
+				foreground color.Color
+			}{
+				{"button", theme.Button, theme.ButtonText},
+				{"active button", theme.ButtonActive, theme.ButtonActiveText},
+			} {
+				diff := luminance(pair.foreground) - luminance(pair.background)
+				if diff < 0.35 && diff > -0.35 {
+					t.Errorf("%s: label and fill are too close in luminance (%.2f vs %.2f)",
+						pair.label, luminance(pair.foreground), luminance(pair.background))
+				}
+			}
+		})
+	}
+}
+
 func TestSetDarkBackgroundSwapsTheActiveTheme(t *testing.T) {
 	original := ThemeDefault
 	t.Cleanup(func() { ThemeDefault = original })

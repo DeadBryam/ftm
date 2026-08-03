@@ -43,7 +43,8 @@ func (e *EmptyState) Render() string {
 		Render(i18n.T("tunnels_desc"))
 
 	cta := lipgloss.NewStyle().
-		Background(gold).
+		Background(ui.ThemeDefault.ButtonActive).
+		Foreground(ui.ThemeDefault.ButtonActiveText).
 		Bold(true).
 		Padding(0, 2).
 		Render(i18n.T("create_first"))
