@@ -5,6 +5,7 @@ const THEMES = [
   'catppuccin-mocha',
   'catppuccin-latte',
   'gruvbox',
+  'gruvbox-light',
   'rose-pine',
   'rose-pine-dawn',
 ] as const;
