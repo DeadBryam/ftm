@@ -42,7 +42,7 @@ func (e *EmptyState) Render() string {
 		centered.Foreground(t.TextDim).Render(i18n.T("press_a_hint")),
 		"",
 		centered.Foreground(t.Bronze).Render(
-			i18n.T("tip_dashboard") + " " + e.Dashboard + "  ·  ws " + fmt.Sprintf("%d", e.Sessions)),
+			i18n.T("tip_dashboard") + " " + e.Dashboard + "  •  ws " + fmt.Sprintf("%d", e.Sessions)),
 	}, "\n")
 
 	panel := ui.Panel(i18n.T("welcome_title"), body, emptyWidth, lipgloss.Height(body)+ui.PanelChrome, t.Gold)

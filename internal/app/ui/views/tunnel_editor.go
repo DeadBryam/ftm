@@ -90,7 +90,7 @@ func (f *TunnelEditor) providerHint(width int) string {
 		return i18n.T("provider_hint")
 	}
 
-	return ui.Truncate(strings.Join(f.Providers, " · "), width)
+	return ui.Truncate(strings.Join(f.Providers, " • "), width)
 }
 
 func (f *TunnelEditor) field(inner, index int, label, hint, focusedHint, value string) string {

@@ -38,7 +38,7 @@ func (l *LogsView) Render() string {
 
 	title := i18n.T("tunnel_logs")
 	if l.TunnelName != "" {
-		title += "  ·  " + l.TunnelName
+		title += "  •  " + l.TunnelName
 	}
 
 	body := lipgloss.NewStyle().

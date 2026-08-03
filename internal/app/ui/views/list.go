@@ -95,7 +95,7 @@ func (l *ListView) header() string {
 
 	meta := lipgloss.NewStyle().
 		Foreground(t.TextDim).
-		Render(fmt.Sprintf("v%s  ·  ws %d", version.Version, l.Sessions))
+		Render(fmt.Sprintf("v%s  •  ws %d", version.Version, l.Sessions))
 
 	gap := ui.Clamp(l.Width-lipgloss.Width(title)-lipgloss.Width(meta), 1)
 
