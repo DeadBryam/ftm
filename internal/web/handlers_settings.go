@@ -20,12 +20,32 @@ func (h *Handlers) handleSettings(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// isSelectableLanguage reports whether a value may be stored as the language
+// preference: a translated language, or "auto" to follow the system.
+func isSelectableLanguage(lang string) bool {
+	if lang == config.LanguageAuto {
+		return true
+	}
+
+	for _, supported := range i18n.AvailableLanguages() {
+		if supported == lang {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (h *Handlers) handleGetSettings(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"notifications_enabled": h.config.NotificationsStatus,
 		"notification_sound":    h.config.NotificationSound,
-		"language":              h.config.Language,
+		// language is the stored preference, which may be "auto";
+		// language_resolved is what "auto" currently resolves to, so the UI can
+		// label the option as "Auto (Espanol)" rather than guessing.
+		"language":          h.config.Language,
+		"language_resolved": i18n.CurrentLanguage(),
 	})
 }
 
@@ -50,18 +70,15 @@ func (h *Handlers) handlePatchSettings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Language != nil {
-		validLangs := i18n.AvailableLanguages()
-		isValid := false
-		for _, l := range validLangs {
-			if l == *req.Language {
-				isValid = true
-				break
-			}
+		if !isSelectableLanguage(*req.Language) {
+			http.Error(w, "Unsupported language", http.StatusBadRequest)
+			return
 		}
-		if isValid {
-			h.config.Language = *req.Language
-			i18n.ChangeLanguage(*req.Language)
-		}
+
+		h.config.Language = *req.Language
+		// Store the choice as given ("auto" stays "auto" so it keeps following
+		// the system), but apply the language it currently resolves to.
+		i18n.ChangeLanguage(i18n.ResolveLanguage(*req.Language))
 	}
 
 	notifications.SetNotificationsEnabled(h.config.NotificationsStatus == config.NotificationGranted)
@@ -75,7 +92,11 @@ func (h *Handlers) handlePatchSettings(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"notifications_enabled": h.config.NotificationsStatus,
 		"notification_sound":    h.config.NotificationSound,
-		"language":              h.config.Language,
+		// language is the stored preference, which may be "auto";
+		// language_resolved is what "auto" currently resolves to, so the UI can
+		// label the option as "Auto (Espanol)" rather than guessing.
+		"language":          h.config.Language,
+		"language_resolved": i18n.CurrentLanguage(),
 	})
 }
 
