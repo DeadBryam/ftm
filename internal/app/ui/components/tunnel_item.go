@@ -24,6 +24,8 @@ func NewTunnelItem() *TunnelItem {
 	return &TunnelItem{}
 }
 
+const nameWidth = 18
+
 const (
 	TunnelStateOffline    = 0
 	TunnelStateStarting   = 1
@@ -121,10 +123,7 @@ func (t *TunnelItem) statusBadge(bgColor color.Color) string {
 }
 
 func (t *TunnelItem) name(bgColor color.Color) string {
-	name := t.Name
-	if len(name) > 18 {
-		name = name[:15] + "..."
-	}
+	name := ui.Truncate(t.Name, nameWidth)
 
 	return lipgloss.NewStyle().
 		Bold(t.Selected).
