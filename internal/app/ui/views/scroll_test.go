@@ -212,3 +212,16 @@ func TestEveryRowUsesTheSameColumns(t *testing.T) {
 		}
 	}
 }
+
+func TestLogsBoxFloatsInsideTheTerminal(t *testing.T) {
+	for _, size := range []struct{ width, height int }{{100, 30}, {160, 50}, {60, 20}} {
+		w, h := LogsBox(size.width, size.height)
+
+		if w >= size.width {
+			t.Errorf("%dx%d: the box is %d wide, too wide to float", size.width, size.height, w)
+		}
+		if h >= size.height {
+			t.Errorf("%dx%d: the box is %d tall, too tall to float", size.width, size.height, h)
+		}
+	}
+}

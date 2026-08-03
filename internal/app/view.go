@@ -18,7 +18,7 @@ func (m *Model) View() tea.View {
 		case viewList:
 			content = m.viewList()
 		case viewLogs:
-			content = m.viewLogs()
+			content = ui.Overlay(m.viewList(), m.viewLogs(), m.Width, m.Height)
 		case viewNewTunnel:
 			content = ui.Overlay(m.viewList(), m.viewTunnelEditor(false), m.Width, m.Height)
 		case viewEditTunnel:
@@ -113,19 +113,17 @@ func (m *Model) viewEmptyState() string {
 }
 
 func (m *Model) viewLogs() string {
-	view := views.NewLogsView()
-	view.Width = m.Width
-	view.Height = m.Height
-	view.TunnelName = m.getTunnelName(m.SelectedTunnel)
+	width, height := views.LogsBox(m.Width, m.Height)
 
-	logs := m.App.Manager.GetLogs(m.SelectedTunnel)
-	var content string
-	for _, log := range logs {
-		content += log + "\n"
-	}
-	view.Content = content
-
+	m.LogViewport.SetWidth(ui.PanelInner(width))
+	m.LogViewport.SetHeight(height - ui.PanelChrome - 1)
 	m.updateLogViewport()
+
+	view := views.NewLogsView()
+	view.Width = width
+	view.Height = height
+	view.TunnelName = m.getTunnelName(m.SelectedTunnel)
+	view.Content = m.LogViewport.View()
 
 	return view.Render()
 }

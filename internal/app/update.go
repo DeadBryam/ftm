@@ -22,8 +22,6 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.Width = msg.Width
 		m.Height = msg.Height
-		m.LogViewport.SetWidth(msg.Width - 4)
-		m.LogViewport.SetHeight(msg.Height - 8)
 		return m, nil
 
 	case tea.BackgroundColorMsg:
