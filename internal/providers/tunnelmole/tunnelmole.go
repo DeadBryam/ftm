@@ -102,7 +102,8 @@ func (p *TunnelmoleProvider) Start(ctx context.Context, tunnel config.TunnelConf
 		return nil, fmt.Errorf("installing")
 	}
 
-	ctx, cancel := context.WithCancel(ctx)
+	baseCtx := ctx
+	ctx, cancel := context.WithCancel(baseCtx)
 
 	args := []string{fmt.Sprintf("%d", tunnel.LocalPort)}
 
@@ -110,26 +111,33 @@ func (p *TunnelmoleProvider) Start(ctx context.Context, tunnel config.TunnelConf
 	cmd.Stdout = logWriter
 	cmd.Stderr = logWriter
 
-	if err := cmd.Start(); err != nil {
-		cancel()
-		if needsRosetta(err.Error()) && runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
-			if !RosettaInstalled() {
-				return nil, fmt.Errorf("%w: %s", fmt.Errorf("rosetta required"), errRosettaNeeded)
-			}
-			cmd = exec.CommandContext(ctx, "/Library/Apple/usr/libexec/oah", append([]string{"-r", binary}, args...)...)
-			cmd.Stdout = logWriter
-			cmd.Stderr = logWriter
-			if err := cmd.Start(); err != nil {
-				return nil, fmt.Errorf("failed to start tunnelmole: %w", err)
-			}
-			return &providers.Process{Cancel: cancel}, nil
-		}
+	proc, err := providers.StartProcess(cmd, cancel)
+	if err == nil {
+		return proc, nil
+	}
+
+	if !needsRosetta(err.Error()) || runtime.GOOS != "darwin" || runtime.GOARCH != "arm64" {
 		return nil, fmt.Errorf("failed to start tunnelmole: %w", err)
 	}
 
-	return &providers.Process{
-		Cancel: cancel,
-	}, nil
+	if !RosettaInstalled() {
+		return nil, fmt.Errorf("%w: %s", fmt.Errorf("rosetta required"), errRosettaNeeded)
+	}
+
+	// StartProcess already cancelled the context on the failed attempt, so the
+	// retry needs a fresh one or the translated process is killed immediately.
+	ctx, cancel = context.WithCancel(baseCtx)
+
+	cmd = exec.CommandContext(ctx, "/Library/Apple/usr/libexec/oah", append([]string{"-r", binary}, args...)...)
+	cmd.Stdout = logWriter
+	cmd.Stderr = logWriter
+
+	proc, err = providers.StartProcess(cmd, cancel)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start tunnelmole: %w", err)
+	}
+
+	return proc, nil
 }
 
 var tunnelmoleURLRegex = regexp.MustCompile(`https?://[a-zA-Z0-9-]+-ip-[0-9-]+\.tunnelmole\.net`)

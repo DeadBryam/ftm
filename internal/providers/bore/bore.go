@@ -106,14 +106,12 @@ func (p *BoreProvider) Start(ctx context.Context, tunnel config.TunnelConfig, lo
 	cmd.Stdout = logWriter
 	cmd.Stderr = logWriter
 
-	if err := cmd.Start(); err != nil {
-		cancel()
+	proc, err := providers.StartProcess(cmd, cancel)
+	if err != nil {
 		return nil, fmt.Errorf("failed to start bore: %w", err)
 	}
 
-	return &providers.Process{
-		Cancel: cancel,
-	}, nil
+	return proc, nil
 }
 
 var boreURLRegex = regexp.MustCompile(`bore\.pub:\d+`)

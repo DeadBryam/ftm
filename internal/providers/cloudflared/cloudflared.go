@@ -91,14 +91,12 @@ func (p *CloudflaredProvider) Start(ctx context.Context, tunnel config.TunnelCon
 	cmd.Stdout = logWriter
 	cmd.Stderr = logWriter
 
-	if err := cmd.Start(); err != nil {
-		cancel()
+	proc, err := providers.StartProcess(cmd, cancel)
+	if err != nil {
 		return nil, fmt.Errorf("failed to start cloudflared: %w", err)
 	}
 
-	return &providers.Process{
-		Cancel: cancel,
-	}, nil
+	return proc, nil
 }
 
 var cloudflareURLRegex = regexp.MustCompile(`https?://[a-zA-Z0-9-]+\.trycloudflare\.com`)

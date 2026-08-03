@@ -124,14 +124,12 @@ func (p *SSHProvider) Start(ctx context.Context, tunnel config.TunnelConfig, log
 	cmd.Stdout = logWriter
 	cmd.Stderr = logWriter
 
-	if err := cmd.Start(); err != nil {
-		cancel()
+	proc, err := providers.StartProcess(cmd, cancel)
+	if err != nil {
 		return nil, fmt.Errorf("failed to start ssh tunnel: %w", err)
 	}
 
-	return &providers.Process{
-		Cancel: cancel,
-	}, nil
+	return proc, nil
 }
 
 var ansiEscape = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
