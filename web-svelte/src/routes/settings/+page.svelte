@@ -11,7 +11,6 @@
     VolumeX,
     ChevronLeft,
     Check,
-    Languages,
   } from "lucide-svelte";
   import SettingsSection from "$lib/components/SettingsSection.svelte";
   import SettingRow from "$lib/components/SettingRow.svelte";
@@ -96,8 +95,8 @@
       ></div>
     </div>
   {:else}
-    <div class="columns-1 gap-app md:columns-2">
-      <div class="mb-app break-inside-avoid">
+    <div class="grid grid-cols-1 gap-app lg:grid-cols-2 lg:items-start">
+      <div class="flex flex-col gap-app">
         <SettingsSection title={t("notifications_section")}>
           {#snippet children()}
             <div class="space-y-1">
@@ -121,23 +120,13 @@
             </div>
           {/snippet}
         </SettingsSection>
-      </div>
 
-      <div class="mb-app break-inside-avoid">
-        <SettingsSection title={t("appearance_section")}>
-          {#snippet children()}
-            <ThemeSelector groups={themeGroups} />
-          {/snippet}
-        </SettingsSection>
-      </div>
-
-      <div class="mb-app break-inside-avoid">
         <SettingsSection title={t("language_section")}>
           {#snippet children()}
             <div
               role="radiogroup"
               aria-label={t("language_section")}
-              class="grid grid-cols-1 gap-2 sm:grid-cols-3"
+              class="flex flex-col gap-1.5"
             >
               {#each languageOptions as lang}
                 {@const selected = settingsStore.settings.language === lang}
@@ -148,7 +137,7 @@
                   disabled={saving}
                   onclick={() => changeLanguage(lang)}
                   class={cn(
-                    "flex cursor-pointer items-center gap-2.5 rounded-control border px-3 py-2.5 text-left transition-colors",
+                    "flex w-full cursor-pointer items-center gap-3 rounded-control border px-3 py-2.5 text-left transition-colors",
                     selected
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border text-text hover:border-primary/40 hover:bg-hover",
@@ -157,17 +146,15 @@
                 >
                   <span
                     class={cn(
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-control",
+                      "flex h-7 w-7 shrink-0 items-center justify-center rounded-control",
                       selected ? "bg-primary/20" : "bg-secondary",
                     )}
                   >
                     {#if selected}
-                      <Check size={16} class="text-primary" />
-                    {:else}
-                      <Languages size={16} class="text-text-muted" />
+                      <Check size={14} class="text-primary" />
                     {/if}
                   </span>
-                  <span class="min-w-0 flex-1 text-sm font-medium leading-tight">
+                  <span class="text-sm font-medium">
                     {t(`lang_${lang}`)}
                   </span>
                 </button>
@@ -176,6 +163,12 @@
           {/snippet}
         </SettingsSection>
       </div>
+
+      <SettingsSection title={t("appearance_section")}>
+        {#snippet children()}
+          <ThemeSelector groups={themeGroups} />
+        {/snippet}
+      </SettingsSection>
     </div>
   {/if}
 </div>
