@@ -21,8 +21,8 @@ type viewState int
 const (
 	viewList viewState = iota
 	viewLogs
-	viewAddForm
-	viewEditForm
+	viewNewTunnel
+	viewEditTunnel
 	viewConfirm
 	viewDownloading
 	viewSettings
@@ -47,8 +47,8 @@ type Model struct {
 	Items               []list.Item
 	LogViewport         viewport.Model
 	SelectedTunnel      string
-	FormFocus           int
-	FormValues          FormData
+	EditorFocus         int
+	Draft               TunnelDraft
 	editingTunnelID     string
 	Message             string
 	DownloadProgress    providers.DownloadProgress
@@ -65,7 +65,7 @@ type Model struct {
 	statusUpdates       chan config.TunnelStatus
 }
 
-type FormData struct {
+type TunnelDraft struct {
 	ID       string
 	Name     string
 	Provider string

@@ -56,7 +56,7 @@ func TestEscapeDoesNothingOnTheList(t *testing.T) {
 }
 
 func TestForceQuitAlwaysCloses(t *testing.T) {
-	for _, state := range []viewState{viewList, viewLogs, viewSettings, viewAddForm} {
+	for _, state := range []viewState{viewList, viewLogs, viewSettings, viewNewTunnel} {
 		m := modelWithTunnel(t, "t1", "Foundry VTT")
 		m.State = state
 

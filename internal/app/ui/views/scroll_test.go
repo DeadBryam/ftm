@@ -167,7 +167,7 @@ func TestFloatingViewsAreNarrowerThanTheTerminal(t *testing.T) {
 	const width = 100
 
 	for name, out := range map[string]string{
-		"form":     NewFormView().Render(),
+		"form":     NewTunnelEditor().Render(),
 		"settings": NewSettingsView().Render(),
 	} {
 		for i, line := range strings.Split(out, "\n") {

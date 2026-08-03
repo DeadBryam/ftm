@@ -29,7 +29,7 @@ func NewModel(app *App) *Model {
 		Cursor:        0,
 		LogViewport:   viewport.New(),
 		ProgressBar:   p,
-		FormValues: FormData{
+		Draft: TunnelDraft{
 			Provider: string(config.ProviderCloudflared),
 			Port:     "30000",
 		},

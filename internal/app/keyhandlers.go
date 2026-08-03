@@ -6,7 +6,7 @@ import (
 )
 
 func (m *Model) entersText() bool {
-	return m.State == viewAddForm || m.State == viewEditForm
+	return m.State == viewNewTunnel || m.State == viewEditTunnel
 }
 
 func (m *Model) handleKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
@@ -18,7 +18,7 @@ func (m *Model) handleKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 		if key.Matches(msg, m.Keys.Back) {
 			return m.handleBack()
 		}
-		return m.handleFormKey(msg)
+		return m.handleEditorKey(msg)
 	}
 
 	if m.State == viewConfirm {

@@ -147,7 +147,7 @@ arrow_hint: "← → para cambiar"
 numbers_hint: "solo números"
 submit_new: "Crear Túnel"
 submit_edit: "Guardar Cambios"
-form_nav_hint: "TAB: Navegar  •  ENTER: Enviar  •  ESC: Cancelar"
+editor_nav_hint: "TAB: Navegar  •  ENTER: Enviar  •  ESC: Cancelar"
 
 # Empty states
 no_tunnels: "No hay túneles configurados"

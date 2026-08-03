@@ -40,10 +40,10 @@ func (m *Model) handleListKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 		m.openConfigDir()
 
 	case key.Matches(msg, m.Keys.Add):
-		m.startAddForm()
+		m.startNewTunnel()
 
 	case key.Matches(msg, m.Keys.Edit):
-		return m.startEditForm()
+		return m.startEditTunnel()
 
 	case key.Matches(msg, m.Keys.Delete):
 		return m.handleListDelete()
@@ -94,25 +94,25 @@ func (m *Model) handleListCopy() {
 	}
 }
 
-func (m *Model) startAddForm() {
-	m.State = viewAddForm
-	m.FormFocus = 0
-	m.FormValues = FormData{
+func (m *Model) startNewTunnel() {
+	m.State = viewNewTunnel
+	m.EditorFocus = 0
+	m.Draft = TunnelDraft{
 		Provider: string(config.ProviderCloudflared),
 		Port:     "30000",
 	}
 }
 
-func (m *Model) startEditForm() (tea.Model, tea.Cmd) {
+func (m *Model) startEditTunnel() (tea.Model, tea.Cmd) {
 	if item, ok := m.selectedItem(); ok {
 		if item.Status.State != config.TunnelStateStopped {
 			m.showMessage(i18n.T("error_tunnel_running"))
 			return m, nil
 		}
-		m.State = viewEditForm
+		m.State = viewEditTunnel
 		m.editingTunnelID = item.Tunnel.ID
-		m.FormFocus = 0
-		m.FormValues = FormData{
+		m.EditorFocus = 0
+		m.Draft = TunnelDraft{
 			ID:       item.Tunnel.ID,
 			Name:     item.Tunnel.Name,
 			Provider: string(item.Tunnel.Provider),

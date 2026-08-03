@@ -19,10 +19,10 @@ func (m *Model) View() tea.View {
 			content = m.viewList()
 		case viewLogs:
 			content = m.viewLogs()
-		case viewAddForm:
-			content = ui.Overlay(m.viewList(), m.viewAddForm(false), m.Width, m.Height)
-		case viewEditForm:
-			content = ui.Overlay(m.viewList(), m.viewAddForm(true), m.Width, m.Height)
+		case viewNewTunnel:
+			content = ui.Overlay(m.viewList(), m.viewTunnelEditor(false), m.Width, m.Height)
+		case viewEditTunnel:
+			content = ui.Overlay(m.viewList(), m.viewTunnelEditor(true), m.Width, m.Height)
 		case viewDownloading:
 			content = m.viewDownloading()
 		case viewSettings:
@@ -143,13 +143,13 @@ func (m *Model) getTunnelName(id string) string {
 	return ""
 }
 
-func (m *Model) viewAddForm(isEdit bool) string {
-	view := views.NewFormView()
-	view.Focus = m.FormFocus
+func (m *Model) viewTunnelEditor(isEdit bool) string {
+	view := views.NewTunnelEditor()
+	view.Focus = m.EditorFocus
 	view.IsEditMode = isEdit
-	view.Name = m.FormValues.Name
-	view.Provider = m.FormValues.Provider
-	view.Port = m.FormValues.Port
+	view.Name = m.Draft.Name
+	view.Provider = m.Draft.Provider
+	view.Port = m.Draft.Port
 
 	return view.Render()
 }

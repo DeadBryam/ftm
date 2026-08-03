@@ -8,7 +8,7 @@ import (
 	"github.com/sthbryan/ftm/internal/i18n"
 )
 
-type FormView struct {
+type TunnelEditor struct {
 	Focus      int
 	IsEditMode bool
 	Name       string
@@ -16,18 +16,18 @@ type FormView struct {
 	Port       string
 }
 
-func NewFormView() *FormView {
-	return &FormView{}
+func NewTunnelEditor() *TunnelEditor {
+	return &TunnelEditor{}
 }
 
 const (
-	formWidth   = 54
+	editorWidth = 54
 	submitFocus = 4
 )
 
-func (f *FormView) Render() string {
+func (f *TunnelEditor) Render() string {
 	t := ui.ThemeDefault
-	inner := ui.PanelInner(formWidth)
+	inner := ui.PanelInner(editorWidth)
 
 	title, subtitle := i18n.T("new_tunnel"), i18n.T("new_tunnel_desc")
 	if f.IsEditMode {
@@ -47,13 +47,13 @@ func (f *FormView) Render() string {
 		"",
 		lipgloss.NewStyle().Width(inner).Align(lipgloss.Center).Render(f.submitButton()),
 		"",
-		dim.Align(lipgloss.Center).Render(i18n.T("form_nav_hint")),
+		dim.Align(lipgloss.Center).Render(i18n.T("editor_nav_hint")),
 	}, "\n")
 
-	return ui.Panel(title, body, formWidth, lipgloss.Height(body)+ui.PanelChrome, t.Gold)
+	return ui.Panel(title, body, editorWidth, lipgloss.Height(body)+ui.PanelChrome, t.Gold)
 }
 
-func (f *FormView) field(inner, index int, label, hint, focusedHint, value string) string {
+func (f *TunnelEditor) field(inner, index int, label, hint, focusedHint, value string) string {
 	t := ui.ThemeDefault
 	focused := f.Focus == index
 
@@ -90,7 +90,7 @@ func (f *FormView) field(inner, index int, label, hint, focusedHint, value strin
 	}, "\n")
 }
 
-func (f *FormView) submitButton() string {
+func (f *TunnelEditor) submitButton() string {
 	t := ui.ThemeDefault
 
 	label := i18n.T("submit_new")
