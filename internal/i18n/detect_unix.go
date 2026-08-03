@@ -2,23 +2,26 @@
 
 package i18n
 
-import (
-	"os"
+import "os"
 
-	"golang.org/x/text/language"
-)
+// localeEnvVars is the POSIX precedence order: LC_ALL overrides everything,
+// LC_MESSAGES governs program messages specifically, and LANG is the fallback
+// default. Reading only LANG gets the wrong answer for anyone who overrides
+// their message language without changing the rest of their locale.
+var localeEnvVars = []string{"LC_ALL", "LC_MESSAGES", "LANG"}
 
 func detectSystemLang() string {
-	lang := os.Getenv("LANG")
-	if lang == "" {
-		return DefaultLang
+	for _, key := range localeEnvVars {
+		if code := normalizeLocale(os.Getenv(key)); code != "" {
+			return parseLangCode(code)
+		}
 	}
 
-	tag, err := language.Parse(lang)
-	if err != nil {
-		return DefaultLang
+	// GUI apps get an empty environment on macOS, so there is a platform
+	// fallback. Elsewhere this reports nothing.
+	if code := detectPlatformLang(); code != "" {
+		return parseLangCode(code)
 	}
 
-	base, _ := tag.Base()
-	return parseLangCode(base.String())
+	return DefaultLang
 }
