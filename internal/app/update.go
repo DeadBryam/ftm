@@ -6,6 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/sthbryan/ftm/internal/app/ui"
 	"github.com/sthbryan/ftm/internal/i18n"
 	"github.com/sthbryan/ftm/internal/providers"
 )
@@ -23,6 +24,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Height = msg.Height
 		m.LogViewport.SetWidth(msg.Width - 4)
 		m.LogViewport.SetHeight(msg.Height - 8)
+		return m, nil
+
+	case tea.BackgroundColorMsg:
+		ui.SetDarkBackground(msg.IsDark())
 		return m, nil
 
 	case tickMsg:

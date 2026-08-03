@@ -25,6 +25,7 @@ const (
 
 func (m *Model) Init() tea.Cmd {
 	return tea.Batch(
+		tea.RequestBackgroundColor,
 		tickCmd(),
 		m.waitForStatus(),
 		m.checkDownloadProgress(),
