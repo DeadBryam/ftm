@@ -13,6 +13,8 @@
 @import './themes/_alucard.css';
 @import './themes/_kanagawa.css';
 @import './themes/_kanagawa-lotus.css';
+@import './themes/_one-dark.css';
+@import './themes/_one-light.css';
 
 @theme {
   --color-bg: var(--color-bg);

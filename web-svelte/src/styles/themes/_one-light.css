@@ -1,0 +1,37 @@
+:root[data-theme="one-light"] {
+  --color-bg: #fafafa;
+  --color-card: #ffffff;
+  --color-text: #383a42;
+  --color-heading: #202328;
+  --color-muted: #a0a1a7;
+  --color-border: #d3d3d3;
+  --color-border-light: #e5e5e5;
+  --color-primary: #4078f2;
+  --color-btn-text: #ffffff;
+  --color-primary-hover: #3066d9;
+  --color-hover: #e8e8e8;
+  --color-btn-primary: #4078f2;
+  --color-btn-primary-hover: #3066d9;
+  --color-btn-start: #50a14f;
+  --color-btn-start-hover: #418a40;
+  --color-btn-stop: #e45649;
+  --color-btn-stop-hover: #c8473a;
+  --color-btn-danger: #e45649;
+  --color-btn-danger-hover: #c8473a;
+  --color-status-running: #50a14f;
+  --color-status-starting: #c18401;
+  --color-status-installing: #4078f2;
+  --color-status-error: #e45649;
+  --color-status-stopped: var(--color-muted);
+  --color-logs-bg: #f0f0f0;
+  --color-logs-text: #383a42;
+  --color-url-bg: #e8e8e8;
+  --color-url-text: #4078f2;
+  --color-input-bg: #ffffff;
+  --color-input-text: #383a42;
+  --color-input-placeholder: #a0a1a7;
+  --color-input-disabled: #e5e5e5;
+  --color-badge-text: #ffffff;
+  --color-secondary-btn: #e5e5e5;
+  --color-secondary-btn-text: #383a42;
+}

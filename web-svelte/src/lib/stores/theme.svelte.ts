@@ -13,6 +13,8 @@ const THEMES = [
   'alucard',
   'kanagawa',
   'kanagawa-lotus',
+  'one-dark',
+  'one-light',
   'rose-pine',
   'rose-pine-dawn',
 ] as const;
