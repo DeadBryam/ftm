@@ -21,6 +21,7 @@ type Manager struct {
 	mu                  sync.RWMutex
 	processes           map[string]*ManagedProcess
 	providers           map[config.Provider]providers.Provider
+	providerExpiration  map[string]int
 	DownloadProgress    chan providers.DownloadProgress
 	StatusChannel       chan config.TunnelStatus
 	NotificationHandler func(status config.TunnelStatus)
@@ -53,6 +54,32 @@ func (m *Manager) callNotificationHandler(status config.TunnelStatus) {
 
 func (m *Manager) SetStatusChannel(ch chan config.TunnelStatus) {
 	m.StatusChannel = ch
+}
+
+// SetProviderExpiration records how long each provider keeps a tunnel alive, in
+// minutes, with 0 meaning "does not expire".
+//
+// Without this the ExpiresAt field is never populated, which is why the web
+// dashboard's expiry warnings never fired: the frontend has had the countdown
+// logic all along, but nothing ever sent it a deadline.
+func (m *Manager) SetProviderExpiration(minutes map[string]int) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.providerExpiration = make(map[string]int, len(minutes))
+	for provider, mins := range minutes {
+		m.providerExpiration[provider] = mins
+	}
+}
+
+// expiresAtLocked returns the deadline for a tunnel started at startedAt, in
+// Unix milliseconds, or 0 if the provider does not expire.
+func (m *Manager) expiresAtLocked(provider config.Provider, startedAt time.Time) int64 {
+	mins, ok := m.providerExpiration[string(provider)]
+	if !ok || mins <= 0 {
+		return 0
+	}
+	return startedAt.Add(time.Duration(mins) * time.Minute).UnixMilli()
 }
 
 // callStatusUpdate publishes a status change to whoever is listening.
@@ -175,8 +202,10 @@ func (m *Manager) Start(tunnel config.TunnelConfig, onUpdate func(config.TunnelS
 	if err != nil {
 		return err
 	}
+	startedAt := time.Now()
 	mp.Process = proc
 	mp.Status.State = config.TunnelStateStarting
+	mp.Status.ExpiresAt = m.expiresAtLocked(tunnel.Provider, startedAt)
 
 	m.processes[tunnel.ID] = mp
 
@@ -187,7 +216,7 @@ func (m *Manager) Start(tunnel config.TunnelConfig, onUpdate func(config.TunnelS
 
 	go m.startupTimeoutMonitor(tunnel.ID, proc)
 	go m.watchExit(tunnel.ID, proc)
-	m.callExpirationStart(tunnel.ID, tunnel.Name, string(tunnel.Provider), time.Now())
+	m.callExpirationStart(tunnel.ID, tunnel.Name, string(tunnel.Provider), startedAt)
 
 	return nil
 }

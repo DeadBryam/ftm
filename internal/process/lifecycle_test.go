@@ -227,3 +227,42 @@ func TestManagerRestartIsNotTimedOutByTheOldMonitor(t *testing.T) {
 		}
 	}
 }
+
+// The web dashboard has always had expiry-countdown logic, but nothing ever
+// sent it a deadline, so the warnings never fired.
+func TestManagerPublishesExpiryForExpiringProviders(t *testing.T) {
+	m, updates := newScriptManager(t, "sleep 5")
+	m.SetProviderExpiration(map[string]int{string(config.ProviderCloudflared): 60})
+
+	before := time.Now()
+	if err := m.Start(tunnelFixture(), nil); err != nil {
+		t.Fatalf("Start failed: %v", err)
+	}
+	defer m.StopAll()
+
+	status := <-updates
+	if status.ExpiresAt == 0 {
+		t.Fatal("ExpiresAt = 0 for a provider that expires after 60 minutes")
+	}
+
+	got := time.UnixMilli(status.ExpiresAt)
+	wantMin := before.Add(59 * time.Minute)
+	wantMax := before.Add(61 * time.Minute)
+	if got.Before(wantMin) || got.After(wantMax) {
+		t.Fatalf("ExpiresAt = %v, want roughly 60 minutes after %v", got, before)
+	}
+}
+
+func TestManagerLeavesExpiryUnsetForProvidersThatDoNotExpire(t *testing.T) {
+	m, updates := newScriptManager(t, "sleep 5")
+	m.SetProviderExpiration(map[string]int{string(config.ProviderCloudflared): 0})
+
+	if err := m.Start(tunnelFixture(), nil); err != nil {
+		t.Fatalf("Start failed: %v", err)
+	}
+	defer m.StopAll()
+
+	if status := <-updates; status.ExpiresAt != 0 {
+		t.Fatalf("ExpiresAt = %d for a provider that does not expire, want 0", status.ExpiresAt)
+	}
+}
