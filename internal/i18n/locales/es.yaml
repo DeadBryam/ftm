@@ -4,6 +4,10 @@ app_description: "Gestiona túneles para exponer Foundry VTT"
 
 # General
 ok: "Aceptar"
+confirm_delete_title: "¿Eliminar conexión?"
+confirm_delete_body: "Se eliminará \"{0}\". No se puede deshacer."
+confirm_yes: "y  confirmar"
+confirm_no: "n / esc  cancelar"
 cancel: "Cancelar"
 close: "Cerrar"
 save: "Guardar"
