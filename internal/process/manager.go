@@ -348,10 +348,10 @@ func (m *Manager) GetStatus(tunnelID string) (config.TunnelStatus, bool) {
 
 func (m *Manager) updateURL(tunnelID, url string) {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	mp, ok := m.processes[tunnelID]
 	if !ok {
+		m.mu.Unlock()
 		return
 	}
 
@@ -359,12 +359,11 @@ func (m *Manager) updateURL(tunnelID, url string) {
 	mp.Status.PublicURL = url
 	mp.Status.State = config.TunnelStateOnline
 
-	if mp.OnUpdate != nil {
-		mp.OnUpdate(mp.Status)
-	}
+	status := mp.Status
+	m.publishLocked(mp)
+	m.mu.Unlock()
 
-	m.callNotificationHandler(mp.Status)
-	m.callStatusUpdate(mp.Status)
+	m.callNotificationHandler(status)
 }
 
 func (m *Manager) GetLogs(tunnelID string) []string {
