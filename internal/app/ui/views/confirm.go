@@ -62,7 +62,7 @@ func (c *ConfirmView) Render() string {
 	body := strings.Join([]string{title, surface.Render(""), message, surface.Render(""), actions}, "\n")
 
 	return lipgloss.NewStyle().
-		Border(lipgloss.RoundedBorder()).
+		Border(lipgloss.NormalBorder()).
 		BorderForeground(accent).
 		BorderBackground(t.Surface).
 		Background(t.Surface).

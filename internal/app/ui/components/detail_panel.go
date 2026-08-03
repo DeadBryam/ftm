@@ -74,7 +74,7 @@ func (d *DetailPanel) details() string {
 		b.WriteString("\n")
 
 		urlBox := lipgloss.NewStyle().
-			BorderStyle(lipgloss.RoundedBorder()).
+			BorderStyle(lipgloss.NormalBorder()).
 			BorderForeground(ui.ThemeDefault.Gold).
 			Foreground(ui.ThemeDefault.Text).
 			Padding(0, 1).

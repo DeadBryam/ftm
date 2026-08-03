@@ -118,7 +118,7 @@ func (f *TunnelEditor) field(inner, index int, label, hint, focusedHint, value s
 	input := lipgloss.NewStyle().
 		Width(inner).
 		Padding(0, 1).
-		Border(lipgloss.RoundedBorder()).
+		Border(lipgloss.NormalBorder()).
 		BorderForeground(border).
 		Foreground(foreground).
 		Render(value)

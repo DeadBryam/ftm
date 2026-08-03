@@ -32,13 +32,13 @@ func Panel(title, content string, width, height int, accent color.Color) string 
 
 	fill := Clamp(width-PanelChrome-lipgloss.Width(heading), 0)
 
-	top := edge.Render("╭") + heading + edge.Render(strings.Repeat("─", fill)) + edge.Render("╮")
+	top := edge.Render("┌") + heading + edge.Render(strings.Repeat("─", fill)) + edge.Render("┐")
 
 	body := lipgloss.NewStyle().
 		Width(width).
 		Height(height-1).
 		MaxHeight(height-1).
-		Border(lipgloss.RoundedBorder()).
+		Border(lipgloss.NormalBorder()).
 		BorderTop(false).
 		BorderForeground(accent).
 		Padding(0, 1).
