@@ -11,8 +11,6 @@ import (
 )
 
 var upgrader = websocket.Upgrader{
-	// Without this the upgrade accepts any Origin, letting any page the user
-	// visits open a socket to the local API. See allowedOrigin in origin.go.
 	CheckOrigin: func(r *http.Request) bool {
 		_, ok := allowedOrigin(r)
 		return ok

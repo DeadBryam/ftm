@@ -16,13 +16,10 @@ func TestCompareSemver(t *testing.T) {
 		{"1.1.0", "1.0.9", 1},
 		{"2.0.0", "1.9.9", 1},
 
-		// Numeric, not lexicographic: this is the comparison that decides
-		// whether an update is offered, and "0.9.0" > "0.10.0" as strings.
 		{"0.10.0", "0.9.0", 1},
 		{"0.9.0", "0.10.0", -1},
 		{"0.10.0", "0.10.0", 0},
 
-		// Tag prefixes and partial versions.
 		{"v1.2.3", "1.2.3", 0},
 		{"1.2", "1.2.0", 0},
 		{"1", "1.0.0", 0},
@@ -37,8 +34,6 @@ func TestCompareSemver(t *testing.T) {
 	}
 }
 
-// Prerelease and build metadata are stripped before comparing, so a release
-// candidate compares equal to its release and does not trigger an update.
 func TestCompareSemverIgnoresPrereleaseAndBuild(t *testing.T) {
 	if got := compareSemver("1.2.3-rc1", "1.2.3"); got != 0 {
 		t.Fatalf("compareSemver(1.2.3-rc1, 1.2.3) = %d, want 0", got)
@@ -57,8 +52,6 @@ func TestParseSemverNonNumericIsZero(t *testing.T) {
 	}
 }
 
-// The asset name has to match the file names published by the release
-// workflow, or Check reports "no asset in release" on every platform.
 func TestPlatformAssetName(t *testing.T) {
 	name := platformAssetName()
 

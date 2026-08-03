@@ -21,6 +21,7 @@ type Manager struct {
 	mu                  sync.RWMutex
 	processes           map[string]*ManagedProcess
 	providers           map[config.Provider]providers.Provider
+	providerExpiration  map[string]int
 	DownloadProgress    chan providers.DownloadProgress
 	StatusChannel       chan config.TunnelStatus
 	NotificationHandler func(status config.TunnelStatus)
@@ -55,13 +56,24 @@ func (m *Manager) SetStatusChannel(ch chan config.TunnelStatus) {
 	m.StatusChannel = ch
 }
 
-// callStatusUpdate publishes a status change to whoever is listening.
-//
-// Every caller holds m.mu, so this must not block. The channel is buffered, but
-// a blocking send would freeze the entire Manager behind the mutex if the
-// consumer ever stalled or was never started -- taking the TUI down with it,
-// since it shares the same lock. Dropping is the safe failure mode here: each
-// message carries the full status, and clients resync over /api/tunnels.
+func (m *Manager) SetProviderExpiration(minutes map[string]int) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.providerExpiration = make(map[string]int, len(minutes))
+	for provider, mins := range minutes {
+		m.providerExpiration[provider] = mins
+	}
+}
+
+func (m *Manager) expiresAtLocked(provider config.Provider, startedAt time.Time) int64 {
+	mins, ok := m.providerExpiration[string(provider)]
+	if !ok || mins <= 0 {
+		return 0
+	}
+	return startedAt.Add(time.Duration(mins) * time.Minute).UnixMilli()
+}
+
 func (m *Manager) callStatusUpdate(status config.TunnelStatus) {
 	if m.StatusChannel == nil {
 		return
@@ -175,8 +187,10 @@ func (m *Manager) Start(tunnel config.TunnelConfig, onUpdate func(config.TunnelS
 	if err != nil {
 		return err
 	}
+	startedAt := time.Now()
 	mp.Process = proc
 	mp.Status.State = config.TunnelStateStarting
+	mp.Status.ExpiresAt = m.expiresAtLocked(tunnel.Provider, startedAt)
 
 	m.processes[tunnel.ID] = mp
 
@@ -185,83 +199,138 @@ func (m *Manager) Start(tunnel config.TunnelConfig, onUpdate func(config.TunnelS
 	}
 	m.callStatusUpdate(mp.Status)
 
-	go m.startupTimeoutMonitor(tunnel.ID)
-	m.callExpirationStart(tunnel.ID, tunnel.Name, string(tunnel.Provider), time.Now())
+	go m.startupTimeoutMonitor(tunnel.ID, proc)
+	go m.watchExit(tunnel.ID, proc)
+	m.callExpirationStart(tunnel.ID, tunnel.Name, string(tunnel.Provider), startedAt)
 
 	return nil
 }
 
-func (m *Manager) startupTimeoutMonitor(tunnelID string) {
-	time.Sleep(5 * time.Second)
+func (m *Manager) publishLocked(mp *ManagedProcess) {
+	if mp.OnUpdate != nil {
+		mp.OnUpdate(mp.Status)
+	}
+	m.callStatusUpdate(mp.Status)
+}
+
+func (m *Manager) watchExit(tunnelID string, proc *providers.Process) {
+	<-proc.Exited()
+
 	m.mu.Lock()
-	if mp, ok := m.processes[tunnelID]; ok {
-		if mp.Status.PublicURL == "" && mp.Status.State != config.TunnelStateOnline {
-			mp.Status.State = config.TunnelStateConnecting
-			if mp.OnUpdate != nil {
-				mp.OnUpdate(mp.Status)
-			}
-			m.callStatusUpdate(mp.Status)
-		}
+	mp, ok := m.processes[tunnelID]
+	if !ok || mp.Process != proc {
+		m.mu.Unlock()
+		return
+	}
+
+	mp.Process = nil
+	mp.closeLogSubscribers()
+
+	mp.Status.PublicURL = ""
+	if err := proc.Err(); err != nil {
+		mp.Status.State = config.TunnelStateError
+		mp.Status.ErrorMessage = fmt.Sprintf("tunnel process exited unexpectedly: %v", err)
+	} else {
+		mp.Status.State = config.TunnelStateStopped
+		mp.Status.ErrorMessage = ""
+	}
+
+	status := mp.Status
+	m.publishLocked(mp)
+	m.mu.Unlock()
+
+	m.callNotificationHandler(status)
+	m.callExpirationStop(tunnelID)
+}
+
+const (
+	connectingAfter = 5 * time.Second
+	giveUpAfter     = 25 * time.Second
+)
+
+func (m *Manager) startupTimeoutMonitor(tunnelID string, proc *providers.Process) {
+	select {
+	case <-proc.Exited():
+		return
+	case <-time.After(connectingAfter):
+	}
+
+	m.mu.Lock()
+	mp, ok := m.processes[tunnelID]
+	if !ok || mp.Process != proc {
+		m.mu.Unlock()
+		return
+	}
+	if mp.Status.PublicURL == "" && mp.Status.State != config.TunnelStateOnline {
+		mp.Status.State = config.TunnelStateConnecting
+		m.publishLocked(mp)
 	}
 	m.mu.Unlock()
 
-	time.Sleep(25 * time.Second)
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	if mp, ok := m.processes[tunnelID]; ok {
-		if mp.Status.State == config.TunnelStateConnecting || mp.Status.State == config.TunnelStateStarting {
-			mp.Status.State = config.TunnelStateTimeout
-			mp.Status.ErrorMessage = "Connection timed out after 30 seconds"
-			if mp.Process != nil && mp.Process.Cancel != nil {
-				mp.Process.Cancel()
-				mp.Process = nil
-			}
-			if mp.OnUpdate != nil {
-				mp.OnUpdate(mp.Status)
-			}
-
-			m.callNotificationHandler(mp.Status)
-			m.callStatusUpdate(mp.Status)
-		}
+	select {
+	case <-proc.Exited():
+		return
+	case <-time.After(giveUpAfter):
 	}
+
+	m.mu.Lock()
+	mp, ok = m.processes[tunnelID]
+	if !ok || mp.Process != proc {
+		m.mu.Unlock()
+		return
+	}
+	if mp.Status.State != config.TunnelStateConnecting && mp.Status.State != config.TunnelStateStarting {
+		m.mu.Unlock()
+		return
+	}
+
+	mp.Process = nil
+	mp.closeLogSubscribers()
+
+	mp.Status.State = config.TunnelStateTimeout
+	mp.Status.ErrorMessage = "Connection timed out after 30 seconds"
+	status := mp.Status
+	m.publishLocked(mp)
+	m.mu.Unlock()
+
+	m.callNotificationHandler(status)
+	m.callExpirationStop(tunnelID)
+
+	proc.Stop()
 }
 
 func (m *Manager) Stop(tunnelID string) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	mp, ok := m.processes[tunnelID]
 	if !ok {
+		m.mu.Unlock()
 		return fmt.Errorf("tunnel %s is not running", tunnelID)
 	}
 
-	if mp.Process != nil && mp.Process.Cancel != nil {
-		mp.Process.Cancel()
-	}
-
-	mp.Status.State = config.TunnelStateStopping
-	mp.Status.PublicURL = ""
-
+	delete(m.processes, tunnelID)
 	mp.closeLogSubscribers()
 
-	if mp.OnUpdate != nil {
-		mp.OnUpdate(mp.Status)
-	}
-
-	m.callNotificationHandler(mp.Status)
-	m.callStatusUpdate(mp.Status)
-
-	mp.Status.State = config.TunnelStateStopped
+	proc := mp.Process
+	mp.Status.State = config.TunnelStateStopping
 	mp.Status.PublicURL = ""
-	mp.Status.ErrorMessage = ""
-	if mp.OnUpdate != nil {
-		mp.OnUpdate(mp.Status)
+	stopping := mp.Status
+	m.publishLocked(mp)
+	m.mu.Unlock()
+
+	m.callNotificationHandler(stopping)
+
+	if proc != nil {
+		proc.Stop()
 	}
-	m.callStatusUpdate(mp.Status)
+
+	m.mu.Lock()
+	mp.Status.State = config.TunnelStateStopped
+	mp.Status.ErrorMessage = ""
+	m.publishLocked(mp)
+	m.mu.Unlock()
 
 	m.callExpirationStop(tunnelID)
-	delete(m.processes, tunnelID)
 
 	return nil
 }
@@ -332,12 +401,23 @@ func (m *Manager) IsRunning(tunnelID string) bool {
 
 func (m *Manager) StopAll() {
 	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	for tunnelID := range m.processes {
-		if mp, ok := m.processes[tunnelID]; ok && mp.Process != nil && mp.Process.Cancel != nil {
-			mp.Process.Cancel()
+	procs := make([]*providers.Process, 0, len(m.processes))
+	for _, mp := range m.processes {
+		mp.closeLogSubscribers()
+		if mp.Process != nil {
+			procs = append(procs, mp.Process)
 		}
 	}
 	m.processes = make(map[string]*ManagedProcess)
+	m.mu.Unlock()
+
+	var wg sync.WaitGroup
+	for _, proc := range procs {
+		wg.Add(1)
+		go func(p *providers.Process) {
+			defer wg.Done()
+			p.Stop()
+		}(proc)
+	}
+	wg.Wait()
 }

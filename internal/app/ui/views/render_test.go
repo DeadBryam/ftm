@@ -2,11 +2,6 @@ package views
 
 import "testing"
 
-// Every view is laid out by subtracting rendered widths from the terminal
-// width, which goes negative once the terminal is narrower than the header.
-// strings.Repeat panics on a negative count, so a narrow window used to take
-// the whole TUI down. Rendering across the range is what proves it does not.
-
 func sampleItems() []TunnelViewData {
 	return []TunnelViewData{
 		{

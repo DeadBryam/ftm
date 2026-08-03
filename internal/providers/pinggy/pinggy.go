@@ -77,14 +77,12 @@ func (p *PinggyCliProvider) Start(ctx context.Context, tunnel config.TunnelConfi
 	cmd.Stdout = logWriter
 	cmd.Stderr = logWriter
 
-	if err := cmd.Start(); err != nil {
-		cancel()
+	proc, err := providers.StartProcess(cmd, cancel)
+	if err != nil {
 		return nil, fmt.Errorf("failed to start pinggy: %w", err)
 	}
 
-	return &providers.Process{
-		Cancel: cancel,
-	}, nil
+	return proc, nil
 }
 
 var pinggyRegex = regexp.MustCompile(`https?://[a-z0-9-]+\.[a-z]+\.pinggy\.(io|link)`)

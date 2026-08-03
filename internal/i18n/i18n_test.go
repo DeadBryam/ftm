@@ -2,8 +2,6 @@ package i18n
 
 import "testing"
 
-// seed replaces the package-level store for a single test and restores it
-// afterwards, since translations are global process state.
 func seed(t *testing.T, translations map[string]map[string]string, lang string) {
 	t.Helper()
 
@@ -60,8 +58,7 @@ func TestTFSubstitutesPlaceholders(t *testing.T) {
 	if got := TF("none", "unused"); got != "no placeholders" {
 		t.Errorf("TF(none) = %q, want the string unchanged", got)
 	}
-	// Each argument replaces one occurrence, so a repeated placeholder keeps
-	// its second instance literal.
+
 	if got := TF("repeat", "x"); got != "x and {0}" {
 		t.Errorf("TF(repeat) = %q", got)
 	}
@@ -96,7 +93,7 @@ func TestParseAcceptLanguage(t *testing.T) {
 		{"en-US,en;q=0.9", LangEN},
 		{"fr-FR,fr;q=0.9", DefaultLang},
 		{"not a language tag", DefaultLang},
-		// The first supported tag wins, even if an unsupported one precedes it.
+
 		{"de-DE,es;q=0.7", LangES},
 	}
 
@@ -124,8 +121,6 @@ func TestParseLangCode(t *testing.T) {
 	}
 }
 
-// The embedded locales must actually load, and both languages must define the
-// same keys, or the UI silently falls back to English in places.
 func TestEmbeddedLocalesLoadWithMatchingKeys(t *testing.T) {
 	seed(t, map[string]map[string]string{}, DefaultLang)
 

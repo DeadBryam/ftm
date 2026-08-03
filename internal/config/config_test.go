@@ -6,8 +6,6 @@ import (
 	"testing"
 )
 
-// isolateHome points the config directory at a temp dir so tests never touch
-// the developer's real ~/.config/foundry-tunnel.
 func isolateHome(t *testing.T) string {
 	t.Helper()
 
@@ -229,8 +227,6 @@ func TestTunnelCRUD(t *testing.T) {
 	}
 }
 
-// GetTunnel hands out a pointer into the slice, so callers can mutate config
-// in place. Removing an entry must not leave that aliasing behind.
 func TestGetTunnelReturnsLivePointer(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.AddTunnel(TunnelConfig{ID: "a", Name: "First", LocalPort: 30000})
