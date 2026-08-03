@@ -95,7 +95,8 @@ desktop: web
 .PHONY: desktop-package
 desktop-package: desktop
 	@echo "Desktop binary: $(DESKTOP_OUT)/$(DESKTOP_BIN)"
-	@echo "(Store/MSIX packaging: scripts/package-msix.ps1 on Windows)"
+	@echo "MSIX: built in CI (workflow Desktop MSIX / release job on windows-latest)."
+	@echo "Local Windows: pwsh ./scripts/package-msix.ps1 -ExePath $(DESKTOP_OUT)/$(DESKTOP_BIN) -Version 0.10.0"
 
 # Run without installing
 .PHONY: run

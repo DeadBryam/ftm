@@ -166,12 +166,44 @@ jobs:
               ;;
           esac
 
-      - name: Upload artifact
+      - name: Package MSIX
+        if: matrix.suffix == 'windows'
+        shell: pwsh
+        env:
+          SECRET_IDENTITY: ${{ secrets.MS_STORE_IDENTITY_NAME }}
+          SECRET_PUBLISHER: ${{ secrets.MS_STORE_PUBLISHER }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: |
+          $ver = $env:GITHUB_REF_NAME.TrimStart('v')
+          $id = $env:SECRET_IDENTITY
+          if ([string]::IsNullOrWhiteSpace($id)) { $id = "sthbryan.ftm" }
+          $pub = $env:SECRET_PUBLISHER
+          if ([string]::IsNullOrWhiteSpace($pub)) { $pub = "CN=ftm-ci" }
+          Write-Host "MSIX IdentityName=$id Publisher=$pub Version=$ver"
+          .\scripts\package-msix.ps1 `
+            -ExePath .\desktop\build\bin\ftm-desktop-windows.exe `
+            -Version $ver `
+            -IdentityName $id `
+            -Publisher $pub `
+            -OutputDir .\desktop\build\msix `
+            -OutputName ftm-desktop `
+            -ExeName ftm-desktop.exe `
+            -IconPath .\desktop\icon.png
+
+      - name: Upload desktop binary
         uses: actions/upload-artifact@v4
         with:
           name: ftm-desktop-${{ matrix.suffix }}
           path: desktop/build/bin
           retention-days: 7
+
+      - name: Upload MSIX
+        if: matrix.suffix == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: msix-ftm-desktop
+          path: desktop/build/msix/*.msix
+          retention-days: 14
 
   release:
     name: Create Release
