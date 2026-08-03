@@ -55,14 +55,14 @@ func (d *DownloadingView) Render(progressBarView string) string {
 	b.WriteString(stepStyle.Render(step))
 	b.WriteString("\n\n")
 
-	barWidth := d.Width - 10
-	padding := (d.Width - barWidth) / 2
+	barWidth := ui.Clamp(d.Width-10, 1)
+	padding := ui.Clamp((d.Width-barWidth)/2, 0)
 
 	progressContainer := lipgloss.NewStyle().
 		Width(barWidth).
 		Render("[" + progressBarView + "]")
 
-	b.WriteString(strings.Repeat(" ", padding))
+	b.WriteString(ui.Repeat(" ", padding))
 	b.WriteString(progressContainer)
 	b.WriteString("\n")
 

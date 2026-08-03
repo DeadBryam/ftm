@@ -1,0 +1,31 @@
+# Linters are enabled explicitly so CI stays green and meaningful.
+#
+# errcheck is deliberately NOT enabled yet: the codebase has ~34 unchecked
+# error returns, several of which are real bugs worth fixing individually
+# (Manager.Stop, Config.Save and clipboard.Write all fail silently today).
+# Turning it on wholesale would either bury those in a mechanical sweep or
+# paint CI red. It gets its own pass.
+run:
+  timeout: 5m
+
+linters:
+  disable-all: true
+  enable:
+    - govet
+    - staticcheck
+    - unused
+    - ineffassign
+    - gosimple
+    - misspell
+    - bodyclose
+
+issues:
+  exclude-dirs:
+    - desktop
+  exclude-rules:
+    # The bubbletea mouse API these use is deprecated, but the whole mouse
+    # handler is being rewritten against the newer API in the TUI pass.
+    - path: internal/app/keyhandlers_mouse\.go
+      linters:
+        - staticcheck
+      text: "SA1019"

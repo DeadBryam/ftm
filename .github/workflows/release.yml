@@ -60,8 +60,10 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
         run: |
-          go build -ldflags "-s -w -X main.version=${{ github.ref_name }}" -o ftm-${{ matrix.suffix }}${{ matrix.ext }} ./cmd/ftm
+          VERSION="${GITHUB_REF_NAME#v}"
+          go build -ldflags "-s -w -X github.com/sthbryan/ftm/internal/version.Version=${VERSION}" -o ftm-${{ matrix.suffix }}${{ matrix.ext }} ./cmd/ftm
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4

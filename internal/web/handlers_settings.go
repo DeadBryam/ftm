@@ -97,7 +97,7 @@ func (h *Handlers) handleI18n(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"translations": currentTrans,
 		"current":      lang,
-		"available":     i18n.AvailableLanguages(),
+		"available":    i18n.AvailableLanguages(),
 	})
 }
 

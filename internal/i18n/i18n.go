@@ -137,8 +137,6 @@ func InitFromConfig(cfg *config.Config) {
 	SetLanguageWithFallback(systemLang)
 }
 
-
-
 func SupportedLanguages() []string {
 	return []string{LangEN, LangES}
 }

@@ -39,7 +39,7 @@ func (l *LogsView) Render() string {
 	b.WriteString("\n")
 
 	dividerStyle := lipgloss.NewStyle().Foreground(bronze)
-	b.WriteString(dividerStyle.Render(strings.Repeat("─", l.Width-2)))
+	b.WriteString(dividerStyle.Render(ui.Repeat("─", l.Width-2)))
 	b.WriteString("\n")
 
 	b.WriteString(l.Content)

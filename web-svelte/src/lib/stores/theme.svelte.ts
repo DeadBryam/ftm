@@ -24,6 +24,8 @@ const THEMES = [
   'rust'
 ] as const;
 
+export type Theme = (typeof THEMES)[number];
+
 const STORAGE_KEY = 'ftm-theme';
 
 let currentTheme = $state<Theme>('dracula');

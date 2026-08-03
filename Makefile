@@ -4,6 +4,7 @@ VERSION := 0.10.0
 BINARY := ftm
 CMD := ./cmd/ftm
 DESKTOP_DIR := ./desktop
+LDFLAGS := -X github.com/sthbryan/ftm/internal/version.Version=$(VERSION)
 
 build-web:
 	./scripts/build-web-assets.sh
@@ -11,7 +12,7 @@ build-web:
 	cp $(DESKTOP_DIR)/icon.png $(DESKTOP_DIR)/build/appicon.png
 
 build: build-web
-	go build -ldflags "-X main.Version=$(VERSION)" -o $(BINARY) $(CMD)
+	go build -ldflags "$(LDFLAGS)" -o $(BINARY) $(CMD)
 
 desktop-dev: build-web
 	cd $(DESKTOP_DIR) && wails build -s -nopackage -devtools
@@ -57,11 +58,11 @@ install: build
 	cp $(BINARY) $(GOPATH)/bin/$(BINARY)
 
 release:
-	GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=$(VERSION)" -o $(BINARY)-darwin-amd64 $(CMD)
-	GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.Version=$(VERSION)" -o $(BINARY)-darwin-arm64 $(CMD)
-	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=$(VERSION)" -o $(BINARY)-linux-amd64 $(CMD)
-	GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=$(VERSION)" -o $(BINARY)-linux-arm64 $(CMD)
-	GOOS=windows GOARCH=amd64 go build -ldflags "-X main.Version=$(VERSION)" -o $(BINARY)-windows.exe $(CMD)
+	GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o $(BINARY)-darwin-amd64 $(CMD)
+	GOOS=darwin GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(BINARY)-darwin-arm64 $(CMD)
+	GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o $(BINARY)-linux-amd64 $(CMD)
+	GOOS=linux GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(BINARY)-linux-arm64 $(CMD)
+	GOOS=windows GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o $(BINARY)-windows.exe $(CMD)
 
 dev:
 	go run $(CMD)

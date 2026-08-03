@@ -47,12 +47,12 @@ func (s SoundType) String() string {
 }
 
 var (
-	notifier      Notifier
-	soundPlayer   SoundPlayer
-	available     bool
-	soundEnabled  bool
+	notifier             Notifier
+	soundPlayer          SoundPlayer
+	available            bool
+	soundEnabled         bool
 	notificationsEnabled bool
-	mu            sync.RWMutex
+	mu                   sync.RWMutex
 )
 
 func Init() {
@@ -94,11 +94,11 @@ func Notify(title, body string) error {
 	mu.RLock()
 	enabled := notificationsEnabled
 	mu.RUnlock()
-	
+
 	if !enabled {
 		return nil
 	}
-	
+
 	if notifier == nil || !available {
 		log.Printf("[notification] %s: %s", title, body)
 		return nil
@@ -114,11 +114,11 @@ func PlaySound(t SoundType) error {
 	mu.RLock()
 	enabled := soundEnabled
 	mu.RUnlock()
-	
+
 	if !enabled {
 		return nil
 	}
-	
+
 	if soundPlayer == nil || !available {
 		return nil
 	}

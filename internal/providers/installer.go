@@ -1,7 +1,6 @@
 package providers
 
 import (
-	"archive/zip"
 	"compress/gzip"
 	"fmt"
 	"io"
@@ -175,38 +174,6 @@ func (i *Installer) extractGzipFallback(src, dest string) error {
 	}
 
 	return os.Chmod(dest, 0755)
-}
-
-func (i *Installer) extractZip(src, dest string) error {
-	r, err := zip.OpenReader(src)
-	if err != nil {
-		return err
-	}
-	defer r.Close()
-
-	for _, f := range r.File {
-		if f.Name == "cloudflared" || f.Name == "cloudflared.exe" {
-			rc, err := f.Open()
-			if err != nil {
-				return err
-			}
-			defer rc.Close()
-
-			out, err := os.Create(dest)
-			if err != nil {
-				return err
-			}
-			defer out.Close()
-
-			if _, err := io.Copy(out, rc); err != nil {
-				return err
-			}
-
-			return os.Chmod(dest, 0755)
-		}
-	}
-
-	return fmt.Errorf("binary not found in zip")
 }
 
 func (i *Installer) BinDir() string {
