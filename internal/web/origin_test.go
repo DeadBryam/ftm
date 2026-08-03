@@ -50,6 +50,56 @@ func TestAllowedOrigin(t *testing.T) {
 	}
 }
 
+func TestAllowedHost(t *testing.T) {
+	tests := []struct {
+		host string
+		want bool
+	}{
+		{"127.0.0.1:40500", true},
+		{"localhost:40500", true},
+		{"localhost", true},
+		{"[::1]:40500", true},
+		{"wails.localhost", true},
+
+		// DNS rebinding: resolves to loopback, but the Host gives it away.
+		{"evil.com:40500", false},
+		{"rebind.evil.com:40500", false},
+		{"192.168.1.50:40500", false},
+		{"", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.host, func(t *testing.T) {
+			r := httptest.NewRequest(http.MethodGet, "/api/tunnels", nil)
+			r.Host = tt.host
+
+			if got := allowedHost(r); got != tt.want {
+				t.Fatalf("allowedHost(%q) = %v, want %v", tt.host, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGuardHostRejectsRebinding(t *testing.T) {
+	reached := false
+	handler := guardHost(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		reached = true
+	}))
+
+	r := httptest.NewRequest(http.MethodGet, "/api/tunnels", nil)
+	r.Host = "evil.com:40500"
+	w := httptest.NewRecorder()
+
+	handler.ServeHTTP(w, r)
+
+	if reached {
+		t.Fatal("handler ran for a rebound host, want it blocked before reaching the API")
+	}
+	if w.Code != http.StatusForbidden {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusForbidden)
+	}
+}
+
 func TestIsLoopbackHost(t *testing.T) {
 	allowed := []string{"localhost", "app.localhost", "127.0.0.1", "127.0.0.53", "::1"}
 	for _, host := range allowed {

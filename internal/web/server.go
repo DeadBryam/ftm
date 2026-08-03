@@ -109,7 +109,7 @@ func (s *Server) Start() error {
 	return nil
 }
 
-func (s *Server) setupRoutes() *http.ServeMux {
+func (s *Server) setupRoutes() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/api/", s.handlers.Route)
@@ -136,7 +136,7 @@ func (s *Server) setupRoutes() *http.ServeMux {
 		fileServer.ServeHTTP(w, r)
 	})
 
-	return mux
+	return guardHost(mux)
 }
 
 func (s *Server) Stop() error {

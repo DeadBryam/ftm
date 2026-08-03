@@ -58,3 +58,34 @@ func allowedOrigin(r *http.Request) (origin string, ok bool) {
 
 	return "", false
 }
+
+// allowedHost reports whether the request's Host header names this machine.
+//
+// This closes DNS rebinding, which the Origin check alone does not: an attacker
+// points evil.com at 127.0.0.1, so their page reaches the dashboard as a
+// *same-origin* request and never sends an Origin header at all. The Host
+// header still says "evil.com", which is what gives it away.
+func allowedHost(r *http.Request) bool {
+	host := r.Host
+	if h, _, err := net.SplitHostPort(host); err == nil {
+		host = h
+	}
+	host = strings.Trim(host, "[]")
+
+	if host == "" {
+		return false
+	}
+
+	return isLoopbackHost(host) || isWailsHost(host)
+}
+
+// guardHost rejects requests whose Host header does not name this machine.
+func guardHost(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !allowedHost(r) {
+			http.Error(w, "forbidden host", http.StatusForbidden)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
