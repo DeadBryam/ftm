@@ -100,7 +100,7 @@
       "md:grid-cols-[minmax(0,17.5rem)_1fr] lg:grid-cols-[minmax(0,19rem)_1fr]",
     )}
   >
-    <div class="flex min-h-0 max-md:order-1 md:order-2 md:min-h-0">
+    <div class="flex min-h-0 flex-1 max-md:order-1 md:order-2 md:h-full md:min-h-0">
       <ConnectionsPanel
         onAction={handleAction}
         onCreateFirst={handleCreateFirst}
