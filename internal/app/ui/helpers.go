@@ -7,7 +7,18 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
-const HeaderMargin = 4
+func TailLines(s string, count int) string {
+	if count <= 0 {
+		return ""
+	}
+
+	lines := strings.Split(s, "\n")
+	if len(lines) <= count {
+		return s
+	}
+
+	return strings.Join(lines[len(lines)-count:], "\n")
+}
 
 func Repeat(s string, count int) string {
 	if count <= 0 {
