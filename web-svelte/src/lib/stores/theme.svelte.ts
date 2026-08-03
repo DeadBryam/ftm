@@ -9,6 +9,8 @@ const THEMES = [
   'gruvbox-light',
   'tokyo-night',
   'tokyo-night-day',
+  'dracula',
+  'alucard',
   'rose-pine',
   'rose-pine-dawn',
 ] as const;

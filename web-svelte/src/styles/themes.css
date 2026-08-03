@@ -9,6 +9,8 @@
 @import './themes/_rose-pine-dawn.css';
 @import './themes/_tokyo-night.css';
 @import './themes/_tokyo-night-day.css';
+@import './themes/_dracula.css';
+@import './themes/_alucard.css';
 
 @theme {
   --color-bg: var(--color-bg);
