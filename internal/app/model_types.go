@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"time"
 
 	"charm.land/bubbles/v2/help"
 	"charm.land/bubbles/v2/list"
@@ -50,7 +51,6 @@ type Model struct {
 	FormValues          FormData
 	editingTunnelID     string
 	Message             string
-	MessageTimer        int
 	DownloadProgress    providers.DownloadProgress
 	DownloadingProvider string
 	PendingTunnel       *config.TunnelConfig
@@ -60,6 +60,8 @@ type Model struct {
 	listTop             int
 	pendingDeleteID     string
 	pendingDeleteName   string
+	messageUntil        time.Time
+	statusUpdates       chan config.TunnelStatus
 }
 
 type FormData struct {

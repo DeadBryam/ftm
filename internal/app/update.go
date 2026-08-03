@@ -47,11 +47,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *Model) handleTick() (tea.Model, tea.Cmd) {
 	m.refreshItems()
 
-	if m.MessageTimer > 0 {
-		m.MessageTimer--
-		if m.MessageTimer == 0 {
-			m.Message = ""
-		}
+	if m.Message != "" && time.Now().After(m.messageUntil) {
+		m.Message = ""
 	}
 	return m, tickCmd()
 }
@@ -81,7 +78,7 @@ func (m *Model) handleStatusUpdate(msg statusUpdateMsg) (tea.Model, tea.Cmd) {
 		m.playBeep()
 		m.showMessage(i18n.TF("error_state", msg.status.ErrorMessage))
 	}
-	return m, nil
+	return m, m.waitForStatus()
 }
 
 func (m *Model) handleUpdateCheck(msg updateCheckMsg) (tea.Model, tea.Cmd) {

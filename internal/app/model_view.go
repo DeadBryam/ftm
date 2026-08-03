@@ -21,13 +21,14 @@ func NewModel(app *App) *Model {
 	)
 
 	m := &Model{
-		App:         app,
-		Keys:        DefaultKeys,
-		Help:        h,
-		State:       viewList,
-		Cursor:      0,
-		LogViewport: viewport.New(),
-		ProgressBar: p,
+		App:           app,
+		statusUpdates: make(chan config.TunnelStatus, 64),
+		Keys:          DefaultKeys,
+		Help:          h,
+		State:         viewList,
+		Cursor:        0,
+		LogViewport:   viewport.New(),
+		ProgressBar:   p,
 		FormValues: FormData{
 			Provider: string(config.ProviderCloudflared),
 			Port:     "30000",
