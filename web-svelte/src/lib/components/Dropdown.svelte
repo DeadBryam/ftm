@@ -1,7 +1,6 @@
 <script lang="ts">
   import { cn } from "$lib/utils/cn";
   import { ChevronDown } from "lucide-svelte";
-  import { animate, spring } from "motion";
   import { t } from "$lib/stores/i18n.svelte";
   import type { DropdownOption } from "$lib/types";
   import type { Snippet } from "svelte";
@@ -36,7 +35,6 @@
   }: DropdownProps = $props();
 
   let isOpen = $state(false);
-  let menuEl: HTMLDivElement | undefined = $state();
 
   const menuPosition = $derived.by(() => {
     const vert = align.startsWith("top") ? "" : "top-full mt-1.5";
@@ -44,15 +42,11 @@
   });
 
   function open() {
-    if (isOpen || !menuEl) return;
     isOpen = true;
-    animate(menuEl, { opacity: 1, scale: 1, y: 0 }, { type: "spring" });
   }
 
   function close() {
-    if (!isOpen || !menuEl) return;
     isOpen = false;
-    animate(menuEl, { opacity: 0, scale: 1, y: -4 }, { type: "spring" });
   }
 
   function toggle(e: MouseEvent) {
@@ -83,7 +77,7 @@
   });
 </script>
 
-<div class={cn("dropdown-container h-fit relative flex", className)}>
+<div class={cn("dropdown-container relative flex h-fit", className)}>
   <button
     type="button"
     {id}
@@ -92,8 +86,8 @@
     aria-expanded={isOpen}
     aria-haspopup="true"
     class={cn(
-      "dropdown-trigger flex items-center gap-1.5 px-3 py-2 text-xs h-9 rounded-xl border min-h-9 cursor-pointer",
-      "bg-card border-border text-text hover:bg-hover flex-1",
+      "dropdown-trigger flex h-9 min-h-9 flex-1 cursor-pointer items-center gap-1.5 rounded-xl border px-3 py-2 text-xs",
+      "border-border bg-card text-text hover:bg-hover",
     )}
   >
     {#if children}
@@ -107,25 +101,24 @@
     {/if}
   </button>
 
-  <!-- Always in DOM, just hidden via opacity when closed -->
   <div
-    bind:this={menuEl}
     id={id ? `${id}-menu` : undefined}
     role="menu"
     inert={!isOpen}
     aria-hidden={!isOpen}
     aria-orientation="vertical"
-    style="opacity: 0; scale: 0.95; transform: translateY(-4px);"
     class={cn(
-      "dropdown-menu absolute min-w-[150px] max-h-[300px] rounded-2xl border p-1 z-[9999] overflow-y-auto cursor-default",
+      "dropdown-menu absolute z-[9999] max-h-[300px] min-w-[150px] overflow-y-auto rounded-2xl border border-border bg-card p-1",
+      "origin-top transition-[opacity,transform] duration-150 ease-out",
       menuPosition,
-      "bg-card border-border pointer-events-none",
-      isOpen && "pointer-events-auto",
+      isOpen
+        ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
+        : "pointer-events-none -translate-y-1 scale-95 opacity-0",
     )}
   >
     {#each options as option}
       {#if option.label === "separator"}
-        <div class="h-px my-1 mx-2 bg-border"></div>
+        <div class="mx-2 my-1 h-px bg-border"></div>
       {:else}
         <button
           type="button"
@@ -136,9 +129,8 @@
             onSelect?.(option);
           }}
           class={cn(
-            "flex items-center gap-2 w-full px-3 py-2 text-xs rounded-xl text-left cursor-pointer",
-            "text-text bg-transparent border-none hover:bg-hover",
-            "disabled:opacity-50 disabled:cursor-not-allowed",
+            "flex w-full cursor-pointer items-center gap-2 rounded-xl border-none bg-transparent px-3 py-2 text-left text-xs text-text",
+            "hover:bg-hover disabled:cursor-not-allowed disabled:opacity-50",
             option.danger && "text-red-500 hover:bg-red-500/10",
           )}
         >
