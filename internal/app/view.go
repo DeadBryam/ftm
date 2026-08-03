@@ -11,6 +11,7 @@ import (
 
 func (m *Model) View() tea.View {
 	var content string
+	var cursor *tea.Cursor
 	if m.Width == 0 || m.Height == 0 {
 		content = i18n.T("loading")
 	} else {
@@ -19,10 +20,8 @@ func (m *Model) View() tea.View {
 			content = m.viewList()
 		case viewLogs:
 			content = ui.Overlay(m.viewList(), m.viewLogs(), m.Width, m.Height)
-		case viewNewTunnel:
-			content = ui.Overlay(m.viewList(), m.viewTunnelEditor(false), m.Width, m.Height)
-		case viewEditTunnel:
-			content = ui.Overlay(m.viewList(), m.viewTunnelEditor(true), m.Width, m.Height)
+		case viewNewTunnel, viewEditTunnel:
+			content, cursor = m.overlayTunnelEditor()
 		case viewDownloading:
 			content = m.viewDownloading()
 		case viewSettings:
@@ -35,6 +34,7 @@ func (m *Model) View() tea.View {
 	}
 
 	v := tea.NewView(ui.Fill(content, m.Width, m.Height))
+	v.Cursor = cursor
 	v.AltScreen = true
 	v.MouseMode = tea.MouseModeCellMotion
 	return v
@@ -147,16 +147,25 @@ func (m *Model) getTunnelName(id string) string {
 	return ""
 }
 
-func (m *Model) viewTunnelEditor(isEdit bool) string {
+func (m *Model) overlayTunnelEditor() (string, *tea.Cursor) {
 	view := views.NewTunnelEditor()
 	view.Providers = providerNames()
 	view.Focus = m.EditorFocus
-	view.IsEditMode = isEdit
+	view.IsEditMode = m.State == viewEditTunnel
 	view.Name = m.Draft.Name
 	view.Provider = m.Draft.Provider
 	view.Port = m.Draft.Port
 
-	return view.Render()
+	editor := view.Render()
+	content := ui.Overlay(m.viewList(), editor, m.Width, m.Height)
+
+	if !view.HasCursor {
+		return content, nil
+	}
+
+	x, y := ui.OverlayOrigin(editor, m.Width, m.Height)
+
+	return content, tea.NewCursor(x+view.CursorColumn, y+view.CursorRow)
 }
 
 func providerNames() []string {

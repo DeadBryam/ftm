@@ -7,13 +7,17 @@ import (
 	"github.com/charmbracelet/x/ansi"
 )
 
+func OverlayOrigin(foreground string, width, height int) (x, y int) {
+	return Clamp((width-lipgloss.Width(foreground))/2, 0),
+		Clamp((height-lipgloss.Height(foreground))/2, 0)
+}
+
 func Overlay(background, foreground string, width, height int) string {
 	if width <= 0 || height <= 0 {
 		return foreground
 	}
 
-	x := Clamp((width-lipgloss.Width(foreground))/2, 0)
-	y := Clamp((height-lipgloss.Height(foreground))/2, 0)
+	x, y := OverlayOrigin(foreground, width, height)
 
 	canvas := lipgloss.NewCanvas(width, height).
 		Compose(lipgloss.NewCompositor(

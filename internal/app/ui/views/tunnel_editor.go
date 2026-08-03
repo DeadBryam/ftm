@@ -15,6 +15,10 @@ type TunnelEditor struct {
 	Name       string
 	Provider   string
 	Port       string
+
+	HasCursor    bool
+	CursorRow    int
+	CursorColumn int
 }
 
 func NewTunnelEditor() *TunnelEditor {
@@ -37,21 +41,48 @@ func (f *TunnelEditor) Render() string {
 
 	dim := lipgloss.NewStyle().Foreground(t.TextDim).Width(inner)
 
-	body := strings.Join([]string{
-		dim.Render(subtitle),
-		"",
-		f.field(inner, 0, i18n.T("name_label"), i18n.T("tunnel_name_hint"), i18n.T("type_hint"), f.Name),
-		"",
-		f.field(inner, 1, i18n.T("provider_label"), f.providerHint(inner), i18n.T("arrow_hint"), f.Provider),
-		"",
-		f.field(inner, 2, i18n.T("local_port"), i18n.T("port_hint"), i18n.T("numbers_hint"), f.Port),
-		"",
-		lipgloss.NewStyle().Width(inner).Align(lipgloss.Center).Render(f.submitButton()),
-		"",
-		dim.Align(lipgloss.Center).Render(i18n.T("editor_nav_hint")),
-	}, "\n")
+	var lines []string
+	add := func(section string) {
+		lines = append(lines, strings.Split(section, "\n")...)
+	}
+
+	addField := func(index int, label, hint, focusedHint, value string) {
+		if f.Focus == index && entersText(index) {
+			f.markCursor(len(lines)+valueRowInField, value)
+		}
+		add(f.field(inner, index, label, hint, focusedHint, value))
+	}
+
+	add(dim.Render(subtitle))
+	add("")
+	addField(0, i18n.T("name_label"), i18n.T("tunnel_name_hint"), i18n.T("type_hint"), f.Name)
+	add("")
+	addField(1, i18n.T("provider_label"), f.providerHint(inner), i18n.T("arrow_hint"), f.Provider)
+	add("")
+	addField(2, i18n.T("local_port"), i18n.T("port_hint"), i18n.T("numbers_hint"), f.Port)
+	add("")
+	add(lipgloss.NewStyle().Width(inner).Align(lipgloss.Center).Render(f.submitButton()))
+	add("")
+	add(dim.Align(lipgloss.Center).Render(i18n.T("editor_nav_hint")))
+
+	body := strings.Join(lines, "\n")
 
 	return ui.Panel(title, body, editorWidth, lipgloss.Height(body)+ui.PanelChrome, t.Gold)
+}
+
+const (
+	valueRowInField = 2
+	valueColumn     = ui.PanelChrome + 2
+)
+
+func entersText(index int) bool {
+	return index == 0 || index == 2
+}
+
+func (f *TunnelEditor) markCursor(row int, value string) {
+	f.HasCursor = true
+	f.CursorRow = row + 1
+	f.CursorColumn = valueColumn + lipgloss.Width(value)
 }
 
 func (f *TunnelEditor) providerHint(width int) string {
