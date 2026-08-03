@@ -147,6 +147,6 @@ func (f *TunnelEditor) submitButton() string {
 		Background(background).
 		Foreground(foreground).
 		Bold(true).
-		Padding(0, 4).
+		Padding(1, 8).
 		Render(label)
 }
