@@ -10,8 +10,6 @@ import (
 )
 
 type ConfirmView struct {
-	Width   int
-	Height  int
 	Title   string
 	Message string
 	Danger  bool
@@ -21,6 +19,8 @@ func NewConfirmView() *ConfirmView {
 	return &ConfirmView{}
 }
 
+const confirmWidth = 46
+
 func (c *ConfirmView) Render() string {
 	t := ui.ThemeDefault
 
@@ -29,35 +29,43 @@ func (c *ConfirmView) Render() string {
 		accent = t.Danger
 	}
 
-	title := lipgloss.NewStyle().
+	surface := lipgloss.NewStyle().Background(t.Surface).Width(confirmWidth)
+
+	title := surface.
 		Foreground(accent).
 		Bold(true).
 		Render(c.Title)
 
-	message := lipgloss.NewStyle().
+	message := surface.
 		Foreground(t.Text).
 		Render(c.Message)
 
-	confirm := lipgloss.NewStyle().Foreground(accent).Bold(true).Render(i18n.T("confirm_yes"))
-	cancel := lipgloss.NewStyle().Foreground(t.TextDim).Render(i18n.T("confirm_no"))
+	confirm := lipgloss.NewStyle().
+		Background(t.ButtonActive).
+		Foreground(t.ButtonActiveText).
+		Bold(true).
+		Padding(0, 2).
+		Render(i18n.T("confirm_yes"))
 
-	body := strings.Join([]string{title, "", message, "", confirm + "    " + cancel}, "\n")
+	cancel := lipgloss.NewStyle().
+		Background(t.Button).
+		Foreground(t.ButtonText).
+		Padding(0, 2).
+		Render(i18n.T("confirm_no"))
 
-	box := lipgloss.NewStyle().
+	gap := lipgloss.NewStyle().Background(t.Surface).Render("  ")
+
+	actions := surface.
+		Align(lipgloss.Right).
+		Render(confirm + gap + cancel)
+
+	body := strings.Join([]string{title, surface.Render(""), message, surface.Render(""), actions}, "\n")
+
+	return lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(accent).
-		Padding(1, 3).
+		BorderBackground(t.Surface).
+		Background(t.Surface).
+		Padding(1, 2).
 		Render(body)
-
-	boxHeight := lipgloss.Height(box)
-	top := ui.Clamp((c.Height-boxHeight)/2, 1)
-
-	var b strings.Builder
-	b.WriteString(ui.Repeat("\n", top))
-	for _, line := range strings.Split(box, "\n") {
-		b.WriteString(ui.Center(line, c.Width))
-		b.WriteString("\n")
-	}
-
-	return b.String()
 }

@@ -3,6 +3,7 @@ package app
 import (
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/sthbryan/ftm/internal/app/ui"
 	"github.com/sthbryan/ftm/internal/app/ui/views"
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/i18n"
@@ -27,7 +28,7 @@ func (m *Model) View() tea.View {
 		case viewSettings:
 			content = m.viewSettings()
 		case viewConfirm:
-			content = m.viewConfirm()
+			content = ui.Overlay(m.viewList(), m.viewConfirm(), m.Width, m.Height)
 		default:
 			content = m.viewList()
 		}
@@ -74,7 +75,6 @@ func (m *Model) collectTunnelData() []views.TunnelViewData {
 				Provider:    string(ti.Tunnel.Provider),
 				LocalPort:   ti.Tunnel.LocalPort,
 				StatusState: statusStateIndex(ti.Status.State),
-				StatusMsg:   statusMsg(ti.Status.State),
 				PublicURL:   ti.Status.PublicURL,
 				ErrorMsg:    ti.Status.ErrorMessage,
 			})
@@ -102,23 +102,6 @@ func statusStateIndex(state config.TunnelState) int {
 	}
 }
 
-func statusMsg(state config.TunnelState) string {
-	switch state {
-	case config.TunnelStateStarting:
-		return i18n.T("starting")
-	case config.TunnelStateConnecting:
-		return i18n.T("connecting")
-	case config.TunnelStateOnline:
-		return i18n.T("online")
-	case config.TunnelStateError:
-		return i18n.T("error")
-	case config.TunnelStateTimeout:
-		return i18n.T("timeout")
-	default:
-		return i18n.T("offline")
-	}
-}
-
 func (m *Model) viewEmptyState() string {
 	view := views.NewEmptyState()
 	view.Height = m.Height
@@ -132,6 +115,7 @@ func (m *Model) viewEmptyState() string {
 func (m *Model) viewLogs() string {
 	view := views.NewLogsView()
 	view.Width = m.Width
+	view.Height = m.Height
 	view.TunnelName = m.getTunnelName(m.SelectedTunnel)
 
 	logs := m.App.Manager.GetLogs(m.SelectedTunnel)
@@ -162,6 +146,7 @@ func (m *Model) getTunnelName(id string) string {
 func (m *Model) viewAddForm(isEdit bool) string {
 	view := views.NewFormView()
 	view.Width = m.Width
+	view.Height = m.Height
 	view.Focus = m.FormFocus
 	view.IsEditMode = isEdit
 	view.Name = m.FormValues.Name
@@ -186,8 +171,6 @@ func (m *Model) viewDownloading() string {
 
 func (m *Model) viewConfirm() string {
 	view := views.NewConfirmView()
-	view.Width = m.Width
-	view.Height = m.Height
 	view.Danger = true
 	view.Title = i18n.T("confirm_delete_title")
 	view.Message = i18n.TF("confirm_delete_body", m.pendingDeleteName)
@@ -198,6 +181,7 @@ func (m *Model) viewConfirm() string {
 func (m *Model) viewSettings() string {
 	view := views.NewSettingsView()
 	view.Width = m.Width
+	view.Height = m.Height
 	if m.SettingsView != nil {
 		view.NotificationsEnabled = m.SettingsView.NotificationsEnabled
 		view.NotificationSound = m.SettingsView.NotificationSound
