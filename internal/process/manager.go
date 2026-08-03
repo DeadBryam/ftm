@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"sync"
 	"time"
 
@@ -54,9 +55,22 @@ func (m *Manager) SetStatusChannel(ch chan config.TunnelStatus) {
 	m.StatusChannel = ch
 }
 
+// callStatusUpdate publishes a status change to whoever is listening.
+//
+// Every caller holds m.mu, so this must not block. The channel is buffered, but
+// a blocking send would freeze the entire Manager behind the mutex if the
+// consumer ever stalled or was never started -- taking the TUI down with it,
+// since it shares the same lock. Dropping is the safe failure mode here: each
+// message carries the full status, and clients resync over /api/tunnels.
 func (m *Manager) callStatusUpdate(status config.TunnelStatus) {
-	if m.StatusChannel != nil {
-		m.StatusChannel <- status
+	if m.StatusChannel == nil {
+		return
+	}
+
+	select {
+	case m.StatusChannel <- status:
+	default:
+		log.Printf("process: status channel full, dropped %q update for tunnel %s", status.State, status.ID)
 	}
 }
 
