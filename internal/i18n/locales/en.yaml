@@ -282,3 +282,5 @@ update_web_button: "Update now"
 update_web_notes: "Release notes"
 toggle_on: "ON"
 toggle_off: "OFF"
+
+recent_activity: "Recent activity"

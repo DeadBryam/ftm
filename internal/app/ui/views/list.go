@@ -18,6 +18,7 @@ type TunnelViewData struct {
 	StatusState int
 	PublicURL   string
 	ErrorMsg    string
+	Logs        []string
 }
 
 type ListView struct {
@@ -144,7 +145,7 @@ func (l *ListView) twoColumn(bodyHeight int) string {
 
 	right := ui.Panel(
 		i18n.T("selected_tunnel"),
-		l.renderDetailPanel(ui.PanelInner(rightWidth)),
+		l.renderDetailPanel(ui.PanelInner(rightWidth), bodyHeight-ui.PanelChrome),
 		rightWidth, bodyHeight, ui.ThemeDefault.Bronze,
 	)
 
@@ -232,7 +233,7 @@ func (l *ListView) scrollHint(width int, text string) string {
 		Render(text)
 }
 
-func (l *ListView) renderDetailPanel(width int) string {
+func (l *ListView) renderDetailPanel(width, height int) string {
 	if l.Cursor < 0 || l.Cursor >= len(l.Items) {
 		return lipgloss.NewStyle().
 			Foreground(ui.ThemeDefault.TextDim).
@@ -248,7 +249,9 @@ func (l *ListView) renderDetailPanel(width int) string {
 		StatusState: item.StatusState,
 		PublicURL:   item.PublicURL,
 		ErrorMsg:    item.ErrorMsg,
+		Logs:        item.Logs,
 		Width:       width,
+		Height:      height,
 	}
 
 	return panel.Render()

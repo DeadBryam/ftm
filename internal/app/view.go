@@ -68,8 +68,13 @@ func (m *Model) viewList() string {
 
 func (m *Model) collectTunnelData() []views.TunnelViewData {
 	data := make([]views.TunnelViewData, 0, len(m.Items))
-	for _, item := range m.Items {
+	for i, item := range m.Items {
 		if ti, ok := item.(TunnelItem); ok {
+			var logs []string
+			if i == m.Cursor {
+				logs = m.App.Manager.GetLogs(ti.Tunnel.ID)
+			}
+
 			data = append(data, views.TunnelViewData{
 				Name:        ti.Tunnel.Name,
 				Provider:    string(ti.Tunnel.Provider),
@@ -77,6 +82,7 @@ func (m *Model) collectTunnelData() []views.TunnelViewData {
 				StatusState: statusStateIndex(ti.Status.State),
 				PublicURL:   ti.Status.PublicURL,
 				ErrorMsg:    ti.Status.ErrorMessage,
+				Logs:        logs,
 			})
 		}
 	}

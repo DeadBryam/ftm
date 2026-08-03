@@ -225,3 +225,27 @@ func TestLogsBoxFloatsInsideTheTerminal(t *testing.T) {
 		}
 	}
 }
+
+func TestDetailPanelShowsRecentActivity(t *testing.T) {
+	items := manyItems(1)
+	items[0].Logs = []string{"first line", "second line", "newest line"}
+
+	v := listWith(items, 120, 30, 0)
+
+	if out := v.Render(); !strings.Contains(out, "newest line") {
+		t.Error("the detail panel is not showing the latest log line")
+	}
+}
+
+func TestDetailPanelDropsTheLogTailWhenThereIsNoRoom(t *testing.T) {
+	items := manyItems(1)
+	items[0].Logs = []string{"first line", "second line", "newest line"}
+
+	for _, height := range []int{10, 12, 14, 16, 20, 30} {
+		v := listWith(items, 120, height, 0)
+
+		if lines := strings.Count(v.Render(), "\n") + 1; lines > height {
+			t.Errorf("height %d: rendered %d lines", height, lines)
+		}
+	}
+}

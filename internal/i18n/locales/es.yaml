@@ -282,3 +282,5 @@ update_web_button: "Actualizar"
 update_web_notes: "Notas del release"
 toggle_on: "SÍ"
 toggle_off: "NO"
+
+recent_activity: "Actividad reciente"

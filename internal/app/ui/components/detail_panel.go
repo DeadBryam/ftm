@@ -16,18 +16,30 @@ type DetailPanel struct {
 	StatusState int
 	PublicURL   string
 	ErrorMsg    string
+	Logs        []string
 	Width       int
+	Height      int
 }
 
 func NewDetailPanel() *DetailPanel {
 	return &DetailPanel{}
 }
 
-func (d *DetailPanel) Render() string {
-	var b strings.Builder
+const minLogTail = 2
 
-	b.WriteString(lipgloss.NewStyle().
-		Render(""))
+func (d *DetailPanel) Render() string {
+	details := d.details()
+
+	tail := d.logTail(ui.Clamp(d.Height-lipgloss.Height(details)-1, 0))
+	if tail == "" {
+		return details
+	}
+
+	return details + "\n\n" + tail
+}
+
+func (d *DetailPanel) details() string {
+	var b strings.Builder
 
 	nameStyle := lipgloss.NewStyle().
 		Bold(true).
@@ -51,7 +63,10 @@ func (d *DetailPanel) Render() string {
 
 	b.WriteString(labelStyle.Render(i18n.T("status_label") + ":"))
 	b.WriteString(" ")
-	b.WriteString(textStyle.Render(StatusLabel(d.StatusState)))
+	b.WriteString(lipgloss.NewStyle().
+		Foreground(StatusColor(d.StatusState)).
+		Bold(true).
+		Render(StatusLabel(d.StatusState)))
 	b.WriteString("\n\n")
 
 	if d.StatusState == TunnelStateOnline && d.PublicURL != "" {
@@ -63,8 +78,8 @@ func (d *DetailPanel) Render() string {
 			BorderForeground(ui.ThemeDefault.Gold).
 			Foreground(ui.ThemeDefault.Text).
 			Padding(0, 1).
-			Width(d.Width - 2).
-			Render(d.PublicURL)
+			Width(d.Width).
+			Render(ui.Truncate(d.PublicURL, d.Width-4))
 		b.WriteString(urlBox)
 		b.WriteString("\n")
 
@@ -81,7 +96,7 @@ func (d *DetailPanel) Render() string {
 
 		errorBox := lipgloss.NewStyle().
 			Foreground(ui.ThemeDefault.Danger).
-			Width(d.Width - 2).
+			Width(d.Width).
 			Render(d.ErrorMsg)
 		b.WriteString(errorBox)
 		b.WriteString("\n\n")
@@ -90,6 +105,30 @@ func (d *DetailPanel) Render() string {
 	b.WriteString(d.actions())
 
 	return b.String()
+}
+
+func (d *DetailPanel) logTail(rows int) string {
+	if len(d.Logs) == 0 || rows < minLogTail+1 {
+		return ""
+	}
+
+	lines := d.Logs
+	if tail := rows - 1; len(lines) > tail {
+		lines = lines[len(lines)-tail:]
+	}
+
+	header := lipgloss.NewStyle().
+		Foreground(ui.ThemeDefault.TextDim).
+		Render(i18n.T("recent_activity"))
+
+	body := make([]string, 0, len(lines))
+	for _, line := range lines {
+		body = append(body, lipgloss.NewStyle().
+			Foreground(ui.ThemeDefault.Bronze).
+			Render(ui.Truncate(line, d.Width)))
+	}
+
+	return header + "\n" + strings.Join(body, "\n")
 }
 
 func (d *DetailPanel) actions() string {
