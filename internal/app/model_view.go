@@ -20,6 +20,9 @@ func NewModel(app *App) *Model {
 		progress.WithoutPercentage(),
 	)
 
+	logViewport := viewport.New()
+	logViewport.SoftWrap = true
+
 	m := &Model{
 		App:           app,
 		statusUpdates: make(chan config.TunnelStatus, 64),
@@ -27,7 +30,7 @@ func NewModel(app *App) *Model {
 		Help:          h,
 		State:         viewList,
 		Cursor:        0,
-		LogViewport:   viewport.New(),
+		LogViewport:   logViewport,
 		ProgressBar:   p,
 		Draft: TunnelDraft{
 			Provider: string(config.ProviderCloudflared),
