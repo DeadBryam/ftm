@@ -1,5 +1,7 @@
+import type { Theme } from "$lib/stores/theme.svelte";
+
 export interface ThemeVariant {
-  id: string;
+  id: Theme;
   color: string;
 }
 
