@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/bubbles/help"
-	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -35,103 +34,6 @@ type Settings struct {
 }
 
 const TwoColumnThreshold = 100
-
-type KeyMap struct {
-	Up       key.Binding
-	Down     key.Binding
-	Left     key.Binding
-	Right    key.Binding
-	Enter    key.Binding
-	Toggle   key.Binding
-	Logs     key.Binding
-	Copy     key.Binding
-	Web      key.Binding
-	Add      key.Binding
-	Edit     key.Binding
-	Delete   key.Binding
-	Config   key.Binding
-	Settings key.Binding
-	Back     key.Binding
-	Quit     key.Binding
-	Help     key.Binding
-	Update   key.Binding
-}
-
-var DefaultKeys = KeyMap{
-	Up: key.NewBinding(
-		key.WithKeys("up"),
-		key.WithHelp("↑", "up"),
-	),
-	Down: key.NewBinding(
-		key.WithKeys("down", "j"),
-		key.WithHelp("↓/j", "down"),
-	),
-	Left: key.NewBinding(
-		key.WithKeys("left", "h"),
-		key.WithHelp("←/h", "prev"),
-	),
-	Right: key.NewBinding(
-		key.WithKeys("right", "l"),
-		key.WithHelp("→/l", "next"),
-	),
-	Enter: key.NewBinding(
-		key.WithKeys("enter"),
-		key.WithHelp("enter", "toggle"),
-	),
-	Toggle: key.NewBinding(
-		key.WithKeys("t"),
-		key.WithHelp("t", "start/stop"),
-	),
-	Logs: key.NewBinding(
-		key.WithKeys("l"),
-		key.WithHelp("l", "logs"),
-	),
-	Copy: key.NewBinding(
-		key.WithKeys("c"),
-		key.WithHelp("c", "copy URL"),
-	),
-	Web: key.NewBinding(
-		key.WithKeys("w"),
-		key.WithHelp("w", "open web"),
-	),
-	Add: key.NewBinding(
-		key.WithKeys("a"),
-		key.WithHelp("a", "add"),
-	),
-	Edit: key.NewBinding(
-		key.WithKeys("e"),
-		key.WithHelp("e", "edit"),
-	),
-	Delete: key.NewBinding(
-		key.WithKeys("d"),
-		key.WithHelp("d", "delete"),
-	),
-	Config: key.NewBinding(
-		key.WithKeys("o"),
-		key.WithHelp("o", "open config"),
-	),
-	Settings: key.NewBinding(
-		key.WithKeys("s"),
-		key.WithHelp("s", "settings"),
-	),
-	Back: key.NewBinding(
-		key.WithKeys("esc"),
-		key.WithHelp("esc", "back"),
-	),
-	Quit: key.NewBinding(
-		key.WithKeys("ctrl+c", "esc"),
-		key.WithHelp("ctrl+c", "quit"),
-		key.WithHelp("esc", "quit"),
-	),
-	Help: key.NewBinding(
-		key.WithKeys("?"),
-		key.WithHelp("?", "help"),
-	),
-	Update: key.NewBinding(
-		key.WithKeys("u"),
-		key.WithHelp("u", "update"),
-	),
-}
 
 type Model struct {
 	App                 *App
