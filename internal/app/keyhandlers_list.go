@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/charmbracelet/bubbles/key"
-	tea "github.com/charmbracelet/bubbletea"
+	"charm.land/bubbles/v2/key"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/sthbryan/ftm/internal/clipboard"
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/i18n"
 )
 
-func (m *Model) handleListKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) handleListKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	switch {
 	case key.Matches(msg, m.Keys.Up):
 		m.moveCursorUp()

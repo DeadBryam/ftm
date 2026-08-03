@@ -3,10 +3,10 @@ package app
 import (
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 )
 
-func (m *Model) handleLogsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) handleLogsKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.LogViewport, cmd = m.LogViewport.Update(msg)
 	m.updateLogViewport()

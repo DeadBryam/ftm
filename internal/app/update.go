@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/sthbryan/ftm/internal/i18n"
 	"github.com/sthbryan/ftm/internal/providers"
@@ -12,7 +12,7 @@ import (
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		return m.handleKey(msg)
 
 	case tea.MouseMsg:
@@ -21,8 +21,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.Width = msg.Width
 		m.Height = msg.Height
-		m.LogViewport.Width = msg.Width - 4
-		m.LogViewport.Height = msg.Height - 8
+		m.LogViewport.SetWidth(msg.Width - 4)
+		m.LogViewport.SetHeight(msg.Height - 8)
 		return m, nil
 
 	case tickMsg:

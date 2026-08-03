@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/charmbracelet/bubbles/key"
-	tea "github.com/charmbracelet/bubbletea"
+	"charm.land/bubbles/v2/key"
+	tea "charm.land/bubbletea/v2"
 )
 
 // entersText reports whether the current view has a focused text field, in
@@ -11,7 +11,7 @@ func (m *Model) entersText() bool {
 	return m.State == viewAddForm || m.State == viewEditForm
 }
 
-func (m *Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) handleKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	// Typing a tunnel name must not quit the app, so while a field has focus
 	// only Ctrl+C and Esc are handled globally.
 	if m.entersText() {
@@ -68,7 +68,7 @@ func (m *Model) handleBack() (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m *Model) handleDownloadingKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) handleDownloadingKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	if key.Matches(msg, m.Keys.Back) || key.Matches(msg, m.Keys.Quit) {
 		m.State = viewList
 	}

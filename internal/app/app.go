@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"runtime"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/i18n"
@@ -98,11 +98,7 @@ func (a *App) Run() error {
 	}
 
 	model := NewModel(a)
-	p := tea.NewProgram(
-		model,
-		tea.WithAltScreen(),
-		tea.WithMouseAllMotion(),
-	)
+	p := tea.NewProgram(model)
 
 	_, err := p.Run()
 	return err

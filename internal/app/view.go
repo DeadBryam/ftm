@@ -1,32 +1,40 @@
 package app
 
 import (
+	tea "charm.land/bubbletea/v2"
+
 	"github.com/sthbryan/ftm/internal/app/ui/views"
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/i18n"
 )
 
-func (m *Model) View() string {
+func (m *Model) View() tea.View {
+	var content string
 	if m.Width == 0 || m.Height == 0 {
-		return i18n.T("loading")
+		content = i18n.T("loading")
+	} else {
+		switch m.State {
+		case viewList:
+			content = m.viewList()
+		case viewLogs:
+			content = m.viewLogs()
+		case viewAddForm:
+			content = m.viewAddForm(false)
+		case viewEditForm:
+			content = m.viewAddForm(true)
+		case viewDownloading:
+			content = m.viewDownloading()
+		case viewSettings:
+			content = m.viewSettings()
+		default:
+			content = m.viewList()
+		}
 	}
 
-	switch m.State {
-	case viewList:
-		return m.viewList()
-	case viewLogs:
-		return m.viewLogs()
-	case viewAddForm:
-		return m.viewAddForm(false)
-	case viewEditForm:
-		return m.viewAddForm(true)
-	case viewDownloading:
-		return m.viewDownloading()
-	case viewSettings:
-		return m.viewSettings()
-	default:
-		return m.viewList()
-	}
+	v := tea.NewView(content)
+	v.AltScreen = true
+	v.MouseMode = tea.MouseModeAllMotion
+	return v
 }
 
 func (m *Model) viewList() string {

@@ -3,13 +3,13 @@ package app
 import (
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/i18n"
 )
 
-func (m *Model) handleFormKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) handleFormKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "tab":
 		m.FormFocus = (m.FormFocus + 1) % 5
@@ -96,6 +96,8 @@ func (m *Model) handleNameInput(s string) {
 		if len(m.FormValues.Name) > 0 {
 			m.FormValues.Name = m.FormValues.Name[:len(m.FormValues.Name)-1]
 		}
+	} else if s == "space" {
+		m.FormValues.Name += " "
 	} else if len(s) == 1 {
 		m.FormValues.Name += s
 	}
