@@ -8,8 +8,10 @@ env:
 on:
   push:
     branches: [main]
+  # Deliberately unfiltered by base branch: stacked PRs target their parent
+  # branch rather than main, and filtering on [main] meant they ran no checks
+  # at all.
   pull_request:
-    branches: [main, master]
   workflow_dispatch:
 
 jobs:
