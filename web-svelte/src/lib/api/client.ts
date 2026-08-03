@@ -1,7 +1,7 @@
 import ky from 'ky';
 
 export const api = ky.create({
-  prefixUrl: '/api',
+  prefix: '/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
