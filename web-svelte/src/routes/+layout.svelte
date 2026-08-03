@@ -2,9 +2,13 @@
   import { onDestroy, onMount } from "svelte";
   import Toasts from "$lib/components/Toasts.svelte";
   import { subscribeWsMessages } from "$lib/api/ws";
-  import { i18n } from "$lib/i18n";
+  import { useI18n } from "$lib/stores/i18n.svelte";
 
   import "../styles/app.css";
+
+  let { children } = $props();
+
+  const i18n = useI18n();
 
   let unsubscribeWs: (() => void) | null = null;
 
@@ -22,7 +26,14 @@
 </script>
 
 <div class="max-w-[1000px] mx-auto p-10 min-h-dvh flex max-md:max-h-dvh">
-  <slot />
+  <!--
+    Held until the catalogue arrives. Rendering first meant the opening frame
+    showed raw keys -- "port", "start", "connections" -- which then flipped to
+    real text. `ready` is set even if the request fails, so this cannot hang.
+  -->
+  {#if i18n.ready}
+    {@render children()}
+  {/if}
 </div>
 
 <Toasts />
