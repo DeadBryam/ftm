@@ -26,8 +26,8 @@
     return null;
   }
 
-  function isFamilyActive(family: ThemeFamily): boolean {
-    return findCurrent()?.family.id === family.id;
+  function familyOfActive(): ThemeFamily | null {
+    return findCurrent()?.family ?? null;
   }
 
   function handleToggleAuto(checked: boolean) {
@@ -47,6 +47,7 @@
   }
 
   const current = $derived(findCurrent());
+  const activeFamily = $derived(familyOfActive());
   const systemModeLabel = $derived(
     theme.systemScheme === "dark" ? t("theme_dark") : t("theme_light"),
   );
@@ -66,99 +67,112 @@
       {t("theme_match_system")}
     </span>
     <span class="truncate text-xs text-text-muted">
-      {theme.isAuto
-        ? `· ${systemModeLabel}`
-        : `· ${t("theme_manual")}`}
+      {theme.isAuto ? `· ${systemModeLabel}` : `· ${t("theme_manual")}`}
     </span>
   </div>
   <SettingsToggle checked={theme.isAuto} onchange={handleToggleAuto} />
 </div>
 
 {#if theme.isAuto}
-  <ul class="flex flex-col gap-1">
+  <div
+    role="radiogroup"
+    aria-label={t("theme_match_system")}
+    class="grid grid-cols-3 gap-2 sm:grid-cols-4"
+  >
     {#each families as family (family.id)}
-      {@const active = isFamilyActive(family)}
-      <li>
-        <button
-          type="button"
-          onclick={() => theme.setFamily(family.id)}
-          class={cn(
-            "group flex w-full cursor-pointer items-center gap-3 rounded-control px-2 py-1.5 text-left transition-colors",
-            active ? "bg-hover" : "hover:bg-hover",
-          )}
+      {@const active = activeFamily?.id === family.id}
+      <button
+        type="button"
+        role="radio"
+        aria-checked={active}
+        onclick={() => theme.setFamily(family.id)}
+        class={cn(
+          "group flex cursor-pointer flex-col items-stretch gap-1.5 rounded-control border p-2 text-left transition-all",
+          active
+            ? "border-primary bg-primary/5 shadow-sm"
+            : "border-border-light bg-bg/40 hover:border-primary/40 hover:bg-hover",
+        )}
+      >
+        <span
+          class="relative h-6 w-full overflow-hidden rounded-control transition-transform duration-200 group-hover:scale-[1.02]"
+          style={active
+            ? `box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-primary);`
+            : `box-shadow: 0 1px 4px ${family.dark.color}50;`}
         >
           <span
-            class={cn(
-              "flex-1 truncate text-sm",
-              active ? "font-semibold text-text-heading" : "font-medium text-text-heading",
-            )}
-          >
-            {family.name}
-          </span>
+            class="absolute inset-y-0 left-0 w-1/2"
+            style="background: {family.dark.color}"
+          ></span>
           <span
-            class="relative h-8 w-16 shrink-0 overflow-hidden rounded-full transition-transform duration-200 group-hover:scale-105"
-            style={active
-              ? `box-shadow: 0 0 0 3px var(--color-bg), 0 0 0 5px var(--color-primary);`
-              : `box-shadow: 0 2px 8px ${family.dark.color}40;`}
-          >
-            <span
-              class="absolute inset-y-0 left-0 w-1/2"
-              style="background: {family.dark.color}"
-            ></span>
-            <span
-              class="absolute inset-y-0 right-0 w-1/2"
-              style="background: {family.light.color}"
-            ></span>
-          </span>
-        </button>
-      </li>
+            class="absolute inset-y-0 right-0 w-1/2"
+            style="background: {family.light.color}"
+          ></span>
+        </span>
+        <span
+          class={cn(
+            "truncate text-center text-xs font-medium",
+            active ? "font-semibold text-text-heading" : "text-text-heading",
+          )}
+        >
+          {family.name}
+        </span>
+      </button>
     {/each}
-  </ul>
-{:else}
-  <div class="flex items-center justify-end gap-6 pb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
-    <span>{t("theme_dark")}</span>
-    <span>{t("theme_light")}</span>
   </div>
-  <ul class="flex flex-col gap-1">
+{:else}
+  <div
+    role="radiogroup"
+    aria-label={t("theme_dark")}
+    class="grid grid-cols-3 gap-2 sm:grid-cols-4"
+  >
     {#each families as family (family.id)}
       {@const darkSelected = theme.current === family.dark.id}
       {@const lightSelected = theme.current === family.light.id}
-      <li
-        class="grid grid-cols-[1fr_auto_auto] items-center gap-3 rounded-control px-2 py-1.5 transition-colors hover:bg-hover"
+      <div
+        class={cn(
+          "flex flex-col items-stretch gap-1.5 rounded-control border p-2 transition-colors",
+          darkSelected || lightSelected
+            ? "border-primary/40 bg-primary/5"
+            : "border-border-light bg-bg/40",
+        )}
       >
-        <span class="truncate text-sm font-medium text-text-heading">
+        <div class="flex gap-1">
+          <ThemeButton
+            id={family.dark.id}
+            color={family.dark.color}
+            selected={darkSelected}
+            label={`${family.name} ${t("theme_dark")}`}
+            onclick={() => theme.setManual(family.dark.id)}
+          />
+          <ThemeButton
+            id={family.light.id}
+            color={family.light.color}
+            selected={lightSelected}
+            label={`${family.name} ${t("theme_light")}`}
+            onclick={() => theme.setManual(family.light.id)}
+          />
+        </div>
+        <span class="truncate text-center text-xs font-medium text-text-heading">
           {family.name}
         </span>
-        <ThemeButton
-          id={family.dark.id}
-          color={family.dark.color}
-          selected={darkSelected}
-          label={`${family.name} ${t("theme_dark")}`}
-          onclick={() => theme.setManual(family.dark.id)}
-        />
-        <ThemeButton
-          id={family.light.id}
-          color={family.light.color}
-          selected={lightSelected}
-          label={`${family.name} ${t("theme_light")}`}
-          onclick={() => theme.setManual(family.light.id)}
-        />
-      </li>
+      </div>
     {/each}
-  </ul>
+  </div>
 {/if}
 
-{#if current}
-  <div class="mt-4 flex items-center gap-3 border-t border-border-light pt-3">
+{#if current && activeFamily}
+  <div
+    class="mt-4 flex items-center gap-3 rounded-control border border-border-light bg-bg/40 px-3 py-2"
+  >
     <div
-      class="h-9 w-9 shrink-0 rounded-full shadow-md"
+      class="h-8 w-8 shrink-0 rounded-full shadow-sm"
       style="background: {current.mode === 'dark' ? current.family.dark.color : current.family.light.color};"
     ></div>
-    <div class="min-w-0">
+    <div class="min-w-0 flex-1">
       <p class="truncate text-sm font-semibold text-text-heading">
         {current.family.name}
       </p>
-      <p class="text-xs text-text-muted">
+      <p class="truncate text-xs text-text-muted">
         {modeLabel} · {t("current_theme")}
       </p>
     </div>
