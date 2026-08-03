@@ -73,7 +73,9 @@ func main() {
 
 	url := application.WebServer.URL()
 	fmt.Printf("🎲 Foundry Tunnel Manager v%s\n", version.Version)
-	fmt.Printf(i18n.TF("dashboard_url", url))
+	// Print, not Printf: the translated string is data, and a stray % in a
+	// locale would be read as a format verb.
+	fmt.Print(i18n.TF("dashboard_url", url))
 
 	if *webOnly {
 		fmt.Print(i18n.T("press_ctrl_c"))
