@@ -15,7 +15,7 @@
   import SettingsSection from "$lib/components/SettingsSection.svelte";
   import SettingRow from "$lib/components/SettingRow.svelte";
   import ThemeSelector from "$lib/components/ThemeSelector.svelte";
-  import { themeGroups } from "$lib/data/themes";
+  import { themeFamilies } from "$lib/data/themes";
   import { cn } from "$lib/utils/cn";
 
   const settingsStore = useSettings();
@@ -166,7 +166,7 @@
 
       <SettingsSection title={t("appearance_section")}>
         {#snippet children()}
-          <ThemeSelector groups={themeGroups} />
+          <ThemeSelector families={themeFamilies} />
         {/snippet}
       </SettingsSection>
     </div>

@@ -2,66 +2,81 @@
   import ThemeButton from "./ThemeButton.svelte";
   import { useTheme } from "$lib/stores/theme.svelte";
   import { t } from "$lib/stores/i18n.svelte";
-
-  interface ThemeGroup {
-    name: string;
-    themes: { id: string; color: string }[];
-  }
+  import type { ThemeFamily, ThemeVariant } from "$lib/data/themes";
 
   interface Props {
-    groups: ThemeGroup[];
+    families: ThemeFamily[];
   }
 
-  let { groups }: Props = $props();
+  let { families }: Props = $props();
 
   const theme = useTheme();
 
-  const themeNames: Record<string, string> = {
-    "foundry-dark": "Foundry Dark",
-    "foundry-light": "Foundry Light",
-    nord: "Nord",
-    "catppuccin-mocha": "Catppuccin",
-    gruvbox: "Gruvbox",
-    "rose-pine": "Rose Pine",
-  };
-
-  function getName(id: string): string {
-    return themeNames[id] || id;
-  }
-
-  function getCurrentColor(): string {
-    for (const group of groups) {
-      const found = group.themes.find((item) => item.id === theme.current);
-      if (found) return found.color;
+  function findCurrent(): { family: ThemeFamily; variant: ThemeVariant; mode: "dark" | "light" } | null {
+    for (const family of families) {
+      if (family.dark.id === theme.current) {
+        return { family, variant: family.dark, mode: "dark" };
+      }
+      if (family.light.id === theme.current) {
+        return { family, variant: family.light, mode: "light" };
+      }
     }
-    return "#c9a227";
+    return null;
   }
+
+  const current = $derived(findCurrent());
+  const modeLabel = $derived(
+    current?.mode === "dark" ? t("theme_dark") : t("theme_light"),
+  );
 </script>
 
-{#each groups as group}
-  <div class="mb-3 last:mb-0">
-    <h3 class="mb-2 text-xs font-medium text-text-muted">{group.name}</h3>
-    <div class="flex flex-wrap gap-2">
-      {#each group.themes as item}
-        <ThemeButton
-          id={item.id}
-          color={item.color}
-          selected={theme.current === item.id}
-          label={getName(item.id)}
-          onclick={() => theme.set(item.id)}
-        />
-      {/each}
+<div class="flex items-center justify-end gap-6 pb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+  <span class="w-6 text-center">◐</span>
+  <span>{t("theme_dark")}</span>
+  <span>{t("theme_light")}</span>
+</div>
+
+<ul class="flex flex-col gap-1.5">
+  {#each families as family (family.id)}
+    {@const darkSelected = theme.current === family.dark.id}
+    {@const lightSelected = theme.current === family.light.id}
+    <li
+      class="grid grid-cols-[1fr_auto_auto] items-center gap-3 rounded-control px-2 py-1.5 transition-colors hover:bg-hover"
+    >
+      <span class="truncate text-sm font-medium text-text-heading">
+        {family.name}
+      </span>
+      <ThemeButton
+        id={family.dark.id}
+        color={family.dark.color}
+        selected={darkSelected}
+        label={`${family.name} ${t("theme_dark")}`}
+        onclick={() => theme.set(family.dark.id)}
+      />
+      <ThemeButton
+        id={family.light.id}
+        color={family.light.color}
+        selected={lightSelected}
+        label={`${family.name} ${t("theme_light")}`}
+        onclick={() => theme.set(family.light.id)}
+      />
+    </li>
+  {/each}
+</ul>
+
+{#if current}
+  <div class="mt-4 flex items-center gap-3 border-t border-border-light pt-3">
+    <div
+      class="h-9 w-9 shrink-0 rounded-full shadow-md ring-2 ring-bg ring-offset-2 ring-offset-card"
+      style="background: {current.variant.color};"
+    ></div>
+    <div class="min-w-0">
+      <p class="truncate text-sm font-semibold text-text-heading">
+        {current.family.name}
+      </p>
+      <p class="text-xs text-text-muted">
+        {modeLabel} · {t("current_theme")}
+      </p>
     </div>
   </div>
-{/each}
-
-<div class="mt-4 flex items-center gap-3 border-t border-border pt-3">
-  <div
-    class="h-8 w-8 shrink-0 rounded-full shadow-md"
-    style="background: {getCurrentColor()};"
-  ></div>
-  <div>
-    <p class="text-sm font-medium">{getName(theme.current)}</p>
-    <p class="text-xs text-text-muted">{t("current_theme")}</p>
-  </div>
-</div>
+{/if}
