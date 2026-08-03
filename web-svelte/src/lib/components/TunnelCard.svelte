@@ -1,5 +1,6 @@
 <script lang="ts">
   import { useToast } from "$lib/stores/toast.svelte";
+  import { useProviders } from "$lib/stores/providers.svelte";
   import {
     AlertCircle,
     Copy,
@@ -48,22 +49,20 @@
     totalItems = 1,
     installProgress = null,
   }: TunnelCardProps = $props();
-  const dropdownAlign = $derived(index === totalItems - 1 && totalItems > 1 ? "top-left" : "left");
+
+  const dropdownAlign = $derived(
+    index === totalItems - 1 && totalItems > 1 ? "top-left" : "left",
+  );
 
   const toast = useToast();
+  const providerStore = useProviders();
 
   let showLogs = $state(false);
   let logs = $state("");
   let loadingLogs = $state(false);
   let logStream: LogStream | null = $state(null);
-
-  const providerNames: Record<string, string> = {
-    cloudflared: "Cloudflared",
-    tunnelmole: "Tunnelmole",
-    localhostrun: "localhost.run",
-    serveo: "Serveo",
-    pinggy: "Pinggy",
-  };
+  let logPre: HTMLPreElement | undefined = $state();
+  let followBottom = $state(true);
 
   const statusConfig: Record<StatusKey, StatusColors> = {
     running: {
@@ -124,6 +123,36 @@
     tunnelState === "installing" || tunnelState === "downloading",
   );
 
+  const providerLabel = $derived(
+    providerStore.providers.find((p) => p.id === tunnel.provider)?.name ??
+      tunnel.provider,
+  );
+
+  const actionLabel = $derived(
+    isInstalling
+      ? t("wait")
+      : tunnelState === "stopping"
+        ? t("stopping")
+        : t("stop"),
+  );
+
+  function scrollLogsToBottom() {
+    if (!logPre || !followBottom) return;
+    logPre.scrollTop = logPre.scrollHeight;
+  }
+
+  function onLogScroll() {
+    if (!logPre) return;
+    const distance =
+      logPre.scrollHeight - logPre.scrollTop - logPre.clientHeight;
+    followBottom = distance < 24;
+  }
+
+  $effect(() => {
+    logs;
+    queueMicrotask(scrollLogsToBottom);
+  });
+
   function copyUrl(url: string) {
     navigator.clipboard.writeText(url);
     toast.info(t("copied"));
@@ -147,8 +176,10 @@
     showLogs = true;
     loadingLogs = true;
     logs = "";
+    followBottom = true;
 
-    logsApi.get(tunnel.id)
+    logsApi
+      .get(tunnel.id)
       .then((initial) => {
         logs = formatLogs(initial);
         loadingLogs = false;
@@ -193,54 +224,52 @@
     Math.trunc((installProgress?.percent ?? 0) * 100) / 100,
   );
   const installStep = $derived(installProgress?.step ?? t("installing"));
-
-  const providerLabel = $derived(providerNames[tunnel.provider] || tunnel.provider);
 </script>
 
 <div
-  class="border rounded-3xl cursor-default transition-all duration-150 bg-card border-border"
+  class="cursor-default rounded-[var(--radius-card)] border border-border bg-card transition-all duration-150"
 >
   <div class="flex flex-col">
     <div
-      class="flex justify-between items-start p-5 gap-4 flex-row sm:items-stretch sm:p-3.5 sm:gap-3"
+      class="flex flex-row items-start justify-between gap-3 p-4 sm:items-stretch sm:p-3.5"
     >
-      <div class="flex-1 min-w-0">
+      <div class="min-w-0 flex-1">
         <div
-          class="font-semibold text-[15px] mb-1 whitespace-nowrap overflow-hidden text-ellipsis sm:text-sm"
+          class="mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-[15px] font-semibold sm:text-sm"
         >
           {tunnel.name}
         </div>
-        <div class="text-xs mb-2 sm:text-xs text-muted">
-          {providerLabel} — {t("port")} {tunnel.port}
+        <div class="mb-2 text-xs text-muted">
+          {providerLabel} · {t("port")} {tunnel.port}
         </div>
         <div
           class={cn(
-            "inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full",
+            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
             statusColors.bg,
             statusColors.text,
           )}
         >
-          <span class={cn("w-1.5 h-1.5 rounded-full", statusColors.dot)}></span>
+          <span class={cn("h-1.5 w-1.5 rounded-full", statusColors.dot)}></span>
           <span>{t(statusInfo.textKey)}</span>
           {#if tunnelState === "installing" && installProgress}
-            <span class="font-semibold ml-1">{installPercent}%</span>
+            <span class="ml-1 font-semibold">{installPercent}%</span>
           {/if}
         </div>
         {#if tunnelState === "installing" && installProgress}
-          <div class="w-full h-1 rounded mt-2 overflow-hidden bg-border">
+          <div class="mt-2 h-1 w-full overflow-hidden rounded bg-border">
             <div
               class="h-full rounded bg-status-installing"
               style="width: {installPercent}%"
             ></div>
           </div>
           <div
-            class="text-[11px] mt-1 whitespace-nowrap overflow-hidden text-ellipsis sm:text-[10px] text-muted"
+            class="mt-1 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-muted sm:text-[10px]"
           >
             {installStep}
           </div>
         {/if}
       </div>
-      <div class="flex gap-2 flex-shrink-0 relative">
+      <div class="relative flex shrink-0 gap-2">
         {#if isRunning}
           <Button
             variant="error"
@@ -248,7 +277,7 @@
             onclick={() => onStop(tunnel.id)}
             disabled={isInstalling || tunnelState === "stopping"}
           >
-            {isInstalling ? t("wait") : tunnelState === "stopping" ? t("stopping") : t("stop")}
+            {actionLabel}
           </Button>
         {:else}
           <Button
@@ -271,52 +300,47 @@
         </Dropdown>
       </div>
     </div>
+
     {#if tunnel.publicUrl}
       <button
         type="button"
         class={cn(
-          "group flex items-center gap-2.5 px-4 py-2.5 border-t cursor-pointer w-full",
-          "sm:px-3.5 sm:py-2.5 bg-url-bg border-t-status-stopped",
-          "hover:bg-hover transition-colors",
+          "flex w-full cursor-pointer items-center gap-2.5 border-t border-t-status-stopped bg-url-bg px-4 py-2.5",
+          "transition-colors hover:bg-hover sm:px-3.5",
           {
             "rounded-b-xl": !(tunnel.errorMessage || showLogs),
           },
         )}
         onclick={() => tunnel.publicUrl && copyUrl(tunnel.publicUrl)}
       >
-        <span class="w-4 h-4 flex-shrink-0 text-muted"><Copy size={16} /></span>
+        <span class="flex h-4 w-4 shrink-0 text-muted"><Copy size={16} /></span>
         <span
-          class="flex-1 text-xs font-mono whitespace-nowrap overflow-hidden text-ellipsis text-start text-primary"
+          class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-start font-mono text-xs text-primary"
           >{tunnel.publicUrl}</span
         >
-        <span
-          class="text-[10px] text-muted opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          >{t("click_to_copy")}</span
-        >
+        <span class="shrink-0 text-[10px] text-muted">{t("click_to_copy")}</span>
       </button>
     {/if}
+
     {#if tunnel.errorMessage}
       <div
         class={cn(
-          "flex items-center gap-2.5 px-4 py-2.5 border-t sm:px-3.5 sm:py-2.5",
-          "bg-status-error/15 border-t-status-error/70 text-status-error",
+          "flex items-center gap-2.5 border-t border-t-status-error/70 bg-status-error/15 px-4 py-2.5 text-status-error sm:px-3.5",
           {
             "rounded-b-xl": !showLogs,
           },
         )}
       >
-        <span class="w-4 h-4 flex-shrink-0"><AlertCircle size={16} /></span>
-        <span class="text-xs font-mono sm:text-xs">{tunnel.errorMessage}</span>
+        <span class="h-4 w-4 shrink-0"><AlertCircle size={16} /></span>
+        <span class="font-mono text-xs break-words">{tunnel.errorMessage}</span>
       </div>
     {/if}
-    <div
-      class={cn(
-        "transition-max-height duration-300 ease-in-out overflow-hidden rounded-b-xl",
-        showLogs ? "max-h-[500px]" : "max-h-0",
-      )}
-    >
-      <div class="overflow-hidden bg-logs-bg">
-        <div class="flex items-center justify-between px-4 py-2.5 border-b border-border sm:px-3.5 sm:py-2">
+
+    {#if showLogs}
+      <div class="overflow-hidden rounded-b-xl bg-logs-bg">
+        <div
+          class="flex items-center justify-between border-b border-border px-4 py-2.5 sm:px-3.5 sm:py-2"
+        >
           <span class="text-[11px] font-medium text-muted">{t("live_logs")}</span>
           <Button variant="ghost" size="sm" icon={X} onclick={closeLogs}>
             {t("close")}
@@ -324,16 +348,18 @@
         </div>
         {#if loadingLogs}
           <div
-            class="flex items-center justify-center gap-3 p-6 sm:p-4 sm:gap-2.5 text-status-stopped"
+            class="flex items-center justify-center gap-3 p-6 text-status-stopped sm:gap-2.5 sm:p-4"
           >
             <span>{t("loading")}</span>
           </div>
         {:else}
           <pre
-            class="m-0 p-4 text-[12px] leading-relaxed whitespace-pre-wrap break-all max-h-[300px] overflow-auto font-mono sm:p-3.5 sm:text-[11px] sm:leading-relaxed text-logs-text">{logs ||
+            bind:this={logPre}
+            onscroll={onLogScroll}
+            class="m-0 max-h-[300px] overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-all p-4 font-mono text-[12px] leading-relaxed text-logs-text sm:p-3.5 sm:text-[11px]">{logs ||
               t("no_logs")}</pre>
         {/if}
       </div>
-    </div>
+    {/if}
   </div>
 </div>
