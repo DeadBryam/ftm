@@ -133,7 +133,7 @@
 >
   <div class="panel-pattern pointer-events-none absolute inset-0 opacity-30" aria-hidden="true"></div>
 
-  <div class="ftm-enter ftm-enter-delay-1 relative z-10 flex shrink-0 items-center justify-between border-b border-border-light px-3.5 py-2.5">
+  <div class="ftm-enter ftm-enter-delay-1 relative z-10 flex shrink-0 items-center justify-between border-b border-border-light bg-card px-3.5 py-2.5">
     <h2 class="m-0 text-sm font-semibold text-text-heading">
       {isEdit ? t("edit_connection") : t("new_connection")}
     </h2>
