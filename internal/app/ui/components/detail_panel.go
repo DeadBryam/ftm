@@ -14,7 +14,6 @@ type DetailPanel struct {
 	Provider    string
 	LocalPort   int
 	StatusState int
-	StatusMsg   string
 	PublicURL   string
 	ErrorMsg    string
 	Width       int

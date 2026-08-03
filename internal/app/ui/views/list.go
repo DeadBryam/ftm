@@ -16,7 +16,6 @@ type TunnelViewData struct {
 	Provider    string
 	LocalPort   int
 	StatusState int
-	StatusMsg   string
 	PublicURL   string
 	ErrorMsg    string
 }
@@ -42,22 +41,9 @@ type ListView struct {
 const ItemHeight = 1
 
 const (
-	singleColumnChrome = 6
-	twoColumnChrome    = 7
+	minBodyHeight  = 4
+	listColumnSize = 0.42
 )
-
-func (l *ListView) rowsAvailable(chrome int) int {
-	if l.Height <= 0 {
-		return 0
-	}
-
-	rows := (l.Height - l.ListTop - chrome) / ItemHeight
-	if rows < 1 {
-		return 1
-	}
-
-	return rows
-}
 
 func NewListView() *ListView {
 	return &ListView{
@@ -70,175 +56,107 @@ func (l *ListView) Render() string {
 		return ""
 	}
 
+	header := l.header()
+	footer := l.footer()
+
+	bodyHeight := l.Height - lipgloss.Height(header) - lipgloss.Height(footer)
+	if bodyHeight < minBodyHeight {
+		bodyHeight = minBodyHeight
+	}
+
+	l.ListTop = lipgloss.Height(header) + 1
+	l.VisibleRows = l.rowsAvailable(bodyHeight)
+
+	body := l.singleColumn(bodyHeight)
 	if l.Width >= l.TwoColumnLimit {
-		return l.twoColumn()
+		body = l.twoColumn(bodyHeight)
 	}
 
-	return l.singleColumn()
+	return header + "\n" + body + "\n" + footer
 }
 
-func (l *ListView) twoColumn() string {
-	var b strings.Builder
+func (l *ListView) rowsAvailable(bodyHeight int) int {
+	rows := bodyHeight - ui.PanelChrome
+	if len(l.Items) > rows {
+		rows -= 2
+	}
 
-	gold := ui.ThemeDefault.Gold
-	bronze := ui.ThemeDefault.Bronze
-	text := ui.ThemeDefault.Text
-	textDim := ui.ThemeDefault.TextDim
+	return ui.Clamp(rows, 1)
+}
+
+func (l *ListView) header() string {
+	t := ui.ThemeDefault
 
 	title := lipgloss.NewStyle().
-		Foreground(gold).
+		Foreground(t.Gold).
 		Bold(true).
 		Render(i18n.T("app_name_tui"))
-	versionStr := lipgloss.NewStyle().
-		Foreground(textDim).
-		Render("v" + version.Version + "  ws:" + fmt.Sprintf("%d", l.Sessions))
 
-	b.WriteString(title)
-	b.WriteString(ui.Repeat(" ", l.Width-lipgloss.Width(title)-lipgloss.Width(versionStr)-ui.HeaderMargin))
-	b.WriteString(versionStr)
-	b.WriteString("\n")
+	meta := lipgloss.NewStyle().
+		Foreground(t.TextDim).
+		Render(fmt.Sprintf("v%s  ·  ws %d", version.Version, l.Sessions))
+
+	gap := ui.Clamp(l.Width-lipgloss.Width(title)-lipgloss.Width(meta), 1)
+
+	lines := []string{title + ui.Repeat(" ", gap) + meta}
 
 	if l.UpdateBadge != "" {
-		badgeStyle := lipgloss.NewStyle().Foreground(ui.ThemeDefault.Gold).Bold(true)
-		b.WriteString(badgeStyle.Render(l.UpdateBadge))
-		b.WriteString("\n")
-	}
-	b.WriteString("\n")
-
-	leftWidth := int(float64(l.Width) * 0.4)
-	rightWidth := l.Width - leftWidth - 3
-
-	leftHeader := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(text).
-		Render(i18n.T("connections"))
-
-	rightHeader := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(text).
-		Render(i18n.T("selected_tunnel"))
-
-	b.WriteString(leftHeader)
-	b.WriteString(ui.Repeat(" ", leftWidth-lipgloss.Width(leftHeader)+3))
-	b.WriteString(rightHeader)
-	b.WriteString("\n")
-
-	dividerStyle := lipgloss.NewStyle().Foreground(bronze)
-	b.WriteString(dividerStyle.Render(ui.Repeat("─", l.Width-2)))
-	b.WriteString("\n")
-
-	l.ListTop = 4
-	if l.UpdateBadge != "" {
-		l.ListTop++
-	}
-	l.VisibleRows = l.rowsAvailable(twoColumnChrome)
-
-	listContent := l.renderTunnelList(leftWidth - 2)
-	detailContent := l.renderDetailPanel(rightWidth - 2)
-
-	listLines := strings.Split(listContent, "\n")
-	detailLines := strings.Split(detailContent, "\n")
-
-	maxLines := len(listLines)
-	if detail := len(detailLines); detail > maxLines {
-		if budget := l.rowsAvailable(twoColumnChrome); budget > 0 && detail > budget {
-			detail = budget
-		}
-		if detail > maxLines {
-			maxLines = detail
-		}
+		lines = append(lines, lipgloss.NewStyle().
+			Foreground(t.Gold).
+			Bold(true).
+			Render(l.UpdateBadge))
 	}
 
-	for i := 0; i < maxLines; i++ {
-		leftLine := ""
-		if i < len(listLines) {
-			leftLine = listLines[i]
-		}
-		rightLine := ""
-		if i < len(detailLines) {
-			rightLine = detailLines[i]
-		}
-
-		leftLine = lipgloss.NewStyle().Width(leftWidth).Render(leftLine)
-
-		b.WriteString(leftLine)
-		b.WriteString(" │ ")
-		b.WriteString(rightLine)
-		b.WriteString("\n")
+	if l.Dashboard != "" {
+		lines = append(lines, lipgloss.NewStyle().Foreground(t.TextDim).Render(i18n.T("dashboard_label")+" ")+
+			lipgloss.NewStyle().Foreground(t.Bronze).Render(l.Dashboard))
 	}
 
-	b.WriteString("\n")
+	return strings.Join(append(lines, ""), "\n")
+}
+
+func (l *ListView) footer() string {
+	lines := []string{""}
 
 	if l.Message != "" {
-		msgStyle := lipgloss.NewStyle().Foreground(gold).Bold(true)
-		b.WriteString(msgStyle.Render(i18n.T("success_prefix") + " " + l.Message))
-		b.WriteString("\n")
+		lines = append(lines, lipgloss.NewStyle().
+			Foreground(ui.ThemeDefault.Success).
+			Bold(true).
+			Render(i18n.T("success_prefix")+" "+l.Message))
 	}
 
 	help := components.NewHelpBar()
 	help.Shortcuts = l.Shortcuts
 	help.Width = l.Width
-	b.WriteString(help.Render())
 
-	return b.String()
+	return strings.Join(append(lines, help.Render()), "\n")
 }
 
-func (l *ListView) singleColumn() string {
-	var b strings.Builder
+func (l *ListView) twoColumn(bodyHeight int) string {
+	leftWidth := int(float64(l.Width) * listColumnSize)
+	rightWidth := l.Width - leftWidth - 1
 
-	gold := ui.ThemeDefault.Gold
-	textDim := ui.ThemeDefault.TextDim
+	left := ui.Panel(
+		i18n.T("connections"),
+		l.renderTunnelList(ui.PanelInner(leftWidth)),
+		leftWidth, bodyHeight, ui.ThemeDefault.Gold,
+	)
 
-	title := lipgloss.NewStyle().
-		Foreground(gold).
-		Bold(true).
-		Render(i18n.T("app_name_tui"))
-	versionStr := lipgloss.NewStyle().
-		Foreground(textDim).
-		Render("v" + version.Version + "  ws:" + fmt.Sprintf("%d", l.Sessions))
+	right := ui.Panel(
+		i18n.T("selected_tunnel"),
+		l.renderDetailPanel(ui.PanelInner(rightWidth)),
+		rightWidth, bodyHeight, ui.ThemeDefault.Bronze,
+	)
 
-	b.WriteString(title)
-	b.WriteString(ui.Repeat(" ", l.Width-lipgloss.Width(title)-lipgloss.Width(versionStr)-ui.HeaderMargin))
-	b.WriteString(versionStr)
-	b.WriteString("\n")
+	return lipgloss.JoinHorizontal(lipgloss.Top, left, " ", right)
+}
 
-	if l.UpdateBadge != "" {
-		badgeStyle := lipgloss.NewStyle().Foreground(ui.ThemeDefault.Gold).Bold(true)
-		b.WriteString(badgeStyle.Render(l.UpdateBadge))
-		b.WriteString("\n")
-	}
-	b.WriteString("\n")
-
-	l.ListTop = 2
-	if l.UpdateBadge != "" {
-		l.ListTop++
-	}
-	if l.Dashboard != "" {
-		l.ListTop += 2
-	}
-	l.VisibleRows = l.rowsAvailable(singleColumnChrome)
-
-	if l.Dashboard != "" {
-		urlStyle := lipgloss.NewStyle().Foreground(gold)
-		b.WriteString(urlStyle.Render(i18n.T("dashboard_label") + " " + l.Dashboard + " " + i18n.T("press_w_hint")))
-		b.WriteString("\n\n")
-	}
-
-	b.WriteString(l.renderTunnelList(l.Width - 2))
-	b.WriteString("\n")
-
-	if l.Message != "" {
-		msgStyle := lipgloss.NewStyle().Foreground(gold).Bold(true)
-		b.WriteString(msgStyle.Render(i18n.T("success_prefix") + " " + l.Message))
-		b.WriteString("\n")
-	}
-
-	help := components.NewHelpBar()
-	help.Shortcuts = l.Shortcuts
-	help.Width = l.Width
-	b.WriteString(help.Render())
-
-	return b.String()
+func (l *ListView) singleColumn(bodyHeight int) string {
+	return ui.Panel(
+		i18n.T("connections"),
+		l.renderTunnelList(ui.PanelInner(l.Width)),
+		l.Width, bodyHeight, ui.ThemeDefault.Gold,
+	)
 }
 
 func (l *ListView) visibleWindow() (first, count int) {
@@ -279,7 +197,6 @@ func (l *ListView) renderTunnelList(width int) string {
 			Provider:    item.Provider,
 			LocalPort:   item.LocalPort,
 			StatusState: item.StatusState,
-			StatusMsg:   item.StatusMsg,
 			Width:       width,
 		}
 		b.WriteString(tunnelItem.Render())
@@ -318,10 +235,9 @@ func (l *ListView) renderDetailPanel(width int) string {
 		Provider:    item.Provider,
 		LocalPort:   item.LocalPort,
 		StatusState: item.StatusState,
-		StatusMsg:   item.StatusMsg,
 		PublicURL:   item.PublicURL,
 		ErrorMsg:    item.ErrorMsg,
-		Width:       width - 2,
+		Width:       width,
 	}
 
 	return panel.Render()
