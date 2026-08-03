@@ -1,0 +1,37 @@
+:root[data-theme="rose-pine-dawn"] {
+  --color-bg: #faf4ed;
+  --color-card: #fffaf3;
+  --color-text: #575279;
+  --color-heading: #575279;
+  --color-muted: #9893a5;
+  --color-border: #d8d5d0;
+  --color-border-light: #f2e9e1;
+  --color-primary: #907aa9;
+  --color-btn-text: #fffaf3;
+  --color-primary-hover: #7d6a96;
+  --color-hover: #f2e9e1;
+  --color-btn-primary: #907aa9;
+  --color-btn-primary-hover: #7d6a96;
+  --color-btn-start: #56949f;
+  --color-btn-start-hover: #437d87;
+  --color-btn-stop: #b4637a;
+  --color-btn-stop-hover: #9c4f65;
+  --color-btn-danger: #b4637a;
+  --color-btn-danger-hover: #9c4f65;
+  --color-status-running: #56949f;
+  --color-status-starting: #ea9d34;
+  --color-status-installing: #907aa9;
+  --color-status-error: #b4637a;
+  --color-status-stopped: var(--color-muted);
+  --color-logs-bg: #f2e9e1;
+  --color-logs-text: #575279;
+  --color-url-bg: #fffaf3;
+  --color-url-text: #907aa9;
+  --color-input-bg: #fffaf3;
+  --color-input-text: #575279;
+  --color-input-placeholder: #9893a5;
+  --color-input-disabled: #f2e9e1;
+  --color-badge-text: #faf4ed;
+  --color-secondary-btn: #f2e9e1;
+  --color-secondary-btn-text: #575279;
+}

@@ -6,6 +6,7 @@ const THEMES = [
   'catppuccin-latte',
   'gruvbox',
   'rose-pine',
+  'rose-pine-dawn',
 ] as const;
 
 export type Theme = (typeof THEMES)[number];
