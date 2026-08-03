@@ -86,7 +86,7 @@
     aria-expanded={isOpen}
     aria-haspopup="true"
     class={cn(
-      "dropdown-trigger flex h-8 min-h-8 flex-1 cursor-pointer items-center gap-1.5 rounded-[var(--radius-control)] border px-2.5 py-1.5 text-xs",
+      "dropdown-trigger flex h-8 min-h-8 flex-1 cursor-pointer items-center gap-1.5 rounded-control border px-2.5 py-1.5 text-xs",
       "border-border bg-card text-text hover:bg-hover",
     )}
   >
@@ -108,7 +108,7 @@
     aria-hidden={!isOpen}
     aria-orientation="vertical"
     class={cn(
-      "dropdown-menu absolute z-[9999] max-h-[280px] min-w-[140px] overflow-y-auto rounded-[var(--radius-panel)] border border-border bg-card p-0.5",
+      "dropdown-menu absolute z-[9999] max-h-[280px] min-w-[140px] overflow-y-auto rounded-panel border border-border bg-card p-0.5",
       "origin-top transition-[opacity,transform] duration-150 ease-out",
       menuPosition,
       isOpen
@@ -129,7 +129,7 @@
             onSelect?.(option);
           }}
           class={cn(
-            "flex w-full cursor-pointer items-center gap-2 rounded-[var(--radius-control)] border-none bg-transparent px-2.5 py-1.5 text-left text-xs text-text",
+            "flex w-full cursor-pointer items-center gap-2 rounded-control border-none bg-transparent px-2.5 py-1.5 text-left text-xs text-text",
             "hover:bg-hover disabled:cursor-not-allowed disabled:opacity-50",
             option.danger && "text-red-500 hover:bg-red-500/10",
           )}

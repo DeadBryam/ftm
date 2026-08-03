@@ -75,7 +75,7 @@
   {onclick}
   class={cn(
     "inline-flex items-center justify-center border font-medium cursor-pointer",
-    "transition-all duration-150 rounded-[var(--radius-control)]",
+    "transition-all duration-150 rounded-control",
     "disabled:opacity-50 disabled:cursor-not-allowed",
     "active:scale-[0.98]",
     variantClasses.base,

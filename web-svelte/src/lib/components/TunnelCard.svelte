@@ -227,7 +227,7 @@
 </script>
 
 <div
-  class="cursor-default rounded-[var(--radius-card)] border border-border bg-card transition-all duration-150"
+  class="cursor-default rounded-card border border-border bg-card transition-all duration-150"
 >
   <div class="flex flex-col">
     <div
@@ -244,7 +244,7 @@
         </div>
         <div
           class={cn(
-            "inline-flex items-center gap-1.5 rounded-[var(--radius-control)] px-2 py-0.5 text-xs font-medium",
+            "inline-flex items-center gap-1.5 rounded-control px-2 py-0.5 text-xs font-medium",
             statusColors.bg,
             statusColors.text,
           )}
@@ -308,7 +308,7 @@
           "flex w-full cursor-pointer items-center gap-2 border-t border-t-status-stopped bg-url-bg px-2.5 py-2",
           "transition-colors hover:bg-hover",
           {
-            "rounded-b-[var(--radius-card)]": !(tunnel.errorMessage || showLogs),
+            "rounded-b-card": !(tunnel.errorMessage || showLogs),
           },
         )}
         onclick={() => tunnel.publicUrl && copyUrl(tunnel.publicUrl)}
@@ -327,7 +327,7 @@
         class={cn(
           "flex items-center gap-2 border-t border-t-status-error/70 bg-status-error/15 px-2.5 py-2 text-status-error",
           {
-            "rounded-b-[var(--radius-card)]": !showLogs,
+            "rounded-b-card": !showLogs,
           },
         )}
       >
@@ -337,7 +337,7 @@
     {/if}
 
     {#if showLogs}
-      <div class="overflow-hidden rounded-b-[var(--radius-card)] bg-logs-bg">
+      <div class="overflow-hidden rounded-b-card bg-logs-bg">
         <div
           class="flex items-center justify-between border-b border-border px-2.5 py-1.5"
         >

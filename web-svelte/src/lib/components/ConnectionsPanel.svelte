@@ -19,7 +19,7 @@
 
 <section
   class={cn(
-    "ftm-enter flex h-full min-h-[14rem] w-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-border bg-card",
+    "ftm-enter flex h-full min-h-[14rem] w-full flex-col overflow-hidden rounded-card border border-border bg-card",
     "max-md:max-h-[min(55dvh,28rem)]",
   )}
 >
@@ -32,7 +32,7 @@
       {t("connections")}
     </h2>
     <span
-      class="rounded-[var(--radius-control)] bg-primary px-2 py-0.5 text-xs font-semibold text-btn-text"
+      class="rounded-control bg-primary px-2 py-0.5 text-xs font-semibold text-btn-text"
     >
       {store.tunnels.length}
     </span>

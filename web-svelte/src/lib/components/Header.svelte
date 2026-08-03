@@ -12,7 +12,7 @@
     <img
       src="/favicon.png"
       alt={t('app_name')}
-      class="h-9 w-9 shrink-0 rounded-[var(--radius-control)] object-cover sm:h-10 sm:w-10"
+      class="h-9 w-9 shrink-0 rounded-control object-cover sm:h-10 sm:w-10"
     />
     <div class="min-w-0">
       <h1 class="m-0 font-serif text-xl font-bold tracking-tight text-text-heading sm:text-2xl">
@@ -25,7 +25,7 @@
   <a
     href="/settings"
     class={cn(
-      "rounded-[var(--radius-control)] p-2 transition-colors",
+      "rounded-control p-2 transition-colors",
       isSettings ? "bg-primary/20 text-primary" : "hover:bg-secondary"
     )}
     aria-label={t('settings')}

@@ -95,7 +95,7 @@
 
   <main
     class={cn(
-      "grid min-h-0 flex-1 gap-[var(--app-gap)]",
+      "grid min-h-0 flex-1 gap-app",
       "max-md:grid-cols-1 max-md:content-start max-md:overflow-y-auto",
       "md:grid-cols-[minmax(0,17.5rem)_1fr] lg:grid-cols-[minmax(0,19rem)_1fr]",
     )}
@@ -110,7 +110,7 @@
     <div class="max-md:order-2 md:order-1 md:self-start">
       <button
         type="button"
-        class="mb-2 flex w-full items-center justify-between rounded-[var(--radius-panel)] border border-border bg-card px-3 py-2 text-left text-sm font-medium text-text-heading md:hidden"
+        class="mb-2 flex w-full items-center justify-between rounded-panel border border-border bg-card px-3 py-2 text-left text-sm font-medium text-text-heading md:hidden"
         onclick={() => (formOpen = !formOpen)}
         aria-expanded={formOpen}
       >

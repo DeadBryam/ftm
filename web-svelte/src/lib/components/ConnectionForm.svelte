@@ -127,7 +127,7 @@
 
 <section
   class={cn(
-    "ftm-enter rounded-[var(--radius-panel)] border border-border bg-card p-3.5",
+    "ftm-enter rounded-panel border border-border bg-card p-3.5",
     className,
   )}
 >
@@ -139,7 +139,7 @@
       <button
         type="button"
         onclick={onCancel}
-        class="cursor-pointer rounded-[var(--radius-control)] border-none bg-transparent p-1 text-text-muted transition-colors hover:bg-hover hover:text-text"
+        class="cursor-pointer rounded-control border-none bg-transparent p-1 text-text-muted transition-colors hover:bg-hover hover:text-text"
         aria-label={t("cancel")}
       >
         ×
@@ -149,7 +149,7 @@
 
   <div class="ftm-enter ftm-enter-delay-2">
     {#if providerStore.error}
-      <p class="mb-2 rounded-[var(--radius-control)] border border-status-error/40 bg-status-error/10 px-2.5 py-1.5 text-xs text-status-error">
+      <p class="mb-2 rounded-control border border-status-error/40 bg-status-error/10 px-2.5 py-1.5 text-xs text-status-error">
         {providerStore.error}
       </p>
     {/if}
@@ -166,7 +166,7 @@
           placeholder={isEdit ? t("name_placeholder") : t("tunnel_name_hint")}
           required
           autocomplete="off"
-          class="h-8 w-full rounded-[var(--radius-control)] border border-border bg-input-bg px-2.5 py-1.5 text-sm text-text transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+          class="h-8 w-full rounded-control border border-border bg-input-bg px-2.5 py-1.5 text-sm text-text transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
         />
       </div>
 
@@ -182,7 +182,7 @@
             min="1"
             max="65535"
             required
-            class="h-8 w-full rounded-[var(--radius-control)] border border-border bg-input-bg px-2.5 py-1.5 text-sm text-text transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+            class="h-8 w-full rounded-control border border-border bg-input-bg px-2.5 py-1.5 text-sm text-text transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
           />
         </div>
         <div class="mb-2.5">

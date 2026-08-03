@@ -78,7 +78,7 @@
   <div class="mb-4 flex items-center gap-2">
     <a
       href="/"
-      class="rounded-[var(--radius-control)] p-1.5 hover:bg-secondary transition-colors"
+      class="rounded-control p-1.5 hover:bg-secondary transition-colors"
       aria-label={t('go_back')}
     >
       <ChevronLeft size={18} />
@@ -98,7 +98,7 @@
       ></div>
     </div>
   {:else}
-    <div class="grid grid-cols-1 gap-[var(--app-gap)] lg:grid-cols-2">
+    <div class="grid grid-cols-1 gap-app lg:grid-cols-2">
       <SettingsSection title={t("notifications_section")}>
         {#snippet children()}
           <div class="space-y-3">
