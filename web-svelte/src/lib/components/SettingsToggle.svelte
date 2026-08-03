@@ -23,9 +23,9 @@
   aria-pressed={checked}
   aria-label={checked ? t('disable') : t('enable')}
   class={cn(
-    "relative w-12 h-7 rounded-full transition-all duration-200 flex-shrink-0",
+    "relative h-7 w-12 shrink-0 rounded-full transition-all duration-200",
     checked ? "bg-primary" : "bg-secondary",
-    disabled && "opacity-50 cursor-not-allowed"
+    disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
   )}
 >
   <span

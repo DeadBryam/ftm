@@ -10,13 +10,14 @@
     Volume2,
     VolumeX,
     ChevronLeft,
-    Globe,
+    Check,
+    Languages,
   } from "lucide-svelte";
   import SettingsSection from "$lib/components/SettingsSection.svelte";
   import SettingRow from "$lib/components/SettingRow.svelte";
   import ThemeSelector from "$lib/components/ThemeSelector.svelte";
   import { themeGroups } from "$lib/data/themes";
-  import clsx from "clsx";
+  import { cn } from "$lib/utils/cn";
 
   const settingsStore = useSettings();
   const notifications = useNotifications();
@@ -25,8 +26,6 @@
 
   let saving = $state(false);
 
-  
-  
   const languageOptions = $derived([LANGUAGE_AUTO, ...i18n.available]);
 
   onMount(async () => {
@@ -62,10 +61,9 @@
   }
 
   async function changeLanguage(lang: string) {
+    if (settingsStore.settings.language === lang || saving) return;
     saving = true;
     try {
-      
-      
       await settingsStore.update({ language: lang });
       await i18n.setLanguage(lang);
     } finally {
@@ -78,8 +76,8 @@
   <div class="mb-4 flex items-center gap-2">
     <a
       href="/"
-      class="rounded-control p-1.5 hover:bg-secondary transition-colors"
-      aria-label={t('go_back')}
+      class="cursor-pointer rounded-control p-1.5 transition-colors hover:bg-secondary"
+      aria-label={t("go_back")}
     >
       <ChevronLeft size={18} />
     </a>
@@ -98,60 +96,86 @@
       ></div>
     </div>
   {:else}
-    <div class="grid grid-cols-1 gap-app lg:grid-cols-2">
-      <SettingsSection title={t("notifications_section")}>
-        {#snippet children()}
-          <div class="space-y-3">
-            <SettingRow
-              icon={BellOff}
-              iconActive={Bell}
-              active={settingsStore.settings.notifications_enabled ===
-                "granted"}
-              label={t("enable_notifications_web")}
-              disabled={saving}
-              onchange={toggleNotifications}
-            />
-            <SettingRow
-              icon={VolumeX}
-              iconActive={Volume2}
-              active={settingsStore.settings.notification_sound}
-              label={t("sound_effects")}
-              disabled={saving}
-              onchange={toggleSound}
-            />
-          </div>
-        {/snippet}
-      </SettingsSection>
-
-      <SettingsSection title={t("appearance_section")}>
-        {#snippet children()}
-          <ThemeSelector groups={themeGroups} />
-        {/snippet}
-      </SettingsSection>
-
-      <SettingsSection title={t("language_section")}>
-        {#snippet children()}
-          <div class="flex gap-2">
-            {#each languageOptions as lang}
-              <button
-                class={clsx(
-                  "px-4 py-2 rounded-lg border transition-colors cursor-pointer",
-                  settingsStore.settings.language === lang
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border hover:border-primary/50",
-                )}
-                onclick={() => changeLanguage(lang)}
+    <div class="columns-1 gap-app md:columns-2">
+      <div class="mb-app break-inside-avoid">
+        <SettingsSection title={t("notifications_section")}>
+          {#snippet children()}
+            <div class="space-y-1">
+              <SettingRow
+                icon={BellOff}
+                iconActive={Bell}
+                active={settingsStore.settings.notifications_enabled ===
+                  "granted"}
+                label={t("enable_notifications_web")}
                 disabled={saving}
-              >
-                <span class="flex items-center gap-2">
-                  <Globe size={16} />
-                  {t(`lang_${lang}`)}
-                </span>
-              </button>
-            {/each}
-          </div>
-        {/snippet}
-      </SettingsSection>
+                onchange={toggleNotifications}
+              />
+              <SettingRow
+                icon={VolumeX}
+                iconActive={Volume2}
+                active={settingsStore.settings.notification_sound}
+                label={t("sound_effects")}
+                disabled={saving}
+                onchange={toggleSound}
+              />
+            </div>
+          {/snippet}
+        </SettingsSection>
+      </div>
+
+      <div class="mb-app break-inside-avoid">
+        <SettingsSection title={t("appearance_section")}>
+          {#snippet children()}
+            <ThemeSelector groups={themeGroups} />
+          {/snippet}
+        </SettingsSection>
+      </div>
+
+      <div class="mb-app break-inside-avoid">
+        <SettingsSection title={t("language_section")}>
+          {#snippet children()}
+            <div
+              role="radiogroup"
+              aria-label={t("language_section")}
+              class="grid grid-cols-1 gap-2 sm:grid-cols-3"
+            >
+              {#each languageOptions as lang}
+                {@const selected = settingsStore.settings.language === lang}
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  disabled={saving}
+                  onclick={() => changeLanguage(lang)}
+                  class={cn(
+                    "flex cursor-pointer items-center gap-2.5 rounded-control border px-3 py-2.5 text-left transition-colors",
+                    selected
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-text hover:border-primary/40 hover:bg-hover",
+                    saving && "cursor-not-allowed opacity-60",
+                  )}
+                >
+                  <span
+                    class={cn(
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-control",
+                      selected ? "bg-primary/20" : "bg-secondary",
+                    )}
+                  >
+                    {#if selected}
+                      <Check size={16} class="text-primary" />
+                    {:else}
+                      <Languages size={16} class="text-text-muted" />
+                    {/if}
+                  </span>
+                  <span class="min-w-0 flex-1 text-sm font-medium leading-tight">
+                    {t(`lang_${lang}`)}
+                  </span>
+                </button>
+              {/each}
+            </div>
+          {/snippet}
+        </SettingsSection>
+      </div>
     </div>
   {/if}
 </div>
