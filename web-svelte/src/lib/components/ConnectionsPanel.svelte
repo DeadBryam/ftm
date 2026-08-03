@@ -1,73 +1,46 @@
 <script lang="ts">
   import { Radio } from "lucide-svelte";
-  import { animate, spring } from "motion";
-  import { onMount } from "svelte";
   import { useTunnels } from "$lib/stores/tunnels.svelte";
   import { t } from "$lib/stores/i18n.svelte";
   import { cn } from "$lib/utils/cn";
   import TunnelCard from "./TunnelCard.svelte";
+  import Button from "./Button.svelte";
 
-  let { onAction }: { onAction: (action: string, data: unknown) => void } =
-    $props();
+  let {
+    onAction,
+    onCreateFirst,
+  }: {
+    onAction: (action: string, data: unknown) => void;
+    onCreateFirst?: () => void;
+  } = $props();
 
   const store = useTunnels();
-
-  let sectionEl: HTMLElement | undefined = $state();
-  let headerEl: HTMLElement | undefined = $state();
-  let contentEl: HTMLElement | undefined = $state();
-
-  onMount(() => {
-    requestAnimationFrame(() => {
-      if (sectionEl)
-        animate(sectionEl, { opacity: 1 }, { duration: 0.4, type: "spring" });
-      if (headerEl)
-        animate(
-          headerEl,
-          { opacity: 1 },
-          { duration: 0.4, delay: 0.05, type: "spring" },
-        );
-      if (contentEl)
-        animate(
-          contentEl,
-          { opacity: 1 },
-          { duration: 0.4, delay: 0.1, type: "spring" },
-        );
-    });
-  });
 </script>
 
 <section
-  bind:this={sectionEl}
-  style="opacity: 0;"
   class={cn(
-    "flex flex-col overflow-hidden rounded-3xl border shadow-sm transition-all duration-200",
-    "bg-card border-border",
+    "ftm-enter flex max-h-[min(70dvh,40rem)] min-h-[16rem] flex-col overflow-hidden rounded-[var(--radius-card)] border border-border bg-card shadow-sm transition-all duration-200",
+    "md:max-h-none md:min-h-0 md:flex-1",
   )}
 >
   <div
-    bind:this={headerEl}
-    style="opacity: 0;"
     class={cn(
-      "flex shrink-0 items-center justify-between px-4 py-3 border-b",
-      "bg-url-bg border-border-light",
+      "ftm-enter ftm-enter-delay-1 flex shrink-0 items-center justify-between border-b border-border-light bg-url-bg px-4 py-3",
     )}
   >
     <h2
-      class="m-0 text-base font-semibold font-serif text-text-heading flex items-center gap-2"
+      class="m-0 flex items-center gap-2 font-serif text-base font-semibold text-text-heading"
     >
       {t("connections")}
     </h2>
     <span
-      class="rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-sm text-btn-text bg-primary"
+      class="rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-btn-text shadow-sm"
     >
       {store.tunnels.length}
     </span>
   </div>
-  <div
-    bind:this={contentEl}
-    style="opacity: 0;"
-    class="flex-1 overflow-y-auto p-4"
-  >
+
+  <div class="ftm-enter ftm-enter-delay-2 flex-1 overflow-y-auto p-4">
     {#if store.loading}
       <div
         class="flex flex-col items-center justify-center gap-3 py-10 text-text-muted"
@@ -83,9 +56,14 @@
         <h3 class="mb-1.5 mt-0 text-base text-text-heading">
           {t("no_tunnels")}
         </h3>
-        <p class="m-0 text-sm leading-relaxed">
+        <p class="m-0 mb-4 text-sm leading-relaxed">
           {t("tunnels_desc")}
         </p>
+        {#if onCreateFirst}
+          <Button variant="primary" size="md" onclick={onCreateFirst}>
+            {t("create_first")}
+          </Button>
+        {/if}
       </div>
     {:else}
       <div class="flex flex-col gap-2.5">
