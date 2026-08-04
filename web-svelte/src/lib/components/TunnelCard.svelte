@@ -1,32 +1,14 @@
 <script lang="ts">
   import { useToast } from "$lib/stores/toast.svelte";
   import { useProviders } from "$lib/stores/providers.svelte";
-  import {
-    AlertCircle,
-    Copy,
-    FileText,
-    Menu,
-    Pause,
-    Pencil,
-    Play,
-    Trash2,
-    X,
-  } from "lucide-svelte";
-  import { logsApi } from "$lib/api";
+  import { AlertCircle, Copy, Pause, Play } from "lucide-svelte";
   import { t } from "$lib/stores/i18n.svelte";
   import { useClock } from "$lib/stores/clock.svelte";
   import { cn } from "$lib/utils/cn";
   import { formatDuration } from "$lib/utils/duration";
-  import { formatLogs } from "$lib/utils/logs";
   import { onMount } from "svelte";
   import Button from "./Button.svelte";
-  import Dropdown from "./Dropdown.svelte";
-  import type {
-    DropdownOption,
-    LogStream,
-    Tunnel,
-    TunnelState,
-  } from "$lib/types";
+  import type { Tunnel, TunnelState } from "$lib/types";
 
   type StatusKey = "running" | "starting" | "installing" | "error" | "stopped";
   type StatusColors = { bg: string; text: string; dot: string };
@@ -55,22 +37,11 @@
     installProgress = null,
   }: TunnelCardProps = $props();
 
-  const dropdownAlign = $derived(
-    index === totalItems - 1 && totalItems > 1 ? "top-left" : "left",
-  );
-
   const toast = useToast();
   const providerStore = useProviders();
   const clock = useClock();
 
   onMount(() => clock.subscribe());
-
-  let showLogs = $state(false);
-  let logs = $state("");
-  let loadingLogs = $state(false);
-  let logStream: LogStream | null = $state(null);
-  let logPre: HTMLPreElement | undefined = $state();
-  let followBottom = $state(true);
 
   const statusConfig: Record<StatusKey, StatusColors> = {
     running: {
@@ -162,89 +133,10 @@
         : t("stop"),
   );
 
-  function scrollLogsToBottom() {
-    if (!logPre || !followBottom) return;
-    logPre.scrollTop = logPre.scrollHeight;
-  }
-
-  function onLogScroll() {
-    if (!logPre) return;
-    const distance =
-      logPre.scrollHeight - logPre.scrollTop - logPre.clientHeight;
-    followBottom = distance < 24;
-  }
-
-  $effect(() => {
-    logs;
-    queueMicrotask(scrollLogsToBottom);
-  });
-
   function copyUrl(url: string) {
     navigator.clipboard.writeText(url);
     toast.info(t("copied"));
   }
-
-  function closeLogs() {
-    if (logStream) {
-      logStream.close();
-      logStream = null;
-    }
-    loadingLogs = false;
-    showLogs = false;
-  }
-
-  function loadLogs() {
-    if (showLogs) {
-      closeLogs();
-      return;
-    }
-
-    showLogs = true;
-    loadingLogs = true;
-    logs = "";
-    followBottom = true;
-
-    logsApi
-      .get(tunnel.id)
-      .then((initial) => {
-        logs = formatLogs(initial);
-        loadingLogs = false;
-      })
-      .catch(() => {
-        logs = t("error_loading_logs");
-        loadingLogs = false;
-      });
-
-    logStream = logsApi.createStream(tunnel.id, {
-      onLine: (line: string) => {
-        logs = logs + "\n" + formatLogs(line);
-      },
-      onClose: () => {
-        logStream = null;
-      },
-    });
-  }
-
-  function handleDropdownAction(option: DropdownOption) {
-    switch (option.action) {
-      case "edit":
-        onAction("edit", tunnel.id);
-        break;
-      case "logs":
-        loadLogs();
-        break;
-      case "delete":
-        onAction("delete", tunnel);
-        break;
-    }
-  }
-
-  const dropdownOptions: DropdownOption[] = $derived([
-    { label: t("edit"), action: "edit", icon: Pencil, disabled: isRunning },
-    { label: t("logs"), action: "logs", icon: FileText },
-    { label: "separator", action: "separator" },
-    { label: t("delete"), action: "delete", icon: Trash2, danger: true },
-  ]);
 
   const installPercent = $derived(
     Math.trunc((installProgress?.percent ?? 0) * 100) / 100,
@@ -326,7 +218,7 @@
           </div>
         {/if}
       </div>
-      <div class="relative flex shrink-0 gap-2">
+      <div class="flex shrink-0 gap-2">
         {#if isRunning}
           <Button
             variant="error"
@@ -345,16 +237,6 @@
             {t("start")}
           </Button>
         {/if}
-        <Dropdown
-          options={dropdownOptions}
-          onSelect={handleDropdownAction}
-          align={dropdownAlign}
-          ariaLabel={t("tunnel_options")}
-        >
-          {#snippet children()}
-            <Menu size={16} />
-          {/snippet}
-        </Dropdown>
       </div>
     </div>
 
@@ -364,9 +246,7 @@
         class={cn(
           "flex w-full cursor-pointer items-center gap-2 border-t border-t-status-stopped bg-url-bg px-2.5 py-2",
           "transition-colors hover:bg-hover",
-          {
-            "rounded-b-card": !(tunnel.errorMessage || showLogs),
-          },
+          { "rounded-b-card": !tunnel.errorMessage },
         )}
         onclick={() => tunnel.publicUrl && copyUrl(tunnel.publicUrl)}
       >
@@ -381,42 +261,12 @@
 
     {#if tunnel.errorMessage}
       <div
-        class={cn(
-          "flex items-center gap-2 border-t border-t-status-error/70 bg-status-error/15 px-2.5 py-2 text-status-error",
-          {
-            "rounded-b-card": !showLogs,
-          },
-        )}
+        class="flex items-center gap-2 rounded-b-card border-t border-t-status-error/70 bg-status-error/15 px-2.5 py-2 text-status-error"
       >
         <span class="h-4 w-4 shrink-0"><AlertCircle size={16} /></span>
         <span class="font-mono text-xs break-words">{tunnel.errorMessage}</span>
       </div>
     {/if}
 
-    {#if showLogs}
-      <div class="overflow-hidden rounded-b-card bg-logs-bg">
-        <div
-          class="flex items-center justify-between border-b border-border px-2.5 py-1.5"
-        >
-          <span class="text-[11px] font-medium text-muted">{t("live_logs")}</span>
-          <Button variant="ghost" size="sm" icon={X} onclick={closeLogs}>
-            {t("close")}
-          </Button>
-        </div>
-        {#if loadingLogs}
-          <div
-            class="flex items-center justify-center gap-3 p-6 text-status-stopped sm:gap-2.5 sm:p-4"
-          >
-            <span>{t("loading")}</span>
-          </div>
-        {:else}
-          <pre
-            bind:this={logPre}
-            onscroll={onLogScroll}
-            class="m-0 max-h-[300px] overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-all p-4 font-mono text-[12px] leading-relaxed text-logs-text sm:p-3.5 sm:text-[11px]">{logs ||
-              t("no_logs")}</pre>
-        {/if}
-      </div>
-    {/if}
   </div>
 </div>

@@ -2,19 +2,29 @@
   import {
     Copy,
     MousePointerClick,
+    Pencil,
     QrCode as QrCodeIcon,
+    Trash2,
   } from "lucide-svelte";
   import { useProviders } from "$lib/stores/providers.svelte";
   import { useToast } from "$lib/stores/toast.svelte";
   import { useClock } from "$lib/stores/clock.svelte";
+  import { logsApi } from "$lib/api";
   import { t } from "$lib/stores/i18n.svelte";
   import { cn } from "$lib/utils/cn";
   import { formatDuration } from "$lib/utils/duration";
+  import { formatLogs } from "$lib/utils/logs";
   import QrCode from "./QrCode.svelte";
-  import type { Tunnel } from "$lib/types";
-  import { onMount } from "svelte";
+  import type { LogStream, Tunnel } from "$lib/types";
+  import { onDestroy, onMount } from "svelte";
 
-  let { tunnel }: { tunnel: Tunnel | null } = $props();
+  let {
+    tunnel,
+    onAction,
+  }: {
+    tunnel: Tunnel | null;
+    onAction: (action: string, data: unknown) => void;
+  } = $props();
 
   const providerStore = useProviders();
   const toast = useToast();
@@ -41,6 +51,65 @@
   );
 
   let qrDataUrl = $state("");
+  let logs = $state("");
+  let logPre: HTMLPreElement | undefined = $state();
+  let followBottom = $state(true);
+  let stream: LogStream | null = null;
+
+  const isRunning = $derived(
+    ["online", "starting", "connecting"].includes(tunnel?.state ?? ""),
+  );
+
+  function closeStream() {
+    stream?.close();
+    stream = null;
+  }
+
+  onDestroy(closeStream);
+
+  $effect(() => {
+    const id = tunnel?.id;
+    const running = isRunning;
+
+    closeStream();
+    logs = "";
+    followBottom = true;
+
+    if (!id || !running) return;
+
+    logsApi
+      .get(id)
+      .then((initial) => {
+        if (tunnel?.id === id) logs = formatLogs(initial);
+      })
+      .catch(() => {
+        if (tunnel?.id === id) logs = t("error_loading_logs");
+      });
+
+    stream = logsApi.createStream(id, {
+      onLine: (line) => {
+        logs = logs + "\n" + formatLogs(line);
+      },
+      onClose: () => {
+        stream = null;
+      },
+    });
+
+    return closeStream;
+  });
+
+  $effect(() => {
+    logs;
+    queueMicrotask(() => {
+      if (logPre && followBottom) logPre.scrollTop = logPre.scrollHeight;
+    });
+  });
+
+  function onLogScroll() {
+    if (!logPre) return;
+    followBottom =
+      logPre.scrollHeight - logPre.scrollTop - logPre.clientHeight < 24;
+  }
 
   async function copy() {
     if (!tunnel?.publicUrl) return;
@@ -160,11 +229,49 @@
 
       {#if tunnel.errorMessage}
         <p
-          class="m-0 rounded-control border border-status-error/40 bg-status-error/10 px-2.5 py-1.5 font-mono text-xs break-words text-status-error"
+          class="m-0 mb-3 rounded-control border border-status-error/40 bg-status-error/10 px-2.5 py-1.5 font-mono text-xs break-words text-status-error"
         >
           {tunnel.errorMessage}
         </p>
       {/if}
+
+      <div class="mt-3 border-t border-border-light pt-3">
+        <p class="m-0 mb-1.5 text-xs font-medium text-text-muted">
+          {t("detail_logs")}
+        </p>
+        {#if !isRunning}
+          <p class="m-0 text-xs text-text-muted italic">
+            {t("detail_logs_idle")}
+          </p>
+        {:else}
+          <pre
+            bind:this={logPre}
+            onscroll={onLogScroll}
+            class="m-0 max-h-48 overflow-x-hidden overflow-y-auto rounded-control bg-logs-bg p-2 font-mono text-[11px] leading-relaxed break-all whitespace-pre-wrap text-logs-text">{logs ||
+              t("no_logs")}</pre>
+        {/if}
+      </div>
+
+      <div class="mt-3 flex gap-2 border-t border-border-light pt-3">
+        <button
+          type="button"
+          onclick={() => onAction("edit", tunnel.id)}
+          disabled={isRunning}
+          class="inline-flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-control border border-border bg-input-bg px-3 py-1.5 text-xs text-text transition-colors hover:border-primary/50 hover:bg-hover disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Pencil size={13} />
+          {t("edit")}
+        </button>
+        <button
+          type="button"
+          onclick={() => onAction("delete", tunnel)}
+          disabled={isRunning}
+          class="inline-flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-control border border-status-error/40 bg-status-error/10 px-3 py-1.5 text-xs text-status-error transition-colors hover:bg-status-error/20 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Trash2 size={13} />
+          {t("delete")}
+        </button>
+      </div>
     {/if}
   </div>
 </section>

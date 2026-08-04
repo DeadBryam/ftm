@@ -9,6 +9,7 @@
   import ConnectionsPanel from "$lib/components/ConnectionsPanel.svelte";
   import ConnectionModal from "$lib/components/ConnectionModal.svelte";
   import DetailPanel from "$lib/components/DetailPanel.svelte";
+  import OverviewBar from "$lib/components/OverviewBar.svelte";
   import type { Tunnel } from "$lib/types";
   import { cn } from "$lib/utils/cn";
   import { t } from "$lib/stores/i18n.svelte";
@@ -100,6 +101,7 @@
 
 <div class="flex min-h-0 flex-1 flex-col">
   <UpdateBanner />
+  <OverviewBar />
 
   <main
     class={cn(
@@ -117,8 +119,8 @@
       />
     </div>
 
-    <div class="min-h-0 max-md:hidden md:h-full">
-      <DetailPanel tunnel={selected} />
+    <div class="min-h-0 max-md:min-h-64 md:h-full">
+      <DetailPanel tunnel={selected} onAction={handleAction} />
     </div>
   </main>
 </div>
