@@ -62,8 +62,12 @@ jobs:
           APPIMAGE_EXTRACT_AND_RUN=1 "$APPIMAGE" --appimage-extract >/dev/null
           test -f squashfs-root/ftm-desktop.desktop
           test -f squashfs-root/ftm-desktop.png
-          echo "bundled webkit/gtk libraries:"
-          find squashfs-root -name 'libwebkit2gtk*' -o -name 'libgtk-3*' | head
+          test -f squashfs-root/usr/lib/libwebkit2gtk-4.1.so.0
+          test -f squashfs-root/usr/lib/libgtk-3.so.0
+          test -x squashfs-root/usr/lib/webkit2gtk-4.1/WebKitNetworkProcess
+          test -x squashfs-root/usr/lib/webkit2gtk-4.1/WebKitWebProcess
+          grep -q WEBKIT_EXEC_PATH squashfs-root/apprun-hooks/webkit.sh
+          echo "AppImage is self-contained"
 
       - name: Upload AppImage
         uses: actions/upload-artifact@v4
