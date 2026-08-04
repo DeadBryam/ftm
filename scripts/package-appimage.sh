@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Wrap the Wails Linux binary into an AppImage.
 #
-# One file with the icon and .desktop entry inside it, so launchers stop showing
-# a generic icon. GTK and WebKitGTK come from the system on purpose (see the
-# comment further down); everything else is bundled, which is why this must run
-# on the oldest distro we intend to support (the workflow pins ubuntu-22.04).
+# One file that runs on any distro with glibc >= the build host's, with the
+# icon and .desktop entry inside it, so launchers stop showing a generic icon.
+# GTK and WebKitGTK are bundled by linuxdeploy, which is why this must run on
+# the oldest distro we intend to support (the workflow pins ubuntu-22.04).
 #
 # Output: <out-dir>/ftm-desktop-linux-x86_64.AppImage
 #
@@ -59,49 +59,42 @@ done
 TOOLS="$WORK/tools"
 mkdir -p "$TOOLS"
 base="https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous"
+gtk="https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh"
 
 curl -fsSL -o "$TOOLS/linuxdeploy" "$base/linuxdeploy-${ARCH}.AppImage"
-chmod +x "$TOOLS/linuxdeploy"
+curl -fsSL -o "$TOOLS/linuxdeploy-plugin-gtk.sh" "$gtk"
+chmod +x "$TOOLS/linuxdeploy" "$TOOLS/linuxdeploy-plugin-gtk.sh"
 export PATH="$TOOLS:$PATH"
+
+WEBKIT_LIBEXEC="$APPDIR/usr/lib/webkit2gtk-4.1"
+mkdir -p "$WEBKIT_LIBEXEC"
+
+found_helpers=0
+for candidate in /usr/lib/*/webkit2gtk-4.1 /usr/libexec/webkit2gtk-4.1 /usr/lib/webkit2gtk-4.1; do
+  if [ -f "$candidate/WebKitNetworkProcess" ]; then
+    cp -a "$candidate/." "$WEBKIT_LIBEXEC/"
+    echo "Bundled WebKit helpers from $candidate"
+    found_helpers=1
+    break
+  fi
+done
+
+if [ "$found_helpers" -eq 0 ]; then
+  echo "Could not find WebKitNetworkProcess on this host; install libwebkit2gtk-4.1-0" >&2
+  exit 1
+fi
 
 "$TOOLS/linuxdeploy" \
   --appdir "$APPDIR" \
   --executable "$APPDIR/usr/bin/ftm-desktop" \
   --desktop-file "$APPDIR/usr/share/applications/ftm-desktop.desktop" \
-  --icon-file "$APPDIR/usr/share/icons/hicolor/256x256/apps/ftm-desktop.png"
-
-# WebKitGTK resolves its helper processes from PKGLIBEXECDIR, a path baked in
-# when the library was compiled, and only honours WEBKIT_EXEC_PATH in developer
-# builds. A bundled copy would therefore look for its helpers under the build
-# host's absolute path and abort on every other distro, so the GTK and WebKit
-# stack has to come from the system.
-for pattern in 'libwebkit2gtk-*' 'libjavascriptcoregtk-*' 'libgtk-3*' 'libgdk-3*' \
-               'libgtk-x11*' 'libgdk-x11*' 'libwebkitgtk*'; do
-  find "$APPDIR/usr/lib" -name "$pattern" -delete 2>/dev/null || true
-done
+  --icon-file "$APPDIR/usr/share/icons/hicolor/256x256/apps/ftm-desktop.png" \
+  --deploy-deps-only "$WEBKIT_LIBEXEC" \
+  --plugin gtk
 
 mkdir -p "$APPDIR/apprun-hooks"
 cat > "$APPDIR/apprun-hooks/webkit.sh" <<'HOOK'
-webkit_present=0
-for dir in /usr/lib /usr/lib64 /usr/lib/x86_64-linux-gnu /lib/x86_64-linux-gnu; do
-  if [ -e "$dir/libwebkit2gtk-4.1.so.0" ]; then
-    webkit_present=1
-    break
-  fi
-done
-
-if [ "$webkit_present" -eq 0 ] && command -v ldconfig >/dev/null 2>&1; then
-  ldconfig -p 2>/dev/null | grep -q 'libwebkit2gtk-4.1\.so\.0' && webkit_present=1
-fi
-
-if [ "$webkit_present" -eq 0 ]; then
-  echo "Foundry Tunnel Manager needs WebKitGTK 4.1, which is not installed." >&2
-  echo "  Debian/Ubuntu:  sudo apt install libwebkit2gtk-4.1-0" >&2
-  echo "  Arch:           sudo pacman -S webkit2gtk-4.1" >&2
-  echo "  Fedora:         sudo dnf install webkit2gtk4.1" >&2
-  exit 1
-fi
-
+export WEBKIT_EXEC_PATH="$APPDIR/usr/lib/webkit2gtk-4.1"
 export WEBKIT_DISABLE_COMPOSITING_MODE=1
 HOOK
 
