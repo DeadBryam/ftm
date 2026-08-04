@@ -270,9 +270,7 @@
           <span class="text-xs text-text-muted">{t("themes_hint")}</span>
         </header>
 
-        <div class="border-t border-border-light px-5 py-4">
-          <ThemeSelector families={themeFamilies} />
-        </div>
+        <ThemeSelector families={themeFamilies} />
       </section>
 
       <footer

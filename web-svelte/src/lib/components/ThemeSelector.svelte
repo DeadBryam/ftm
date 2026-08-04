@@ -54,41 +54,50 @@
 </script>
 
 <div
-  class={cn(
-    'mb-3 flex items-center justify-between gap-3 rounded-control border px-3 py-2',
-    theme.isAuto
-      ? 'border-primary/30 bg-primary/5'
-      : 'border-border-light bg-bg/40',
-  )}
+  class="border-t border-border-light"
+  role="button"
+  tabindex="0"
+  onclick={() => handleToggleAuto(!theme.isAuto)}
+  onkeydown={(e) =>
+    (e.key === 'Enter' || e.key === ' ') &&
+    (e.preventDefault(), handleToggleAuto(!theme.isAuto))}
 >
-  <div class="flex min-w-0 items-center gap-2">
-    <Monitor
-      size={15}
+  <div class="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3.5">
+    <div
       class={cn(
-        'shrink-0',
-        theme.isAuto ? 'text-primary' : 'text-text-muted',
+        'flex h-9 w-9 shrink-0 items-center justify-center rounded-control transition-colors',
+        theme.isAuto ? 'bg-primary/15 text-primary' : 'bg-secondary text-text-muted',
       )}
-    />
-    <span class="truncate text-sm font-medium text-text-heading">
-      {t('theme_match_system')}
-    </span>
+    >
+      <Monitor size={17} />
+    </div>
+    <div class="min-w-0">
+      <p class="m-0 text-sm font-medium text-text-heading">
+        {t('theme_match_system')}
+      </p>
+      <p class="m-0 truncate text-xs text-text-muted">
+        {theme.isAuto ? t('theme_auto') : t('theme_manual')}
+      </p>
+    </div>
+    <div role="presentation" onclick={(e) => e.stopPropagation()}>
+      <SettingsToggle checked={theme.isAuto} onchange={handleToggleAuto} />
+    </div>
   </div>
-  <SettingsToggle checked={theme.isAuto} onchange={handleToggleAuto} />
 </div>
 
 <div
   role="radiogroup"
   aria-label={t('theme_match_system')}
-  class="grid grid-cols-3 gap-2"
+  class="grid grid-cols-3 gap-2 px-5 py-4"
 >
   {#each families as family (family.id)}
     {@const active = activeFamily?.id === family.id}
     <div
       class={cn(
-        'flex cursor-pointer flex-col items-stretch gap-2 rounded-control border p-2.5 transition-colors',
+        'flex cursor-pointer flex-col items-stretch gap-2 rounded-control p-2.5 transition-colors',
         active
-          ? 'border-primary bg-primary/5'
-          : 'border-border-light bg-bg/40 hover:border-primary/40 hover:bg-hover',
+          ? 'bg-primary/10 ring-1 ring-primary'
+          : 'bg-secondary/50 hover:bg-hover ring-1 ring-transparent',
       )}
       role="radio"
       aria-checked={active}
@@ -117,39 +126,41 @@
 
 {#if !theme.isAuto && activeFamily}
   <div
-    class="mt-3 flex flex-wrap gap-1.5"
+    class="border-t border-border-light px-5 py-3.5"
     role="radiogroup"
     aria-label={t('theme_dark')}
   >
-    <button
-      type="button"
-      role="radio"
-      aria-checked={activeMode === 'dark'}
-      onclick={() => theme.setManual(activeFamily.dark.id)}
-      class={cn(
-        'inline-flex cursor-pointer items-center gap-1.5 rounded-control border px-3 py-1.5 text-sm transition-all',
-        activeMode === 'dark'
-          ? 'border-primary bg-primary text-btn-text shadow-sm'
-          : 'border-border bg-input-bg text-text hover:border-primary/50 hover:bg-hover',
-      )}
-    >
-      <Moon size={13} />
-      {t('theme_dark')}
-    </button>
-    <button
-      type="button"
-      role="radio"
-      aria-checked={activeMode === 'light'}
-      onclick={() => theme.setManual(activeFamily.light.id)}
-      class={cn(
-        'inline-flex cursor-pointer items-center gap-1.5 rounded-control border px-3 py-1.5 text-sm transition-all',
-        activeMode === 'light'
-          ? 'border-primary bg-primary text-btn-text shadow-sm'
-          : 'border-border bg-input-bg text-text hover:border-primary/50 hover:bg-hover',
-      )}
-    >
-      <Sun size={13} />
-      {t('theme_light')}
-    </button>
+    <div class="flex flex-wrap gap-1.5">
+      <button
+        type="button"
+        role="radio"
+        aria-checked={activeMode === 'dark'}
+        onclick={() => theme.setManual(activeFamily.dark.id)}
+        class={cn(
+          'inline-flex cursor-pointer items-center gap-1.5 rounded-control border px-3 py-1.5 text-sm transition-all',
+          activeMode === 'dark'
+            ? 'border-primary bg-primary text-btn-text shadow-sm'
+            : 'border-border bg-input-bg text-text hover:border-primary/50 hover:bg-hover',
+        )}
+      >
+        <Moon size={13} />
+        {t('theme_dark')}
+      </button>
+      <button
+        type="button"
+        role="radio"
+        aria-checked={activeMode === 'light'}
+        onclick={() => theme.setManual(activeFamily.light.id)}
+        class={cn(
+          'inline-flex cursor-pointer items-center gap-1.5 rounded-control border px-3 py-1.5 text-sm transition-all',
+          activeMode === 'light'
+            ? 'border-primary bg-primary text-btn-text shadow-sm'
+            : 'border-border bg-input-bg text-text hover:border-primary/50 hover:bg-hover',
+        )}
+      >
+        <Sun size={13} />
+        {t('theme_light')}
+      </button>
+    </div>
   </div>
 {/if}
