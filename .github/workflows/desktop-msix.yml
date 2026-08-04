@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Package version (e.g. 0.10.0). Defaults to 0.0.0+run_id'
+        description: 'Package version (e.g. 0.11.0). Revision is always 0. Defaults to 0.0.<run_number>.0'
         required: false
         default: ''
       identity_name:
@@ -74,7 +74,7 @@ jobs:
         run: |
           $ver = $env:INPUT_VERSION
           if ([string]::IsNullOrWhiteSpace($ver)) {
-            $ver = "0.0.0.${{ github.run_number }}"
+            $ver = "0.0.${{ github.run_number }}.0"
           }
           $id = $env:INPUT_IDENTITY
           if ([string]::IsNullOrWhiteSpace($id)) { $id = $env:SECRET_IDENTITY }

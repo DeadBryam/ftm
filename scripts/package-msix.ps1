@@ -112,6 +112,10 @@ function ConvertTo-FourPartVersion {
     $parts = @($clean -split '\.')
     while ($parts.Count -lt 4) { $parts += '0' }
     if ($parts.Count -gt 4) { $parts = $parts[0..3] }
+    if ($parts[3] -ne '0') {
+        Write-Warning "Revision $($parts[3]) is rejected by the Store; forcing 0."
+        $parts[3] = '0'
+    }
     return ($parts -join '.')
 }
 
