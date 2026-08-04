@@ -49,7 +49,7 @@
 
   let {
     variant = "default",
-    size = "md",
+    size = "sm",
     disabled = false,
     type = "button",
     class: className = "",

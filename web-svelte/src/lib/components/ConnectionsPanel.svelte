@@ -107,7 +107,7 @@
             {t("tunnels_desc")}
           </p>
           {#if onCreateFirst}
-            <Button variant="primary" size="md" onclick={onCreateFirst}>
+            <Button variant="primary"  onclick={onCreateFirst}>
               {t("create_first")}
             </Button>
           {/if}
