@@ -3,6 +3,9 @@
   import { useUpdate } from '$lib/stores/update.svelte';
   import { t } from '$lib/stores/i18n.svelte';
   import { subscribeWsMessages } from '$lib/api/ws';
+  import { cn } from '$lib/utils/cn';
+  import Button from './Button.svelte';
+
   const update = useUpdate();
 
   onMount(() => {
@@ -27,7 +30,9 @@
 
 {#if update.info?.hasUpdate}
   <div
-    class="mb-3 flex flex-wrap items-center gap-2 rounded-panel border border-primary/30 bg-primary/10 px-3 py-2 text-sm"
+    class={cn(
+      "ftm-enter mb-3 flex flex-wrap items-center gap-2 rounded-panel border border-primary/30 bg-primary/15 px-3 py-2 text-sm text-text-heading",
+    )}
   >
     <div class="flex items-center gap-3 flex-wrap">
       <span class="font-semibold text-primary">
@@ -47,12 +52,13 @@
       {#if update.applying}
         <span class="text-text-muted">{t('update_applying')}</span>
       {:else}
-        <button
-          class="px-3 py-1.5 rounded-md bg-primary text-white font-medium hover:bg-primary/90 transition-colors cursor-pointer"
+        <Button
+          variant="primary"
+          size="sm"
           onclick={() => update.apply()}
         >
           {t('update_web_button')}
-        </button>
+        </Button>
       {/if}
     </div>
   </div>
@@ -60,7 +66,9 @@
 
 {#if update.error}
   <div
-    class="mb-3 flex items-center gap-2 rounded-panel border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700"
+    class={cn(
+      "ftm-enter mb-3 flex items-center gap-2 rounded-panel border border-status-error/40 bg-status-error/10 px-3 py-2 text-sm text-status-error",
+    )}
   >
     {t('update_apply_failed', { 0: update.error })}
   </div>
