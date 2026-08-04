@@ -7,6 +7,7 @@ import (
 
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/providers"
+	"github.com/sthbryan/ftm/internal/proxy"
 )
 
 type ManagedProcess struct {
@@ -16,6 +17,7 @@ type ManagedProcess struct {
 	LogBuffer      *LogBuffer
 	Status         config.TunnelStatus
 	PublicURL      string
+	Proxy          *proxy.Proxy
 	OnUpdate       func(config.TunnelStatus)
 	logsMu         sync.RWMutex
 	logSubscribers map[chan string]struct{}
@@ -40,6 +42,15 @@ func (mp *ManagedProcess) addLogSubscriber() (chan string, func()) {
 	}
 
 	return ch, cancel
+}
+
+func (mp *ManagedProcess) closeProxy() {
+	if mp.Proxy == nil {
+		return
+	}
+
+	_ = mp.Proxy.Close()
+	mp.Proxy = nil
 }
 
 func (mp *ManagedProcess) publishLog(line string) {

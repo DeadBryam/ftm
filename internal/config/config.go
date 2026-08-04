@@ -15,7 +15,7 @@ const (
 	NotificationGranted  = "granted"
 	NotificationRejected = "rejected"
 
-	ConfigVersion = 2
+	ConfigVersion = 3
 
 	LanguageAuto = "auto"
 )
@@ -28,6 +28,7 @@ type Config struct {
 
 	NotificationsStatus string `yaml:"notifications_status"`
 	NotificationSound   bool   `yaml:"notification_sound"`
+	CountVisitors       bool   `yaml:"count_visitors"`
 
 	ExpirationThresholds      []int          `yaml:"expiration_thresholds"`
 	ProviderExpirationMinutes map[string]int `yaml:"provider_expiration_minutes"`
@@ -40,6 +41,7 @@ func DefaultConfig() *Config {
 		Tunnels:              []TunnelConfig{},
 		NotificationsStatus:  NotificationPending,
 		NotificationSound:    true,
+		CountVisitors:        true,
 		ExpirationThresholds: []int{30, 15, 10, 5, 1},
 		ProviderExpirationMinutes: map[string]int{
 			"pinggy":       60,
@@ -58,6 +60,11 @@ func (c *Config) migrate() bool {
 		if c.Language == "" || c.Language == "en" {
 			c.Language = LanguageAuto
 		}
+		changed = true
+	}
+
+	if c.Version < 3 {
+		c.CountVisitors = true
 		changed = true
 	}
 

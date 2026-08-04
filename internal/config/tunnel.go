@@ -45,27 +45,26 @@ type TunnelConfig struct {
 }
 
 type TunnelStatus struct {
-	ID           string
-	Name         string
-	Provider     Provider
-	LocalPort    int
-	PublicURL    string
-	State        TunnelState
-	ErrorMessage string
-	LogLines     []string
-	Players      int
-	MaxPlayers   int
-	ExpiresAt    int64
-	StartedAt    int64
+	ID             string
+	Name           string
+	Provider       Provider
+	LocalPort      int
+	PublicURL      string
+	State          TunnelState
+	ErrorMessage   string
+	LogLines       []string
+	Visitors       int
+	ActiveSessions int
+	ExpiresAt      int64
+	StartedAt      int64
 }
 
 func (tc *TunnelConfig) Status() TunnelStatus {
 	return TunnelStatus{
-		ID:         tc.ID,
-		Name:       tc.Name,
-		Provider:   tc.Provider,
-		LocalPort:  tc.LocalPort,
-		MaxPlayers: 8,
-		State:      TunnelStateStopped,
+		ID:        tc.ID,
+		Name:      tc.Name,
+		Provider:  tc.Provider,
+		LocalPort: tc.LocalPort,
+		State:     TunnelStateStopped,
 	}
 }

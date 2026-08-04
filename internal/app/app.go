@@ -50,6 +50,7 @@ func New() (*App, error) {
 
 	app.Manager.SetProgressChannel(app.DownloadProgress)
 	app.Manager.SetProviderExpiration(cfg.ProviderExpirationMinutes)
+	app.Manager.SetVisitorTracking(cfg.CountVisitors)
 	notifications.Init()
 	notifications.SetSoundEnabled(cfg.NotificationSound)
 	notifications.SetNotificationsEnabled(cfg.NotificationsStatus == config.NotificationGranted)
