@@ -81,18 +81,27 @@ DESKTOP_BIN := ftm-desktop
 ifeq ($(OS),Windows_NT)
 DESKTOP_BIN := ftm-desktop.exe
 endif
+# Wails v3 defaults to webkitgtk-6.0 (GTK4) on Linux, but the bundled AppImage
+# helpers target WebKitGTK 4.1 (GTK3), so force the gtk3 tag on Linux hosts.
+UNAME_S := $(shell uname -s)
+DESKTOP_DEV_TAGS_ARG :=
+DESKTOP_PROD_TAGS_ARG := production
+ifeq ($(UNAME_S),Linux)
+DESKTOP_DEV_TAGS_ARG := gtk3
+DESKTOP_PROD_TAGS_ARG := production,gtk3
+endif
 
 .PHONY: desktop-dev
 desktop-dev: web
 	@echo "Building desktop (dev)..."
 	@mkdir -p $(DESKTOP_OUT)
-	CGO_ENABLED=1 go build -o $(DESKTOP_OUT)/$(DESKTOP_BIN) ./desktop
+	CGO_ENABLED=1 go build $(if $(DESKTOP_DEV_TAGS_ARG),-tags $(DESKTOP_DEV_TAGS_ARG),) -o $(DESKTOP_OUT)/$(DESKTOP_BIN) ./desktop
 
 .PHONY: desktop
 desktop: web
 	@echo "Building desktop (production tags)..."
 	@mkdir -p $(DESKTOP_OUT)
-	CGO_ENABLED=1 go build -tags production -ldflags "-s -w" -o $(DESKTOP_OUT)/$(DESKTOP_BIN) ./desktop
+	CGO_ENABLED=1 go build $(if $(DESKTOP_PROD_TAGS_ARG),-tags $(DESKTOP_PROD_TAGS_ARG),) -ldflags "-s -w" -o $(DESKTOP_OUT)/$(DESKTOP_BIN) ./desktop
 
 .PHONY: desktop-winres
 desktop-winres:
