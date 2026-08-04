@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    ChevronDown,
     Copy,
     MousePointerClick,
     Pencil,
@@ -52,7 +53,10 @@
     tunnel?.expiresAt && isOnline ? tunnel.expiresAt - clock.now : 0,
   );
 
+  const LOGS_OPEN_KEY = "ftm-detail-logs-open";
+
   let qrDataUrl = $state("");
+  let logsOpen = $state(true);
   let logs = $state("");
   let logPre: HTMLPreElement | undefined = $state();
   let followBottom = $state(true);
@@ -61,6 +65,15 @@
   const isRunning = $derived(
     ["online", "starting", "connecting"].includes(tunnel?.state ?? ""),
   );
+
+  onMount(() => {
+    logsOpen = localStorage.getItem(LOGS_OPEN_KEY) !== "false";
+  });
+
+  function toggleLogs() {
+    logsOpen = !logsOpen;
+    localStorage.setItem(LOGS_OPEN_KEY, String(logsOpen));
+  }
 
   function closeStream() {
     stream?.close();
@@ -72,12 +85,13 @@
   $effect(() => {
     const id = tunnel?.id;
     const running = isRunning;
+    const open = logsOpen;
 
     closeStream();
     logs = "";
     followBottom = true;
 
-    if (!id || !running) return;
+    if (!id || !running || !open) return;
 
     logsApi
       .get(id)
@@ -261,14 +275,28 @@
       {/if}
 
       <div class="mt-3 border-t border-border-light pt-3">
-        <p class="m-0 mb-1.5 text-xs font-medium text-text-muted">
-          {t("detail_logs")}
-        </p>
-        {#if !isRunning}
+        <button
+          type="button"
+          onclick={toggleLogs}
+          aria-expanded={logsOpen}
+          class="mb-1.5 flex w-full cursor-pointer items-center justify-between gap-2 text-xs font-medium text-text-muted transition-colors hover:text-text"
+        >
+          <span>{t("detail_logs")}</span>
+          <span class="flex items-center gap-1">
+            <span class="text-[11px] font-normal">
+              {logsOpen ? t("detail_logs_hide") : t("detail_logs_show")}
+            </span>
+            <ChevronDown
+              size={14}
+              class={cn("transition-transform", !logsOpen && "-rotate-90")}
+            />
+          </span>
+        </button>
+        {#if logsOpen && !isRunning}
           <p class="m-0 text-xs text-text-muted italic">
             {t("detail_logs_idle")}
           </p>
-        {:else}
+        {:else if logsOpen}
           <pre
             bind:this={logPre}
             onscroll={onLogScroll}
