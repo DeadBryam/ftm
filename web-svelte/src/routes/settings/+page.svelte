@@ -128,17 +128,15 @@
         </header>
 
         <div
-          class="border-t border-border-light"
-          role="presentation"
-          onclick={() =>
-            notifActive
-              ? settingsStore.settings.notifications_enabled === "granted" &&
-                toggleNotifications()
-              : toggleNotifications()
-          }
+          class="border-t border-border-light cursor-pointer transition-colors hover:bg-hover"
+          role="button"
+          tabindex="0"
+          onclick={toggleNotifications}
+          onkeydown={(e) =>
+            (e.key === "Enter" || e.key === " ") && (e.preventDefault(), toggleNotifications())}
         >
           <div
-            class="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3.5 transition-colors hover:bg-hover"
+            class="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3.5"
           >
             <div
               class={cn(
@@ -171,49 +169,53 @@
               />
             </div>
           </div>
+        </div>
 
+        <div
+          class="border-t border-border-light cursor-pointer transition-colors hover:bg-hover"
+          role="button"
+          tabindex="0"
+          onclick={toggleSound}
+          onkeydown={(e) =>
+            (e.key === "Enter" || e.key === " ") && (e.preventDefault(), toggleSound())}
+        >
           <div
-            class="border-t border-border-light"
-            role="presentation"
-            onclick={() => toggleSound()}
+            class="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3.5"
           >
             <div
-              class="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3.5 transition-colors hover:bg-hover"
+              class={cn(
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-control transition-colors",
+                soundActive ? "bg-primary/15 text-primary" : "bg-secondary text-text-muted",
+              )}
             >
-              <div
-                class={cn(
-                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-control transition-colors",
-                  soundActive ? "bg-primary/15 text-primary" : "bg-secondary text-text-muted",
-                )}
-              >
-                {#if soundActive}
-                  <Volume2 size={17} />
-                {:else}
-                  <VolumeX size={17} />
-                {/if}
-              </div>
-              <div class="min-w-0">
-                <p class="m-0 text-sm font-medium text-text-heading">
-                  {t("sound_effects")}
-                </p>
-                <p class="m-0 truncate text-xs text-text-muted">
-                  {t("settings_sound_desc")}
-                </p>
-              </div>
-              <div
-                role="presentation"
-                onclick={(e) => e.stopPropagation()}
-              >
-                <SettingsToggle
-                  disabled={saving}
-                  checked={soundActive}
-                  onchange={toggleSound}
-                />
-              </div>
+              {#if soundActive}
+                <Volume2 size={17} />
+              {:else}
+                <VolumeX size={17} />
+              {/if}
+            </div>
+            <div class="min-w-0">
+              <p class="m-0 text-sm font-medium text-text-heading">
+                {t("sound_effects")}
+              </p>
+              <p class="m-0 truncate text-xs text-text-muted">
+                {t("settings_sound_desc")}
+              </p>
+            </div>
+            <div
+              role="presentation"
+              onclick={(e) => e.stopPropagation()}
+            >
+              <SettingsToggle
+                disabled={saving}
+                checked={soundActive}
+                onchange={toggleSound}
+              />
             </div>
           </div>
+        </div>
 
-          <div class="border-t border-border-light">
+        <div class="border-t border-border-light">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4 px-5 pt-3.5 pb-2">
               <div
                 class="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-secondary text-text-muted"
@@ -255,7 +257,6 @@
               {/each}
             </div>
           </div>
-        </div>
       </section>
 
       <section
