@@ -59,3 +59,4 @@ AGENTS.md
 PLAN.md
 # Generated Windows resources
 desktop/*.syso
+__pycache__/

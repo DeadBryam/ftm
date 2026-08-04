@@ -66,7 +66,8 @@ jobs:
           test -f squashfs-root/usr/lib/libgtk-3.so.0
           test -x squashfs-root/usr/lib/webkit2gtk-4.1/WebKitNetworkProcess
           test -x squashfs-root/usr/lib/webkit2gtk-4.1/WebKitWebProcess
-          grep -q WEBKIT_EXEC_PATH squashfs-root/apprun-hooks/webkit.sh
+          grep -q WEBKIT_LINK squashfs-root/apprun-hooks/webkit.sh
+          grep -aq '/tmp/ftm-webkit-4.1' squashfs-root/usr/lib/libwebkit2gtk-4.1.so.0
           echo "AppImage is self-contained"
 
       - name: Upload AppImage

@@ -110,15 +110,7 @@ chmod +x ftm-desktop-linux-x86_64.AppImage
 
 One file, no install step, icon and menu entry included. Runs on any distro with glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+, recent Arch).
 
-It uses the system's WebKitGTK 4.1 rather than bundling it, because WebKitGTK resolves its helper processes from a path fixed at compile time and a bundled copy only works on the distro it was built on. Most desktops already have it; if not:
-
-```bash
-sudo apt install libwebkit2gtk-4.1-0   # Debian/Ubuntu
-sudo pacman -S webkit2gtk-4.1          # Arch
-sudo dnf install webkit2gtk4.1         # Fedora
-```
-
-The app checks on startup and prints the right command for your distro if it is missing.
+WebKitGTK 4.1 is bundled into the image (GTK, WebKit, and the helper binaries such as `WebKitNetworkProcess`/`WebKitWebProcess`). WebKitGTK release builds resolve those helpers from a path baked into `libwebkit2gtk` at compile time, so the packaging script (`scripts/relocate-webkit.py`) rewrites that path to a short fixed location and the `AppRun` hook symlinks it back into the AppDir. That's why the AppImage is genuinely portable rather than only working on the build host.
 
 | | |
 |---|---|
