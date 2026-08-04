@@ -19,6 +19,17 @@ const (
 
 var ErrNotSelfUpdatable = errors.New("this installation cannot replace its own binary")
 
+func (m Method) HintKey() string {
+	switch m {
+	case MethodStore:
+		return "update_manual_store"
+	case MethodHomebrew:
+		return "update_manual_homebrew"
+	default:
+		return "update_manual_download"
+	}
+}
+
 var desktopBuild bool
 
 func MarkDesktop() {

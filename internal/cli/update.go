@@ -32,7 +32,7 @@ func Update(checkOnly bool) error {
 	}
 
 	if info.Method != updater.MethodSelf {
-		fmt.Println(manualUpdateHint(info.Method))
+		fmt.Println(i18n.T(info.Method.HintKey()))
 		return nil
 	}
 
@@ -42,15 +42,4 @@ func Update(checkOnly bool) error {
 	}
 	fmt.Println(i18n.TF("update_success", info.LatestVersion))
 	return nil
-}
-
-func manualUpdateHint(method updater.Method) string {
-	switch method {
-	case updater.MethodStore:
-		return i18n.T("update_manual_store")
-	case updater.MethodHomebrew:
-		return i18n.T("update_manual_homebrew")
-	default:
-		return i18n.T("update_manual_download")
-	}
 }
