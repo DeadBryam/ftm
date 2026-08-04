@@ -3,7 +3,7 @@ package i18n
 import (
 	"embed"
 	"fmt"
-	"path/filepath"
+	"path"
 	"strings"
 	"sync"
 
@@ -202,7 +202,7 @@ func LoadFromFS(fs embed.FS, prefix string) error {
 	languages := SupportedLanguages()
 
 	for _, lang := range languages {
-		path := filepath.Join(prefix, lang+".yaml")
+		path := path.Join(prefix, lang+".yaml")
 		content, err := fs.ReadFile(path)
 		if err != nil {
 			continue
