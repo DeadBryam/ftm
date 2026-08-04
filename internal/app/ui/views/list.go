@@ -12,13 +12,15 @@ import (
 )
 
 type TunnelViewData struct {
-	Name        string
-	Provider    string
-	LocalPort   int
-	StatusState int
-	PublicURL   string
-	ErrorMsg    string
-	Logs        []string
+	Name           string
+	Provider       string
+	LocalPort      int
+	StatusState    int
+	PublicURL      string
+	Visitors       int
+	ActiveSessions int
+	ErrorMsg       string
+	Logs           []string
 }
 
 type ListView struct {
@@ -243,15 +245,17 @@ func (l *ListView) renderDetailPanel(width, height int) string {
 	item := l.Items[l.Cursor]
 
 	panel := components.DetailPanel{
-		Name:        item.Name,
-		Provider:    item.Provider,
-		LocalPort:   item.LocalPort,
-		StatusState: item.StatusState,
-		PublicURL:   item.PublicURL,
-		ErrorMsg:    item.ErrorMsg,
-		Logs:        item.Logs,
-		Width:       width,
-		Height:      height,
+		Name:           item.Name,
+		Provider:       item.Provider,
+		LocalPort:      item.LocalPort,
+		StatusState:    item.StatusState,
+		PublicURL:      item.PublicURL,
+		Visitors:       item.Visitors,
+		ActiveSessions: item.ActiveSessions,
+		ErrorMsg:       item.ErrorMsg,
+		Logs:           item.Logs,
+		Width:          width,
+		Height:         height,
 	}
 
 	return panel.Render()

@@ -53,7 +53,7 @@ func (h *Handlers) Route(w http.ResponseWriter, r *http.Request) {
 	case path == "/api/i18n":
 		h.handleI18n(w, r)
 	case path == "/api/i18n/current":
-		h.handleI18nCurrent(w, r)
+		h.handleI18nCurrent(w)
 	case path == "/api/update":
 		h.handleUpdate(w, r)
 	case path == "/api/detect-port":
@@ -83,11 +83,17 @@ func (h *Handlers) setCORS(w http.ResponseWriter, r *http.Request) bool {
 
 func (h *Handlers) tunnelToMap(t config.TunnelConfig) map[string]interface{} {
 	item := map[string]interface{}{
-		"id":       t.ID,
-		"name":     t.Name,
-		"provider": string(t.Provider),
-		"port":     t.LocalPort,
-		"state":    "stopped",
+		"id":             t.ID,
+		"name":           t.Name,
+		"provider":       string(t.Provider),
+		"port":           t.LocalPort,
+		"state":          "stopped",
+		"publicUrl":      "",
+		"errorMessage":   "",
+		"expiresAt":      int64(0),
+		"startedAt":      int64(0),
+		"visitors":       0,
+		"activeSessions": 0,
 	}
 
 	if status, ok := h.manager.GetStatus(t.ID); ok {
@@ -96,6 +102,8 @@ func (h *Handlers) tunnelToMap(t config.TunnelConfig) map[string]interface{} {
 		item["state"] = string(status.State)
 		item["expiresAt"] = status.ExpiresAt
 		item["startedAt"] = status.StartedAt
+		item["visitors"] = status.Visitors
+		item["activeSessions"] = status.ActiveSessions
 	}
 
 	if item["state"] == "stopped" {
@@ -108,30 +116,8 @@ func (h *Handlers) tunnelToMap(t config.TunnelConfig) map[string]interface{} {
 }
 
 func (h *Handlers) writeTunnelJSON(w http.ResponseWriter, t config.TunnelConfig) {
-	state := "stopped"
-	var publicURL, errorMessage string
-	var expiresAt, startedAt int64
-
-	if tunnelStatus, ok := h.manager.GetStatus(t.ID); ok {
-		publicURL = tunnelStatus.PublicURL
-		errorMessage = tunnelStatus.ErrorMessage
-		state = string(tunnelStatus.State)
-		expiresAt = tunnelStatus.ExpiresAt
-		startedAt = tunnelStatus.StartedAt
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"id":           t.ID,
-		"name":         t.Name,
-		"provider":     string(t.Provider),
-		"port":         t.LocalPort,
-		"state":        state,
-		"publicUrl":    publicURL,
-		"errorMessage": errorMessage,
-		"expiresAt":    expiresAt,
-		"startedAt":    startedAt,
-	})
+	json.NewEncoder(w).Encode(h.tunnelToMap(t))
 }
 
 func MarshalJSON(v interface{}) ([]byte, error) {

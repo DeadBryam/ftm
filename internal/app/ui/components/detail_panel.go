@@ -10,15 +10,17 @@ import (
 )
 
 type DetailPanel struct {
-	Name        string
-	Provider    string
-	LocalPort   int
-	StatusState int
-	PublicURL   string
-	ErrorMsg    string
-	Logs        []string
-	Width       int
-	Height      int
+	Name           string
+	Provider       string
+	LocalPort      int
+	StatusState    int
+	PublicURL      string
+	Visitors       int
+	ActiveSessions int
+	ErrorMsg       string
+	Logs           []string
+	Width          int
+	Height         int
 }
 
 func NewDetailPanel() *DetailPanel {
@@ -87,6 +89,18 @@ func (d *DetailPanel) details() string {
 			Foreground(ui.ThemeDefault.Bronze).
 			Render(i18n.T("press_c_copy"))
 		b.WriteString(copyHint)
+		b.WriteString("\n\n")
+	}
+
+	if d.StatusState == TunnelStateOnline {
+		b.WriteString(labelStyle.Render(i18n.T("detail_sessions") + ":"))
+		b.WriteString(" ")
+		b.WriteString(textStyle.Render(fmt.Sprintf("%d", d.ActiveSessions)))
+		b.WriteString("\n")
+
+		b.WriteString(labelStyle.Render(i18n.T("detail_visitors") + ":"))
+		b.WriteString(" ")
+		b.WriteString(textStyle.Render(fmt.Sprintf("%d", d.Visitors)))
 		b.WriteString("\n\n")
 	}
 

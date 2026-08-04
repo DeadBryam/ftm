@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"strings"
 
@@ -99,32 +98,14 @@ func (p *CloudflaredProvider) Start(ctx context.Context, tunnel config.TunnelCon
 	return proc, nil
 }
 
-var cloudflareURLRegex = regexp.MustCompile(`https?://[a-zA-Z0-9-]+\.trycloudflare\.com`)
-
 func (p *CloudflaredProvider) ParseURL(line string) string {
-	matches := cloudflareURLRegex.FindStringSubmatch(line)
-	if len(matches) > 0 {
-		return matches[0]
+	if strings.Contains(line, "dest=") {
+		return ""
 	}
 
-	lineLower := strings.ToLower(line)
-	if idx := strings.Index(lineLower, "https://"); idx != -1 {
-		rest := line[idx:]
-		if endIdx := strings.IndexAny(rest, " \t\n\r"); endIdx != -1 {
-			rest = rest[:endIdx]
-		}
-		if strings.Contains(strings.ToLower(rest), "trycloudflare.com") {
-			return rest
-		}
-	}
-
-	return ""
-}
-
-func (p *CloudflaredProvider) IsReady(line string) bool {
-	line = strings.ToLower(line)
-	return strings.Contains(line, "trycloudflare.com") ||
-		strings.Contains(line, "started tunnel")
+	return providers.ExtractURL(line, func(host string) bool {
+		return providers.IsSubdomainOf(host, "trycloudflare.com")
+	})
 }
 
 func (p *CloudflaredProvider) IsInstalled() bool {

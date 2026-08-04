@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Plus, Radio, Search } from "lucide-svelte";
   import { useTunnels } from "$lib/stores/tunnels.svelte";
+  import { useToast } from "$lib/stores/toast.svelte";
   import { t } from "$lib/stores/i18n.svelte";
   import { cn } from "$lib/utils/cn";
   import TunnelCard from "./TunnelCard.svelte";
@@ -19,8 +20,25 @@
   } = $props();
 
   const store = useTunnels();
+  const toast = useToast();
 
   const SEARCH_THRESHOLD = 8;
+
+  async function start(id: string) {
+    try {
+      await store.start(id);
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
+  }
+
+  async function stop(id: string) {
+    try {
+      await store.stop(id);
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
+  }
 
   let query = $state("");
 
@@ -124,8 +142,8 @@
               {index}
               totalItems={visible.length}
               selected={tunnel.id === selectedId}
-              onStart={store.start}
-              onStop={store.stop}
+              onStart={start}
+              onStop={stop}
               {onAction}
               installProgress={store.installProgress[
                 tunnel.provider as keyof typeof store.installProgress

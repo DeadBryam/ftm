@@ -76,13 +76,15 @@ func (m *Model) collectTunnelData() []views.TunnelViewData {
 			}
 
 			data = append(data, views.TunnelViewData{
-				Name:        ti.Tunnel.Name,
-				Provider:    string(ti.Tunnel.Provider),
-				LocalPort:   ti.Tunnel.LocalPort,
-				StatusState: statusStateIndex(ti.Status.State),
-				PublicURL:   ti.Status.PublicURL,
-				ErrorMsg:    ti.Status.ErrorMessage,
-				Logs:        logs,
+				Name:           ti.Tunnel.Name,
+				Provider:       string(ti.Tunnel.Provider),
+				LocalPort:      ti.Tunnel.LocalPort,
+				StatusState:    statusStateIndex(ti.Status.State),
+				PublicURL:      ti.Status.PublicURL,
+				Visitors:       ti.Status.Visitors,
+				ActiveSessions: ti.Status.ActiveSessions,
+				ErrorMsg:       ti.Status.ErrorMessage,
+				Logs:           logs,
 			})
 		}
 	}

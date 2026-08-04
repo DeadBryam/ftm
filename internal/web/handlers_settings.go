@@ -114,7 +114,7 @@ func (h *Handlers) handleI18n(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *Handlers) handleI18nCurrent(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) handleI18nCurrent(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"translations": i18n.GetCurrentTranslations(),

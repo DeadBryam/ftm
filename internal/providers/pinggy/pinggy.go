@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/sthbryan/ftm/internal/config"
@@ -85,45 +84,27 @@ func (p *PinggyCliProvider) Start(ctx context.Context, tunnel config.TunnelConfi
 	return proc, nil
 }
 
-var pinggyRegex = regexp.MustCompile(`https?://[a-z0-9-]+\.[a-z]+\.pinggy\.(io|link)`)
-
-func (p *PinggyCliProvider) ParseURL(line string) string {
-	lineLower := strings.ToLower(line)
-
-	if strings.Contains(lineLower, "dashboard.pinggy.io") {
-		return ""
-	}
-
-	matches := pinggyRegex.FindStringSubmatch(lineLower)
-	if len(matches) > 0 {
-		return matches[0]
-	}
-
-	if strings.Contains(lineLower, "pinggy.link") ||
-		(strings.Contains(lineLower, ".pinggy.io") && !strings.Contains(lineLower, "dashboard")) {
-		if idx := strings.Index(lineLower, "https://"); idx != -1 {
-			rest := line[idx:]
-			if endIdx := strings.IndexAny(rest, " \t\n\r,"); endIdx != -1 {
-				return rest[:endIdx]
-			}
-			return rest
-		}
-		if idx := strings.Index(lineLower, "http://"); idx != -1 {
-			rest := line[idx:]
-			if endIdx := strings.IndexAny(rest, " \t\n\r,"); endIdx != -1 {
-				return rest[:endIdx]
-			}
-			return rest
-		}
-	}
-
-	return ""
+var pinggyReserved = map[string]bool{
+	"dashboard": true,
+	"docs":      true,
+	"www":       true,
 }
 
-func (p *PinggyCliProvider) IsReady(line string) bool {
-	lineLower := strings.ToLower(line)
+func (p *PinggyCliProvider) ParseURL(line string) string {
+	return providers.ExtractURL(line, isPinggyTunnelHost)
+}
 
-	return strings.Contains(lineLower, "pinggy.link") ||
-		(strings.Contains(lineLower, ".pinggy.io") && !strings.Contains(lineLower, "dashboard")) ||
-		strings.Contains(lineLower, "connected")
+func isPinggyTunnelHost(host string) bool {
+	labels := strings.Split(host, ".")
+	if len(labels) < 3 || pinggyReserved[labels[0]] {
+		return false
+	}
+
+	for _, label := range labels[1 : len(labels)-1] {
+		if strings.HasPrefix(label, "pinggy") {
+			return true
+		}
+	}
+
+	return false
 }

@@ -19,6 +19,8 @@ interface TunnelMessage {
   errorMessage?: string;
   expiresAt?: number;
   startedAt?: number;
+  visitors?: number;
+  activeSessions?: number;
   done?: boolean;
   install?: { provider: string; percent: number; step: string };
   notification?: {
@@ -67,6 +69,18 @@ function processStateMessage(msg: TunnelMessage) {
     return;
   }
 
+  if (msg.type === 'tunnel_stats' && msg.id) {
+    const current = tunnelsById[msg.id];
+    if (!current) return;
+    if (current.visitors === msg.visitors && current.activeSessions === msg.activeSessions) return;
+
+    tunnelsById = {
+      ...tunnelsById,
+      [msg.id]: { ...current, visitors: msg.visitors, activeSessions: msg.activeSessions }
+    };
+    return;
+  }
+
   const isTunnelStateMessage = msg.type === 'tunnel_state' || msg.type === undefined;
   if (!isTunnelStateMessage || !msg.id) return;
 
@@ -87,6 +101,10 @@ function processStateMessage(msg: TunnelMessage) {
   if (msg.port !== undefined) updated.port = msg.port;
   if (msg.expiresAt !== undefined) updated.expiresAt = msg.expiresAt;
   if (msg.startedAt !== undefined) updated.startedAt = msg.startedAt;
+  if (newState !== 'online') {
+    updated.visitors = 0;
+    updated.activeSessions = 0;
+  }
 
   tunnelsById = { ...tunnelsById, [msg.id]: updated };
 

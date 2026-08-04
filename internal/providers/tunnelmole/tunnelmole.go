@@ -2,12 +2,12 @@ package tunnelmole
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"strings"
 
@@ -15,7 +15,7 @@ import (
 	"github.com/sthbryan/ftm/internal/providers"
 )
 
-const errRosettaNeeded = "tunnelmole requires Rosetta 2 to run on Apple Silicon. Install it with: softwareupdate --install-rosetta"
+var ErrRosettaRequired = errors.New("tunnelmole requires Rosetta 2 to run on Apple Silicon. Install it with: softwareupdate --install-rosetta")
 
 func RosettaInstalled() bool {
 	_, err := os.Stat("/Library/Apple/usr/libexec/oah")
@@ -121,7 +121,7 @@ func (p *TunnelmoleProvider) Start(ctx context.Context, tunnel config.TunnelConf
 	}
 
 	if !RosettaInstalled() {
-		return nil, fmt.Errorf("%w: %s", fmt.Errorf("rosetta required"), errRosettaNeeded)
+		return nil, ErrRosettaRequired
 	}
 
 	ctx, cancel = context.WithCancel(baseCtx)
@@ -138,41 +138,11 @@ func (p *TunnelmoleProvider) Start(ctx context.Context, tunnel config.TunnelConf
 	return proc, nil
 }
 
-var tunnelmoleURLRegex = regexp.MustCompile(`https?://[a-zA-Z0-9-]+-ip-[0-9-]+\.tunnelmole\.net`)
-
 func (p *TunnelmoleProvider) ParseURL(line string) string {
-
-	if strings.Contains(line, "dashboard.tunnelmole.com") {
-		return ""
-	}
-
-	matches := tunnelmoleURLRegex.FindStringSubmatch(line)
-	if len(matches) > 0 {
-		return matches[0]
-	}
-
-	lineLower := strings.ToLower(line)
-	if idx := strings.Index(lineLower, "https://"); idx != -1 {
-		rest := line[idx:]
-		if endIdx := strings.IndexAny(rest, " \t\n\r)"); endIdx != -1 {
-			rest = rest[:endIdx]
+	return providers.ExtractURL(line, func(host string) bool {
+		if strings.HasPrefix(host, "dashboard.") || strings.HasPrefix(host, "www.") {
+			return false
 		}
-		lowerRest := strings.ToLower(rest)
-		if strings.Contains(lowerRest, "tunnelmole.net") &&
-			!strings.Contains(lowerRest, "dashboard") {
-			return rest
-		}
-	}
-
-	return ""
-}
-
-func (p *TunnelmoleProvider) IsReady(line string) bool {
-	lineLower := strings.ToLower(line)
-
-	if tunnelmoleURLRegex.MatchString(line) {
-		return true
-	}
-	return strings.Contains(lineLower, "your site is available at") ||
-		strings.Contains(lineLower, "tunnelmole.net")
+		return providers.IsSubdomainOf(host, "tunnelmole.net", "tunnelmole.com")
+	})
 }

@@ -50,6 +50,7 @@ func New() (*App, error) {
 
 	app.Manager.SetProgressChannel(app.DownloadProgress)
 	app.Manager.SetProviderExpiration(cfg.ProviderExpirationMinutes)
+	app.Manager.SetVisitorTracking(cfg.CountVisitors)
 	notifications.Init()
 	notifications.SetSoundEnabled(cfg.NotificationSound)
 	notifications.SetNotificationsEnabled(cfg.NotificationsStatus == config.NotificationGranted)
@@ -83,6 +84,16 @@ func New() (*App, error) {
 		case config.TunnelStateStopping:
 			notifications.NotifyTunnelStopped(status.Name)
 		}
+	})
+
+	app.Manager.SetVisitorHandler(func(status config.TunnelStatus) {
+		if app.WebServer != nil {
+			app.WebServer.BroadcastNewVisitor(status)
+		}
+		if !app.shouldUseNativeNotifications() {
+			return
+		}
+		notifications.NotifyNewVisitor(status.Name, status.Visitors)
 	})
 
 	app.Manager.SetExpirationCallbacks(

@@ -15,6 +15,7 @@ import (
 	"github.com/sthbryan/ftm/internal/providers/pinggy"
 	"github.com/sthbryan/ftm/internal/providers/ssh"
 	"github.com/sthbryan/ftm/internal/providers/tunnelmole"
+	"github.com/sthbryan/ftm/internal/proxy"
 )
 
 type Manager struct {
@@ -22,9 +23,11 @@ type Manager struct {
 	processes           map[string]*ManagedProcess
 	providers           map[config.Provider]providers.Provider
 	providerExpiration  map[string]int
+	visitorTracking     bool
 	DownloadProgress    chan providers.DownloadProgress
 	StatusChannel       chan config.TunnelStatus
 	NotificationHandler func(status config.TunnelStatus)
+	VisitorHandler      func(status config.TunnelStatus)
 	ExpirationCallbacks struct {
 		OnStart func(tunnelID, name, provider string, startedAt time.Time)
 		OnStop  func(tunnelID string)
@@ -52,8 +55,36 @@ func (m *Manager) callNotificationHandler(status config.TunnelStatus) {
 	}
 }
 
+func (m *Manager) SetVisitorHandler(handler func(config.TunnelStatus)) {
+	m.mu.Lock()
+	m.VisitorHandler = handler
+	m.mu.Unlock()
+}
+
+func (m *Manager) reportNewVisitor(tunnelID string) {
+	m.mu.RLock()
+	handler := m.VisitorHandler
+	m.mu.RUnlock()
+
+	if handler == nil {
+		return
+	}
+
+	if status, ok := m.GetStatus(tunnelID); ok && status.State == config.TunnelStateOnline {
+		handler(status)
+	}
+}
+
 func (m *Manager) SetStatusChannel(ch chan config.TunnelStatus) {
 	m.StatusChannel = ch
+}
+
+const visitorWindow = 5 * time.Minute
+
+func (m *Manager) SetVisitorTracking(enabled bool) {
+	m.mu.Lock()
+	m.visitorTracking = enabled
+	m.mu.Unlock()
 }
 
 func (m *Manager) SetProviderExpiration(minutes map[string]int) {
@@ -105,7 +136,8 @@ func (m *Manager) callExpirationStop(tunnelID string) {
 
 func NewManager() *Manager {
 	return &Manager{
-		processes: make(map[string]*ManagedProcess),
+		processes:       make(map[string]*ManagedProcess),
+		visitorTracking: true,
 		providers: map[config.Provider]providers.Provider{
 			config.ProviderCloudflared:  cloudflared.New(),
 			config.ProviderTunnelmole:   tunnelmole.New(),
@@ -175,6 +207,21 @@ func (m *Manager) Start(tunnel config.TunnelConfig, onUpdate func(config.TunnelS
 		Status:         tunnel.Status(),
 		logSubscribers: make(map[chan string]struct{}),
 	}
+
+	exposed := tunnel
+	if m.visitorTracking {
+		opts := proxy.Options{
+			Window:       visitorWindow,
+			OnNewVisitor: func() { m.reportNewVisitor(tunnel.ID) },
+		}
+
+		if counter, err := proxy.Start(tunnel.LocalPort, opts); err != nil {
+			log.Printf("visitor counting disabled for %s: %v", tunnel.Name, err)
+		} else {
+			mp.Proxy = counter
+			exposed.LocalPort = counter.Port()
+		}
+	}
 	logBuffer.OnNewLine = func(line string) {
 		mp.publishLog(line)
 	}
@@ -183,8 +230,9 @@ func (m *Manager) Start(tunnel config.TunnelConfig, onUpdate func(config.TunnelS
 	writer := io.MultiWriter(logBuffer, urlCapture)
 
 	ctx := context.Background()
-	proc, err := provider.Start(ctx, tunnel, writer)
+	proc, err := provider.Start(ctx, exposed, writer)
 	if err != nil {
+		mp.closeProxy()
 		return err
 	}
 	startedAt := time.Now()
@@ -226,11 +274,12 @@ func (m *Manager) watchExit(tunnelID string, proc *providers.Process) {
 
 	mp.Process = nil
 	mp.closeLogSubscribers()
+	mp.closeProxy()
 
 	mp.Status.PublicURL = ""
 	if err := proc.Err(); err != nil {
 		mp.Status.State = config.TunnelStateError
-		mp.Status.ErrorMessage = fmt.Sprintf("tunnel process exited unexpectedly: %v", err)
+		mp.Status.ErrorMessage = failureReason(mp.LogBuffer.GetLines(), fmt.Sprintf("tunnel process exited unexpectedly: %v", err))
 	} else {
 		mp.Status.State = config.TunnelStateStopped
 		mp.Status.ErrorMessage = ""
@@ -287,9 +336,13 @@ func (m *Manager) startupTimeoutMonitor(tunnelID string, proc *providers.Process
 
 	mp.Process = nil
 	mp.closeLogSubscribers()
+	mp.closeProxy()
 
 	mp.Status.State = config.TunnelStateTimeout
 	mp.Status.ErrorMessage = "Connection timed out after 30 seconds"
+	if reported := reportedFailure(mp.LogBuffer.GetLines()); reported != "" {
+		mp.Status.ErrorMessage = reported
+	}
 	status := mp.Status
 	m.publishLocked(mp)
 	m.mu.Unlock()
@@ -311,6 +364,7 @@ func (m *Manager) Stop(tunnelID string) error {
 
 	delete(m.processes, tunnelID)
 	mp.closeLogSubscribers()
+	mp.closeProxy()
 
 	proc := mp.Process
 	mp.Status.State = config.TunnelStateStopping
@@ -344,7 +398,15 @@ func (m *Manager) GetStatus(tunnelID string) (config.TunnelStatus, bool) {
 	if !ok {
 		return config.TunnelStatus{}, false
 	}
-	return mp.Status, true
+
+	status := mp.Status
+	if mp.Proxy != nil {
+		stats := mp.Proxy.Stats()
+		status.ActiveSessions = stats.ActiveSessions
+		status.Visitors = stats.Visitors
+	}
+
+	return status, true
 }
 
 func (m *Manager) updateURL(tunnelID, url string) {
@@ -356,7 +418,7 @@ func (m *Manager) updateURL(tunnelID, url string) {
 		return
 	}
 
-	if mp.Status.PublicURL == url && mp.Status.State == config.TunnelStateOnline {
+	if mp.Status.PublicURL != "" {
 		m.mu.Unlock()
 		return
 	}
