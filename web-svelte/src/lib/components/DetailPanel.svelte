@@ -14,6 +14,7 @@
   import { cn } from "$lib/utils/cn";
   import { formatDuration } from "$lib/utils/duration";
   import { formatLogs } from "$lib/utils/logs";
+  import IconButton from "./IconButton.svelte";
   import QrCode from "./QrCode.svelte";
   import type { LogStream, Tunnel } from "$lib/types";
   import { onDestroy, onMount } from "svelte";
@@ -215,15 +216,14 @@
           <p class="m-0 text-center text-xs leading-relaxed text-text-muted">
             {t("overview_share")}
           </p>
-          <button
-            type="button"
-            onclick={copyQr}
+          <IconButton
+            icon={QrCodeIcon}
+            label={t("qr_copy")}
+            variant="outline"
+            size="sm"
             disabled={!qrDataUrl}
-            class="inline-flex cursor-pointer items-center gap-1.5 rounded-control border border-border bg-input-bg px-3 py-1.5 text-xs text-text transition-colors hover:border-primary/50 hover:bg-hover disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <QrCodeIcon size={13} />
-            {t("qr_copy")}
-          </button>
+            onclick={copyQr}
+          />
         </div>
       {/if}
 
@@ -252,25 +252,23 @@
         {/if}
       </div>
 
-      <div class="mt-3 flex gap-2 border-t border-border-light pt-3">
-        <button
-          type="button"
+      <div class="mt-3 flex justify-end gap-2 border-t border-border-light pt-3">
+        <IconButton
+          icon={Pencil}
+          label={t("edit")}
+          variant="outline"
+          size="sm"
+          disabled={isRunning}
           onclick={() => onAction("edit", tunnel.id)}
+        />
+        <IconButton
+          icon={Trash2}
+          label={t("delete")}
+          variant="danger"
+          size="sm"
           disabled={isRunning}
-          class="inline-flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-control border border-border bg-input-bg px-3 py-1.5 text-xs text-text transition-colors hover:border-primary/50 hover:bg-hover disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <Pencil size={13} />
-          {t("edit")}
-        </button>
-        <button
-          type="button"
           onclick={() => onAction("delete", tunnel)}
-          disabled={isRunning}
-          class="inline-flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-control border border-status-error/40 bg-status-error/10 px-3 py-1.5 text-xs text-status-error transition-colors hover:bg-status-error/20 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <Trash2 size={13} />
-          {t("delete")}
-        </button>
+        />
       </div>
     {/if}
   </div>

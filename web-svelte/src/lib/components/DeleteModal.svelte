@@ -3,6 +3,7 @@
   import { cn } from "$lib/utils/cn";
   import { t } from "$lib/stores/i18n.svelte";
   import Button from "./Button.svelte";
+  import IconButton from "./IconButton.svelte";
 
   let {
     show,
@@ -59,14 +60,12 @@
           <Trash2 size={20} class="text-status-error" />
           {t("confirm_delete_title")}
         </h2>
-        <button
-          type="button"
-          class="cursor-pointer rounded-lg border-none bg-transparent p-1 text-text-muted hover:bg-hover"
+        <IconButton
+          icon={X}
+          label={t("close")}
+          size="sm"
           onclick={onCancel}
-          aria-label={t("close")}
-        >
-          <X size={18} />
-        </button>
+        />
       </div>
       <p class="mb-6 text-sm text-text-muted">
         {t("confirm_delete_body", { 0: name })}

@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { Plus } from "lucide-svelte";
+  import { Plus, X } from "lucide-svelte";
   import { onMount } from "svelte";
   import { useProviders, detectPort } from "$lib/stores/providers.svelte";
   import { useToast } from "$lib/stores/toast.svelte";
   import { useTunnels } from "$lib/stores/tunnels.svelte";
   import { t } from "$lib/stores/i18n.svelte";
   import Button from "./Button.svelte";
+  import IconButton from "./IconButton.svelte";
   import Dropdown from "./Dropdown.svelte";
   import type { DropdownOption } from "$lib/types";
   import { cn } from "$lib/utils/cn";
@@ -208,20 +209,20 @@
         {#if isEdit}
           <Button
             variant="default"
-            size="md"
+            
             type="button"
             onclick={onCancel}
             class="flex-1"
           >
             {t("cancel")}
           </Button>
-          <Button variant="primary" size="md" type="submit" class="flex-1" disabled={submitting}>
+          <Button variant="primary"  type="submit" class="flex-1" disabled={submitting}>
             {t("save")}
           </Button>
         {:else}
           <Button
             variant="primary"
-            size="md"
+            
             type="submit"
             class="w-full"
             icon={Plus}
