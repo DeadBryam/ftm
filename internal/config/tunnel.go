@@ -56,6 +56,7 @@ type TunnelStatus struct {
 	Players      int
 	MaxPlayers   int
 	ExpiresAt    int64
+	StartedAt    int64
 }
 
 func (tc *TunnelConfig) Status() TunnelStatus {
