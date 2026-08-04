@@ -279,7 +279,7 @@ func (m *Manager) watchExit(tunnelID string, proc *providers.Process) {
 	mp.Status.PublicURL = ""
 	if err := proc.Err(); err != nil {
 		mp.Status.State = config.TunnelStateError
-		mp.Status.ErrorMessage = fmt.Sprintf("tunnel process exited unexpectedly: %v", err)
+		mp.Status.ErrorMessage = failureReason(mp.LogBuffer.GetLines(), fmt.Sprintf("tunnel process exited unexpectedly: %v", err))
 	} else {
 		mp.Status.State = config.TunnelStateStopped
 		mp.Status.ErrorMessage = ""
@@ -340,6 +340,9 @@ func (m *Manager) startupTimeoutMonitor(tunnelID string, proc *providers.Process
 
 	mp.Status.State = config.TunnelStateTimeout
 	mp.Status.ErrorMessage = "Connection timed out after 30 seconds"
+	if reported := reportedFailure(mp.LogBuffer.GetLines()); reported != "" {
+		mp.Status.ErrorMessage = reported
+	}
 	status := mp.Status
 	m.publishLocked(mp)
 	m.mu.Unlock()
