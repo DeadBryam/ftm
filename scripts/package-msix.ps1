@@ -50,7 +50,7 @@ param(
     [string] $Publisher = "CN=ftm-dev",
 
     [string] $DisplayName = "Foundry Tunnel Manager",
-    [string] $PublisherDisplayName = "Bryan Villafuerte",
+    [string] $PublisherDisplayName = "sthbryan",
     [string] $Description = "Share your Foundry VTT world without port forwarding.",
     [string] $ExeName = "ftm-desktop.exe",
 
