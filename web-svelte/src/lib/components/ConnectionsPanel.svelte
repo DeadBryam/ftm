@@ -136,4 +136,12 @@
       {/if}
     </div>
   </div>
+
+  {#if store.tunnels.length > 0}
+    <p
+      class="shrink-0 border-t border-border-light px-3 py-1.5 text-center text-[11px] text-text-muted max-md:hidden"
+    >
+      {t("list_hint_new")}
+    </p>
+  {/if}
 </section>
