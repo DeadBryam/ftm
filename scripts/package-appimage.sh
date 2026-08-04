@@ -66,26 +66,35 @@ curl -fsSL -o "$TOOLS/linuxdeploy-plugin-gtk.sh" "$gtk"
 chmod +x "$TOOLS/linuxdeploy" "$TOOLS/linuxdeploy-plugin-gtk.sh"
 export PATH="$TOOLS:$PATH"
 
+WEBKIT_LIBEXEC="$APPDIR/usr/lib/webkit2gtk-4.1"
+mkdir -p "$WEBKIT_LIBEXEC"
+
+found_helpers=0
+for candidate in /usr/lib/*/webkit2gtk-4.1 /usr/libexec/webkit2gtk-4.1 /usr/lib/webkit2gtk-4.1; do
+  if [ -f "$candidate/WebKitNetworkProcess" ]; then
+    cp -a "$candidate/." "$WEBKIT_LIBEXEC/"
+    echo "Bundled WebKit helpers from $candidate"
+    found_helpers=1
+    break
+  fi
+done
+
+if [ "$found_helpers" -eq 0 ]; then
+  echo "Could not find WebKitNetworkProcess on this host; install libwebkit2gtk-4.1-0" >&2
+  exit 1
+fi
+
 "$TOOLS/linuxdeploy" \
   --appdir "$APPDIR" \
   --executable "$APPDIR/usr/bin/ftm-desktop" \
   --desktop-file "$APPDIR/usr/share/applications/ftm-desktop.desktop" \
   --icon-file "$APPDIR/usr/share/icons/hicolor/256x256/apps/ftm-desktop.png" \
+  --deploy-deps-only "$WEBKIT_LIBEXEC" \
   --plugin gtk
 
-# WebKitGTK launches its network and web processes from a path baked in at
-# compile time, which does not exist inside the AppImage. Without this hook the
-# window comes up permanently blank.
 mkdir -p "$APPDIR/apprun-hooks"
 cat > "$APPDIR/apprun-hooks/webkit.sh" <<'HOOK'
-for libexec in "$APPDIR/usr/libexec/webkit2gtk-4.1" \
-               "$APPDIR/usr/lib/x86_64-linux-gnu/webkit2gtk-4.1" \
-               "$APPDIR/usr/lib/webkit2gtk-4.1"; do
-  if [ -d "$libexec" ]; then
-    export WEBKIT_EXEC_PATH="$libexec"
-    break
-  fi
-done
+export WEBKIT_EXEC_PATH="$APPDIR/usr/lib/webkit2gtk-4.1"
 export WEBKIT_DISABLE_COMPOSITING_MODE=1
 HOOK
 
