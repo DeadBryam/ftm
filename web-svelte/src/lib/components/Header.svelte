@@ -1,10 +1,10 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import { cn } from '$lib/utils/cn';
   import { t } from '$lib/stores/i18n.svelte';
   import { Settings, ChevronLeft } from 'lucide-svelte';
 
+  const isHome = $derived($page.url.pathname === '/');
   const isSettings = $derived($page.url.pathname === '/settings');
 
   function handleBack() {
@@ -39,12 +39,12 @@
     <button
       type="button"
       onclick={handleBack}
-      class="cursor-pointer rounded-control p-2 transition-colors hover:bg-secondary"
-      aria-label={t('go_back')}
+      class="inline-flex cursor-pointer items-center gap-1.5 rounded-control border border-border bg-input-bg px-3 py-1.5 text-sm text-text transition-colors hover:border-primary/50 hover:bg-hover"
     >
-      <ChevronLeft size={18} />
+      <ChevronLeft size={14} />
+      {t('go_home')}
     </button>
-  {:else}
+  {:else if !isHome}
     <a
       href="/settings"
       class="rounded-control p-2 transition-colors hover:bg-secondary"
