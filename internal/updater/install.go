@@ -19,6 +19,18 @@ const (
 
 var ErrNotSelfUpdatable = errors.New("this installation cannot replace its own binary")
 
+func Relaunch() error {
+	execPath, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	if resolved, err := filepath.EvalSymlinks(execPath); err == nil {
+		execPath = resolved
+	}
+
+	return relaunch(execPath)
+}
+
 func (m Method) HintKey() string {
 	switch m {
 	case MethodStore:

@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -62,6 +63,11 @@ func (h *Handlers) postUpdate(w http.ResponseWriter) {
 	_ = json.NewEncoder(w).Encode(map[string]interface{}{"ok": true})
 	go func() {
 		time.Sleep(500 * time.Millisecond)
+		h.server.manager.StopAll()
+
+		if err := updater.Relaunch(); err != nil {
+			log.Printf("relaunch after update failed: %v", err)
+		}
 		os.Exit(0)
 	}()
 }

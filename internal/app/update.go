@@ -1,7 +1,6 @@
 package app
 
 import (
-	"os"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
@@ -96,8 +95,8 @@ func (m *Model) handleUpdateApply(msg updateApplyMsg) (tea.Model, tea.Cmd) {
 		m.showMessage(i18n.TF("update_apply_failed", msg.err.Error()))
 		return m, nil
 	}
-	os.Exit(0)
-	return m, nil
+	m.RelaunchOnExit = true
+	return m, tea.Quit
 }
 
 func scheduleUpdateRecheck() tea.Cmd {

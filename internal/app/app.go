@@ -14,6 +14,7 @@ import (
 	"github.com/sthbryan/ftm/internal/notifications"
 	"github.com/sthbryan/ftm/internal/process"
 	"github.com/sthbryan/ftm/internal/providers"
+	"github.com/sthbryan/ftm/internal/updater"
 	"github.com/sthbryan/ftm/internal/web"
 )
 
@@ -120,8 +121,17 @@ func (a *App) Run() error {
 	model := NewModel(a)
 	p := tea.NewProgram(model)
 
-	_, err := p.Run()
-	return err
+	final, err := p.Run()
+	if err != nil {
+		return err
+	}
+
+	if m, ok := final.(*Model); ok && m.RelaunchOnExit {
+		a.Shutdown()
+		return updater.Relaunch()
+	}
+
+	return nil
 }
 
 func (a *App) StartWebServer() error {

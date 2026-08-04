@@ -57,6 +57,7 @@ type Model struct {
 	ProgressBar         progress.Model
 	SettingsView        *views.SettingsView
 	UpdateAvailable     *updater.Info
+	RelaunchOnExit      bool
 	listTop             int
 	listFirst           int
 	pendingDeleteID     string
