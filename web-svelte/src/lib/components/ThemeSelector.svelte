@@ -88,7 +88,7 @@
 <div
   role="radiogroup"
   aria-label={t('theme_match_system')}
-  class="grid grid-cols-3 gap-2 px-5 py-4"
+  class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 px-5 py-4"
 >
   {#each families as family (family.id)}
     {@const active = activeFamily?.id === family.id}
