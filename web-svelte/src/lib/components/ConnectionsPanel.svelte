@@ -21,11 +21,6 @@
   const store = useTunnels();
 
   const SEARCH_THRESHOLD = 8;
-  const ACTIVE = ["online", "starting", "connecting"];
-
-  const online = $derived(
-    store.tunnels.filter((tunnel) => ACTIVE.includes(tunnel.state)).length,
-  );
 
   let query = $state("");
 
@@ -60,17 +55,6 @@
         class="rounded-control bg-primary px-2 py-0.5 text-xs font-semibold text-btn-text"
       >
         {store.tunnels.length}
-      </span>
-      <span class="flex items-center gap-1.5 truncate text-xs font-normal">
-        <span
-          class={cn(
-            "h-2 w-2 shrink-0 rounded-full",
-            online > 0 ? "bg-status-running" : "bg-status-stopped",
-          )}
-        ></span>
-        <span class="truncate text-text-muted">
-          {online > 0 ? `${online} ${t("overview_online")}` : t("overview_idle")}
-        </span>
       </span>
     </h2>
     {#if onCreate}
