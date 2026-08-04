@@ -98,6 +98,13 @@ CURRENT=$(grep -E '^var Version = "' "$VERSION_FILE" | sed -E 's/^var Version = 
 [[ -n "$CURRENT" ]] || fail "could not parse current version from $VERSION_FILE"
 [[ "$CURRENT" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "current version '$CURRENT' is not semver"
 
+# --- bash 3.2 compat -------------------------------------------------------
+# macOS still ships bash 3.2.57 (last GPLv2). `${var,,}` lowercase is bash 4+,
+# so use tr. Same for other features; keep this in mind when extending.
+to_lower() {
+  printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
+}
+
 # --- semver helpers --------------------------------------------------------
 parse_semver() {
   local v="$1"
@@ -122,15 +129,11 @@ next_version() {
 
 # --- banner -----------------------------------------------------------------
 banner() {
-  printf '\n%s' "$C_CYAN$C_BOLD"
-  cat <<'EOF'
-╔══════════════════════════════════════╗
-║                                      ║
-║   ▄▄▄▄  F T M   release              ║
-║                                      ║
-╚══════════════════════════════════════╝
-EOF
-  printf '%s\n' "$C_RESET"
+  printf '\n'
+  printf ' %s %s\n' \
+    "$(paint 'ftm' "$C_BOLD$C_CYAN")" \
+    "$(paint 'release' "$C_BOLD$C_WHITE")"
+  printf '\n'
   printf ' %s %s\n' "$(paint 'current' "$C_DIM")" "$(paint "v$CURRENT" "$C_BOLD$C_WHITE")"
   if (( DRY_RUN )); then
     printf ' %s %s\n' "$(paint 'mode' "$C_YELLOW")" "dry-run (no writes)"
@@ -145,32 +148,39 @@ choose_bump() {
   minor=$(next_version "$CURRENT" minor)
   major=$(next_version "$CURRENT" major)
 
-  printf ' %s\n\n' "$(paint 'pick a bump' "$C_DIM")"
-  printf ' %s %s %s %s %s\n' \
-    "$(paint '1' "$C_CYAN")" "$(paint 'patch' "$C_BOLD")" \
-    "$(paint "v$CURRENT →" "$C_DIM")" "$(paint "v$patch" "$C_GREEN")" \
-    "$(paint '(bugfixes)' "$C_DIM")"
-  printf ' %s %s %s %s %s\n' \
-    "$(paint '2' "$C_CYAN")" "$(paint 'minor' "$C_BOLD")" \
-    "$(paint "v$CURRENT →" "$C_DIM")" "$(paint "v$minor" "$C_GREEN")" \
-    "$(paint '(features)' "$C_DIM")"
-  printf ' %s %s %s %s %s\n' \
-    "$(paint '3' "$C_CYAN")" "$(paint 'major' "$C_BOLD")" \
-    "$(paint "v$CURRENT →" "$C_DIM")" "$(paint "v$major" "$C_GREEN")" \
-    "$(paint '(breaking)' "$C_DIM")"
-  printf ' %s %s %s\n' \
-    "$(paint '4' "$C_CYAN")" "$(paint 'custom' "$C_BOLD")" \
-    "$(paint 'type x.y.z' "$C_DIM")"
-  printf ' %s %s\n\n' "$(paint 'q' "$C_CYAN")" "$(paint 'quit' "$C_DIM")"
+  {
+    printf ' %s\n\n' "$(paint 'pick a bump' "$C_DIM")"
+    printf ' %s %s %s %s %s\n' \
+      "$(paint '1' "$C_CYAN")" "$(paint 'patch' "$C_BOLD")" \
+      "$(paint "v$CURRENT →" "$C_DIM")" "$(paint "v$patch" "$C_GREEN")" \
+      "$(paint '(bugfixes)' "$C_DIM")"
+    printf ' %s %s %s %s %s\n' \
+      "$(paint '2' "$C_CYAN")" "$(paint 'minor' "$C_BOLD")" \
+      "$(paint "v$CURRENT →" "$C_DIM")" "$(paint "v$minor" "$C_GREEN")" \
+      "$(paint '(features)' "$C_DIM")"
+    printf ' %s %s %s %s %s\n' \
+      "$(paint '3' "$C_CYAN")" "$(paint 'major' "$C_BOLD")" \
+      "$(paint "v$CURRENT →" "$C_DIM")" "$(paint "v$major" "$C_GREEN")" \
+      "$(paint '(breaking)' "$C_DIM")"
+    printf ' %s %s %s\n' \
+      "$(paint '4' "$C_CYAN")" "$(paint 'custom' "$C_BOLD")" \
+      "$(paint 'type x.y.z' "$C_DIM")"
+    printf ' %s %s\n\n' "$(paint 'q' "$C_CYAN")" "$(paint 'quit' "$C_DIM")"
+  } >&2
 
   local answer
   read -r -p " $(paint '?' "$C_BOLD") choice $(paint '[1/2/3/4/q]' "$C_DIM"): " answer
-  answer="${answer,,}"
+  answer=$(to_lower "$answer")
   case "$answer" in
     q|quit|"")
-      printf '\n %s\n\n' "$(paint 'aborted' "$C_DIM")"
-      exit 0
+      # We're inside $(...), so exit/exit N only exits the subshell, not
+      # the parent script. Print a sentinel and let main catch it. The
+      # subshell must still produce something on stdout for the caller to
+      # read, otherwise BUMP ends up empty. Main prints the "aborted"
+      # message once it sees the sentinel.
+      echo "__ABORT__"
       ;;
+    1|p|patch) echo "patch" ;;
     1|p|patch) echo "patch" ;;
     2|m|minor) echo "minor" ;;
     3|major)   echo "major" ;;
@@ -215,7 +225,7 @@ confirm() {
 
   local answer
   read -r -p " $(paint '?' "$C_BOLD") proceed? $(paint '[y/N]' "$C_DIM"): " answer
-  [[ "${answer,,}" =~ ^y(es)?$ ]]
+  [[ "$(to_lower "$answer")" =~ ^y(es)?$ ]]
 }
 
 # --- file updaters ---------------------------------------------------------
@@ -262,6 +272,10 @@ set_wails_versions() {
 banner
 
 BUMP="${BUMP_ARG:-$(choose_bump)}"
+if [[ "$BUMP" == "__ABORT__" || -z "$BUMP" ]]; then
+  printf ' %s\n\n' "$(paint 'aborted' "$C_DIM")"
+  exit 0
+fi
 NEXT=$(next_version "$CURRENT" "$BUMP")
 TAG="v$NEXT"
 
