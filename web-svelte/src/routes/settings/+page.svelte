@@ -268,9 +268,7 @@
           >
             {t("appearance_section")}
           </h2>
-          <span class="text-xs text-text-muted">
-            {themeFamilies.length} {t("themes_count")}
-          </span>
+          <span class="text-xs text-text-muted">{t("themes_hint")}</span>
         </header>
 
         <div class="border-t border-border-light px-5 py-4">

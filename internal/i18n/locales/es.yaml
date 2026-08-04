@@ -213,6 +213,7 @@ settings_notifications_desc: "Recibe avisos cuando los túneles inician, paran o
 settings_sound_desc: "Reproduce un sonido con cada notificación."
 settings_language_desc: "Cambia el idioma de la interfaz."
 themes_count: "temas"
+themes_hint: "Elige tu tema"
 lang_auto_native: "Auto"
 go_back: "Volver"
 lang_auto: "Automático (sistema)"
