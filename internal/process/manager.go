@@ -356,6 +356,11 @@ func (m *Manager) updateURL(tunnelID, url string) {
 		return
 	}
 
+	if mp.Status.PublicURL == url && mp.Status.State == config.TunnelStateOnline {
+		m.mu.Unlock()
+		return
+	}
+
 	mp.PublicURL = url
 	mp.Status.PublicURL = url
 	mp.Status.State = config.TunnelStateOnline
