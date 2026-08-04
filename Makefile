@@ -8,6 +8,8 @@ COMMIT=$(shell git rev-parse --short HEAD 2>/dev/null || echo "none")
 BUILT=$(shell date +%Y-%m-%d)
 LDFLAGS=-ldflags "-X github.com/sthbryan/ftm/internal/version.Version=$(VERSION)"
 CGO_ENABLED=0
+# Windows resources need a strictly numeric version, so drop any git describe suffix.
+WINRES_VERSION=$(shell echo $(VERSION) | sed 's/[-+].*//')
 BUILD_DIR=bin
 PKG=./cmd/ftm
 DESKTOP_DIR=./desktop
@@ -91,6 +93,16 @@ desktop: web
 	@echo "Building desktop (production tags)..."
 	@mkdir -p $(DESKTOP_OUT)
 	CGO_ENABLED=1 go build -tags production -ldflags "-s -w" -o $(DESKTOP_OUT)/$(DESKTOP_BIN) ./desktop
+
+.PHONY: desktop-winres
+desktop-winres:
+	@echo "Generating Windows resources (icon, manifest, version info)..."
+	go run github.com/tc-hib/go-winres@v0.3.3 make \
+		--in $(DESKTOP_DIR)/winres/winres.json \
+		--out $(DESKTOP_DIR)/rsrc \
+		--arch amd64,arm64 \
+		--product-version $(VERSION) \
+		--file-version $(WINRES_VERSION)
 
 .PHONY: desktop-package
 desktop-package: desktop

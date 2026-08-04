@@ -60,6 +60,8 @@ jobs:
         shell: bash
         run: |
           mkdir -p desktop/build/bin
+          go run github.com/tc-hib/go-winres@v0.3.3 make \
+            --in desktop/winres/winres.json --out desktop/rsrc --arch amd64
           CGO_ENABLED=1 go build -tags production -ldflags "-s -w -H windowsgui" \
             -o desktop/build/bin/ftm-desktop-windows.exe ./desktop
 
