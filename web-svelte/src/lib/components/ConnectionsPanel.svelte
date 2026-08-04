@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Radio } from "lucide-svelte";
+  import { Plus, Radio, Search } from "lucide-svelte";
   import { useTunnels } from "$lib/stores/tunnels.svelte";
   import { t } from "$lib/stores/i18n.svelte";
   import { cn } from "$lib/utils/cn";
@@ -9,12 +9,33 @@
   let {
     onAction,
     onCreateFirst,
+    onCreate,
+    selectedId = null,
   }: {
     onAction: (action: string, data: unknown) => void;
     onCreateFirst?: () => void;
+    onCreate?: () => void;
+    selectedId?: string | null;
   } = $props();
 
   const store = useTunnels();
+
+  const SEARCH_THRESHOLD = 8;
+
+  let query = $state("");
+
+  const searchable = $derived(store.tunnels.length >= SEARCH_THRESHOLD);
+
+  const visible = $derived.by(() => {
+    const term = query.trim().toLowerCase();
+    if (!term || !searchable) return store.tunnels;
+    return store.tunnels.filter(
+      (tunnel) =>
+        tunnel.name.toLowerCase().includes(term) ||
+        tunnel.provider.toLowerCase().includes(term) ||
+        String(tunnel.port).includes(term),
+    );
+  });
 </script>
 
 <section
@@ -24,17 +45,42 @@
   )}
 >
   <div
-    class="ftm-enter ftm-enter-delay-1 flex shrink-0 items-center justify-between border-b border-border-light bg-url-bg px-3 py-2"
+    class="ftm-enter ftm-enter-delay-1 flex shrink-0 items-center justify-between gap-3 border-b border-border-light bg-url-bg px-3 py-2"
   >
-    <h2 class="m-0 flex items-center gap-2 text-sm font-semibold text-text-heading">
-      {t("connections")}
-    </h2>
-    <span
-      class="rounded-control bg-primary px-2 py-0.5 text-xs font-semibold text-btn-text"
+    <h2
+      class="m-0 flex items-center gap-2 text-sm font-semibold text-text-heading"
     >
-      {store.tunnels.length}
-    </span>
+      {t("connections")}
+      <span
+        class="rounded-control bg-primary px-2 py-0.5 text-xs font-semibold text-btn-text"
+      >
+        {store.tunnels.length}
+      </span>
+    </h2>
+    {#if onCreate}
+      <Button variant="primary" size="sm" icon={Plus} onclick={onCreate}>
+        {t("new_connection_action")}
+      </Button>
+    {/if}
   </div>
+
+  {#if searchable}
+    <div class="shrink-0 border-b border-border-light px-3 py-2">
+      <div class="relative">
+        <Search
+          size={14}
+          class="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-text-muted"
+        />
+        <input
+          type="search"
+          bind:value={query}
+          placeholder={t("search_placeholder")}
+          aria-label={t("search_placeholder")}
+          class="h-8 w-full rounded-control border border-border bg-input-bg py-1.5 pr-2.5 pl-8 text-sm text-text focus:ring-2 focus:ring-primary focus:outline-none"
+        />
+      </div>
+    </div>
+  {/if}
 
   <div class="ftm-enter ftm-enter-delay-2 relative min-h-0 flex-1 overflow-hidden">
     <div class="panel-pattern" aria-hidden="true"></div>
@@ -54,7 +100,7 @@
           class="flex h-full min-h-40 flex-col items-center justify-center px-3 py-6 text-center text-text-muted"
         >
           <Radio class="mx-auto mb-2 h-8 w-8" size={32} />
-          <h3 class="mb-1 mt-0 text-sm text-text-heading">
+          <h3 class="mt-0 mb-1 text-sm text-text-heading">
             {t("no_tunnels")}
           </h3>
           <p class="m-0 mb-3 max-w-xs text-xs leading-relaxed">
@@ -66,13 +112,18 @@
             </Button>
           {/if}
         </div>
+      {:else if visible.length === 0}
+        <p class="px-3 py-6 text-center text-xs text-text-muted">
+          {t("search_empty")}
+        </p>
       {:else}
         <div class="flex flex-col gap-1.5">
-          {#each store.tunnels as tunnel, index (tunnel.id)}
+          {#each visible as tunnel, index (tunnel.id)}
             <TunnelCard
               {tunnel}
               {index}
-              totalItems={store.tunnels.length}
+              totalItems={visible.length}
+              selected={tunnel.id === selectedId}
               onStart={store.start}
               onStop={store.stop}
               {onAction}

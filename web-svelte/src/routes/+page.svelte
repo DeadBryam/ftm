@@ -3,26 +3,31 @@
   import { useTunnels } from "$lib/stores/tunnels.svelte";
   import { useToast } from "$lib/stores/toast.svelte";
   import { useProviders } from "$lib/stores/providers.svelte";
-  import { useTheme } from "$lib/stores/theme.svelte";
   import UpdateBanner from "$lib/components/UpdateBanner.svelte";
   import DeleteModal from "$lib/components/DeleteModal.svelte";
   import NotificationPermission from "$lib/components/NotificationPermission.svelte";
   import ConnectionsPanel from "$lib/components/ConnectionsPanel.svelte";
-  import ConnectionForm from "$lib/components/ConnectionForm.svelte";
+  import ConnectionModal from "$lib/components/ConnectionModal.svelte";
+  import DetailPanel from "$lib/components/DetailPanel.svelte";
   import OverviewBar from "$lib/components/OverviewBar.svelte";
   import type { Tunnel } from "$lib/types";
   import { cn } from "$lib/utils/cn";
   import { t } from "$lib/stores/i18n.svelte";
-  import { ChevronDown } from "lucide-svelte";
 
   const store = useTunnels();
   const toast = useToast();
   const providerStore = useProviders();
-  const theme = useTheme();
 
   let deleteTunnel: Tunnel | null = $state(null);
   let editingTunnelId: string | null = $state(null);
-  let formOpen = $state(true);
+  let formOpen = $state(false);
+  let selectedId: string | null = $state(null);
+
+  const selected = $derived(
+    store.tunnels.find((tunnel) => tunnel.id === selectedId) ??
+      store.tunnels[0] ??
+      null,
+  );
 
   onMount(async () => {
     store.connect();
@@ -35,6 +40,9 @@
 
   function handleAction(action: string, data: unknown) {
     switch (action) {
+      case "select":
+        selectedId = data as string;
+        break;
       case "edit":
         editingTunnelId = data as string;
         formOpen = true;
@@ -68,24 +76,28 @@
     deleteTunnel = null;
   }
 
-  function handleEditCancel() {
+  function closeForm() {
+    formOpen = false;
     editingTunnelId = null;
   }
 
-  function handleEditSaved() {
+  function openCreate() {
     editingTunnelId = null;
-  }
-
-  function handleCreateFirst() {
     formOpen = true;
-    editingTunnelId = null;
-    queueMicrotask(() => {
-      const el = document.getElementById("conn-name");
-      el?.focus();
-      el?.scrollIntoView({ behavior: "smooth", block: "center" });
-    });
+  }
+
+  function handleKeydown(e: KeyboardEvent) {
+    if (formOpen || deleteTunnel) return;
+    const target = e.target as HTMLElement | null;
+    if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
+    if (e.key === "n") {
+      e.preventDefault();
+      openCreate();
+    }
   }
 </script>
+
+<svelte:window onkeydown={handleKeydown} />
 
 <div class="flex min-h-0 flex-1 flex-col">
   <UpdateBanner />
@@ -95,48 +107,29 @@
     class={cn(
       "grid min-h-0 flex-1 gap-app",
       "max-md:grid-cols-1 max-md:content-start max-md:overflow-y-auto",
-      "md:grid-cols-[minmax(0,17.5rem)_1fr] lg:grid-cols-[minmax(0,19rem)_1fr]",
+      "md:grid-cols-[1fr_minmax(0,17.5rem)] lg:grid-cols-[1fr_minmax(0,19rem)]",
     )}
   >
-    <div class="flex min-h-0 flex-1 max-md:order-1 md:order-2 md:h-full md:min-h-0">
+    <div class="flex min-h-0 flex-1 md:h-full md:min-h-0">
       <ConnectionsPanel
         onAction={handleAction}
-        onCreateFirst={handleCreateFirst}
+        onCreateFirst={openCreate}
+        onCreate={openCreate}
+        selectedId={selected?.id ?? null}
       />
     </div>
 
-    <div class="max-md:order-2 md:order-1 md:flex md:h-full md:min-h-0 md:flex-col">
-      <button
-        type="button"
-        class="mb-2 flex w-full items-center justify-between rounded-panel border border-border bg-card px-3 py-2 text-left text-sm font-medium text-text-heading md:hidden"
-        onclick={() => (formOpen = !formOpen)}
-        aria-expanded={formOpen}
-      >
-        <span>
-          {editingTunnelId ? t("edit_connection") : t("new_connection")}
-        </span>
-        <ChevronDown
-          size={18}
-          class={cn("transition-transform", formOpen && "rotate-180")}
-        />
-      </button>
-
-      <div class={cn("flex min-h-0 flex-1 flex-col", !formOpen && "max-md:hidden")}>
-        {#if editingTunnelId}
-          <ConnectionForm
-            mode="edit"
-            tunnelId={editingTunnelId}
-            onCancel={handleEditCancel}
-            onSaved={handleEditSaved}
-            class="flex-1 min-h-0"
-          />
-        {:else}
-          <ConnectionForm mode="create" class="flex-1 min-h-0" />
-        {/if}
-      </div>
+    <div class="min-h-0 max-md:hidden md:h-full">
+      <DetailPanel tunnel={selected} />
     </div>
   </main>
 </div>
+
+<ConnectionModal
+  show={formOpen}
+  tunnelId={editingTunnelId}
+  onClose={closeForm}
+/>
 
 <DeleteModal
   show={deleteTunnel !== null}

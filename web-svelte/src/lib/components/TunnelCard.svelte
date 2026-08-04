@@ -40,6 +40,7 @@
     onAction: (action: string, data: unknown) => void;
     index?: number;
     totalItems?: number;
+    selected?: boolean;
     installProgress?: InstallProgress | null;
   }
 
@@ -50,6 +51,7 @@
     onAction,
     index = 0,
     totalItems = 1,
+    selected = false,
     installProgress = null,
   }: TunnelCardProps = $props();
 
@@ -250,8 +252,21 @@
   const installStep = $derived(installProgress?.step ?? t("installing"));
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
 <div
-  class="cursor-default rounded-card border border-border bg-card transition-all duration-150"
+  role="button"
+  tabindex="0"
+  aria-pressed={selected}
+  onclick={() => onAction("select", tunnel.id)}
+  onkeydown={(e) =>
+    (e.key === "Enter" || e.key === " ") &&
+    (e.preventDefault(), onAction("select", tunnel.id))}
+  class={cn(
+    "cursor-pointer rounded-card border bg-card transition-colors duration-150",
+    selected
+      ? "border-primary bg-primary/5"
+      : "border-border hover:border-primary/40",
+  )}
 >
   <div class="flex flex-col">
     <div
