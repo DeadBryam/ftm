@@ -23,15 +23,15 @@
   aria-pressed={checked}
   aria-label={checked ? t('disable') : t('enable')}
   class={cn(
-    "relative h-7 w-12 shrink-0 rounded-full transition-all duration-200",
-    checked ? "bg-primary" : "bg-secondary",
+    "relative h-7 w-12 shrink-0 rounded-full border transition-all duration-200",
+    checked ? "border-primary bg-primary" : "border-border bg-secondary",
     disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
   )}
 >
   <span
     class={cn(
-      "absolute top-0.5 w-6 h-6 bg-white rounded-full shadow transition-all duration-200",
-      checked ? "left-5" : "left-0.5"
+      "absolute top-0.5 h-5 w-5 rounded-full shadow transition-all duration-200",
+      checked ? "left-6 bg-btn-text" : "left-0.5 bg-muted",
     )}
   ></span>
 </button>
