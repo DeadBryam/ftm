@@ -115,6 +115,7 @@
           localPort: detectedPort,
         };
         toast.success(t("connection_created", { name }));
+        onSaved?.();
       }
     } catch (err) {
       const key = isEdit ? "connection_update_failed" : "connection_create_failed";
@@ -137,7 +138,7 @@
     <h2 class="m-0 text-sm font-semibold text-text-heading">
       {isEdit ? t("edit_connection") : t("new_connection")}
     </h2>
-    {#if isEdit && onCancel}
+    {#if onCancel}
       <button
         type="button"
         onclick={onCancel}
