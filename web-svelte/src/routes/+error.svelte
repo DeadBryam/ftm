@@ -1,14 +1,11 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import Header from "$lib/components/Header.svelte";
   import { t } from "$lib/stores/i18n.svelte";
   import { Home, ArrowLeft } from "lucide-svelte";
 
   const status = $derived(page.status);
   const isNotFound = $derived(status === 404);
 </script>
-
-<Header />
 
 <main class="mx-auto flex w-full max-w-app min-h-0 flex-1 items-center justify-center px-app-x py-12">
   <div class="w-full max-w-md text-center">

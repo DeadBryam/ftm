@@ -4,7 +4,6 @@
   import { useToast } from "$lib/stores/toast.svelte";
   import { useProviders } from "$lib/stores/providers.svelte";
   import { useTheme } from "$lib/stores/theme.svelte";
-  import Header from "$lib/components/Header.svelte";
   import UpdateBanner from "$lib/components/UpdateBanner.svelte";
   import DeleteModal from "$lib/components/DeleteModal.svelte";
   import NotificationPermission from "$lib/components/NotificationPermission.svelte";
@@ -88,8 +87,6 @@
 </script>
 
 <div class="flex min-h-0 flex-1 flex-col">
-  <Header />
-
   <UpdateBanner />
 
   <main

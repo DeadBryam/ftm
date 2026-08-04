@@ -10,7 +10,6 @@
     BellOff,
     Volume2,
     VolumeX,
-    ChevronLeft,
     Languages,
   } from "lucide-svelte";
   import SettingsToggle from "$lib/components/SettingsToggle.svelte";
@@ -87,20 +86,13 @@
 </script>
 
 <div class="mx-auto flex w-full max-w-app min-h-0 flex-1 flex-col">
-  <div class="mb-6 flex items-center gap-2 px-1">
-    <a
-      href="/"
-      class="cursor-pointer rounded-control p-1.5 transition-colors hover:bg-secondary"
-      aria-label={t("go_back")}
-    >
-      <ChevronLeft size={18} />
-    </a>
+  <div class="mb-4 flex items-center justify-between gap-3 px-1">
     <h1 class="font-serif text-xl font-bold tracking-tight text-text-heading">
       {t("web_settings_title")}
     </h1>
     {#if saving}
       <div
-        class="ml-auto h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
+        class="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
         aria-hidden="true"
       ></div>
     {/if}
