@@ -36,13 +36,13 @@ sleep 1`
 	}
 }
 
-func TestURLChangeStillNotifies(t *testing.T) {
-	script := `echo "https://first.trycloudflare.com"
+func TestFirstURLOfARunWins(t *testing.T) {
+	script := `echo "https://kolfa-1-2-3-4.run.pinggy-free.link"
 sleep 0.3
-echo "https://second.trycloudflare.com"
+echo "https://uqehf-1-2-3-4.free.pinggy.net"
 sleep 1`
 
-	m, _ := newScriptManager(t, script)
+	m, updates := newScriptManager(t, script)
 	t.Cleanup(m.StopAll)
 
 	seen := make(chan string, 8)
@@ -56,15 +56,20 @@ sleep 1`
 		t.Fatalf("Start: %v", err)
 	}
 
-	want := []string{"https://first.trycloudflare.com", "https://second.trycloudflare.com"}
-	for _, url := range want {
-		select {
-		case got := <-seen:
-			if got != url {
-				t.Fatalf("got notification for %q, want %q", got, url)
-			}
-		case <-time.After(5 * time.Second):
-			t.Fatalf("never notified for %q", url)
+	waitForState(t, updates, config.TunnelStateOnline)
+
+	select {
+	case got := <-seen:
+		if got != "https://kolfa-1-2-3-4.run.pinggy-free.link" {
+			t.Fatalf("notified with %q, want the first URL of the run", got)
 		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("never notified")
+	}
+
+	select {
+	case got := <-seen:
+		t.Errorf("alternate host re-notified with %q", got)
+	case <-time.After(700 * time.Millisecond):
 	}
 }
