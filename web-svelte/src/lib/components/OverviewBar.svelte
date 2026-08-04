@@ -91,7 +91,7 @@
 {/snippet}
 
 <section
-  class="ftm-enter mb-3 flex shrink-0 flex-wrap items-stretch gap-2 text-sm"
+  class="ftm-enter mb-app flex shrink-0 flex-wrap items-stretch gap-app text-sm"
 >
   {@render tile(
     Radio,

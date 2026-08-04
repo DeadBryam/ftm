@@ -107,10 +107,10 @@
     class={cn(
       "grid min-h-0 flex-1 gap-app",
       "max-md:grid-cols-1 max-md:content-start max-md:overflow-y-auto",
-      "md:grid-cols-[1fr_minmax(0,17.5rem)] lg:grid-cols-[1fr_minmax(0,19rem)]",
+      "md:grid-cols-3",
     )}
   >
-    <div class="flex min-h-0 flex-1 md:h-full md:min-h-0">
+    <div class="flex min-h-0 flex-1 md:col-span-2 md:h-full md:min-h-0">
       <ConnectionsPanel
         onAction={handleAction}
         onCreateFirst={openCreate}
