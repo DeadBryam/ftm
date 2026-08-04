@@ -234,6 +234,12 @@
           <dt class="text-text-muted">{t("detail_expires")}</dt>
           <dd class="m-0 font-mono text-text">{formatDuration(remaining)}</dd>
         {/if}
+        {#if isOnline}
+          <dt class="text-text-muted">{t("detail_sessions")}</dt>
+          <dd class="m-0 font-mono text-text">{tunnel.activeSessions ?? 0}</dd>
+          <dt class="text-text-muted">{t("detail_visitors")}</dt>
+          <dd class="m-0 font-mono text-text">{tunnel.visitors ?? 0}</dd>
+        {/if}
       </dl>
 
       {#if tunnel.publicUrl}

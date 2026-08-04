@@ -8,6 +8,8 @@ export interface Tunnel {
   errorMessage?: string;
   expiresAt?: number;
   startedAt?: number;
+  visitors?: number;
+  activeSessions?: number;
 }
 
 export type TunnelState = 
