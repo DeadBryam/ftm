@@ -15,6 +15,7 @@ import (
 const (
 	LangEN = "en"
 	LangES = "es"
+	LangPT = "pt"
 )
 
 const DefaultLang = LangEN
@@ -125,14 +126,10 @@ func LoadFromYAML(lang string, content []byte) error {
 	return nil
 }
 
-// InitFromConfig selects the UI language: an explicit choice in the config
-// wins, anything else follows the operating system.
 func InitFromConfig(cfg *config.Config) {
 	SetLanguageWithFallback(ResolveLanguage(cfg.Language))
 }
 
-// ResolveLanguage maps a configured language onto one that is actually loaded.
-// The empty string and "auto" both mean "ask the operating system".
 func ResolveLanguage(configured string) string {
 	if configured == "" || configured == config.LanguageAuto {
 		return detectSystemLang()
@@ -141,7 +138,7 @@ func ResolveLanguage(configured string) string {
 }
 
 func SupportedLanguages() []string {
-	return []string{LangEN, LangES}
+	return []string{LangEN, LangES, LangPT}
 }
 
 func LanguageName(code string) string {
@@ -150,6 +147,8 @@ func LanguageName(code string) string {
 		return "English"
 	case LangES:
 		return "Español"
+	case LangPT:
+		return "Português"
 	default:
 		return code
 	}
@@ -161,6 +160,8 @@ func LanguageTag(code string) string {
 		return "en-US"
 	case LangES:
 		return "es-ES"
+	case LangPT:
+		return "pt-BR"
 	default:
 		return "en-US"
 	}
@@ -189,6 +190,8 @@ func ParseAcceptLanguage(header string) string {
 			return LangEN
 		case "es":
 			return LangES
+		case "pt":
+			return LangPT
 		}
 	}
 

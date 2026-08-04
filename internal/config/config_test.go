@@ -45,15 +45,11 @@ func TestLoadDefaultsToAutoLanguage(t *testing.T) {
 		t.Fatalf("Load() failed: %v", err)
 	}
 
-	// A fresh install must not look like the user picked English, or system
-	// detection never gets a chance to run.
 	if cfg.Language != LanguageAuto {
 		t.Fatalf("Language = %q on a fresh config, want %q", cfg.Language, LanguageAuto)
 	}
 }
 
-// v1 shipped `language: en` as its default, which permanently disabled system
-// detection. Those users never chose English, so migration hands them back.
 func TestMigrateV1EnglishBecomesAuto(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -95,7 +91,6 @@ func TestMigrateReportsWhetherItChangedAnything(t *testing.T) {
 	}
 }
 
-// Migrating has to survive a restart, otherwise every launch rewrites the file.
 func TestLoadPersistsMigration(t *testing.T) {
 	home := isolateHome(t)
 

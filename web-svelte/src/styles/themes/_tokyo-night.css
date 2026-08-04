@@ -1,42 +1,37 @@
-/* ===========================================
-   TOKYO NIGHT - Official Tokyo Night Theme
-   Based on folke/tokyonight.nvim
-   =========================================== */
-
-:root[data-theme="tokyo-night"] {
-  --color-bg: #1f2335;
-  --color-card: #24283b;
-  --color-text: #c0caf5;
-  --color-heading: #c0caf5;
-  --color-muted: #565f89;
+[data-theme="tokyo-night"] {
+  --color-bg: #222436;
+  --color-card: #1f2335;
+  --color-text: #c8d3f5;
+  --color-heading: #d0d6f0;
+  --color-muted: #636da6;
   --color-border: #3b4261;
-  --color-border-light: #292e42;
-  --color-primary: #7aa2f7;
-  --color-btn-text: #292e42;
-  --color-primary-hover: #6891e8;
-  --color-hover: #292e42;
-  --color-btn-primary: #7aa2f7;
-  --color-btn-primary-hover: #6891e8;
-  --color-btn-start: #9ece6a;
-  --color-btn-start-hover: #8cbd5f;
-  --color-btn-stop: #f7768e;
-  --color-btn-stop-hover: #e5637a;
-  --color-btn-danger: #f7768e;
-  --color-btn-danger-hover: #e5637a;
-  --color-status-running: #9ece6a;
-  --color-status-starting: #e0af68;
-  --color-status-installing: #7aa2f7;
-  --color-status-error: #f7768e;
+  --color-border-light: #2f334d;
+  --color-primary: #82aaff;
+  --color-btn-text: #1a1b26;
+  --color-primary-hover: #6f93db;
+  --color-hover: #2f334d;
+  --color-btn-primary: #82aaff;
+  --color-btn-primary-hover: #6f93db;
+  --color-btn-start: #4fd6be;
+  --color-btn-start-hover: #3fbfa9;
+  --color-btn-stop: #ff757f;
+  --color-btn-stop-hover: #e7626c;
+  --color-btn-danger: #ff757f;
+  --color-btn-danger-hover: #e7626c;
+  --color-status-running: #4fd6be;
+  --color-status-starting: #ffc777;
+  --color-status-installing: #82aaff;
+  --color-status-error: #ff757f;
   --color-status-stopped: var(--color-muted);
-  --color-logs-bg: #16161e;
-  --color-logs-text: #c0caf5;
-  --color-url-bg: #292e42;
-  --color-url-text: #7aa2f7;
-  --color-input-bg: #24283b;
-  --color-input-text: #c0caf5;
-  --color-input-placeholder: #565f89;
-  --color-input-disabled: #1f2335;
-  --color-badge-text: #1f2335;
-  --color-secondary-btn: #3b4261;
-  --color-secondary-btn-text: #c0caf5;
+  --color-logs-bg: #1a1b26;
+  --color-logs-text: #c8d3f5;
+  --color-url-bg: #2f334d;
+  --color-url-text: #82aaff;
+  --color-input-bg: #1f2335;
+  --color-input-text: #c8d3f5;
+  --color-input-placeholder: #636da6;
+  --color-input-disabled: #1a1b26;
+  --color-badge-text: #1a1b26;
+  --color-secondary-btn: #2f334d;
+  --color-secondary-btn-text: #c8d3f5;
 }

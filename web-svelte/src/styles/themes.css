@@ -1,30 +1,26 @@
-/* ===========================================
-   THEMES - Main Import File
-   =========================================== */
-
+@import './themes/_foundry-dark.css';
+@import './themes/_foundry-light.css';
 @import './themes/_nord.css';
-@import './themes/_nord-light.css';
+@import './themes/_catppuccin-mocha.css';
+@import './themes/_catppuccin-latte.css';
+@import './themes/_gruvbox.css';
+@import './themes/_gruvbox-light.css';
 @import './themes/_rose-pine.css';
 @import './themes/_rose-pine-dawn.css';
 @import './themes/_tokyo-night.css';
-@import './themes/_tokyo-night-storm.css';
-@import './themes/_tokyo-night-light.css';
-@import './themes/_catppuccin-mocha.css';
-@import './themes/_catppuccin-latte.css';
-@import './themes/_one-dark.css';
-@import './themes/_gruvbox.css';
-@import './themes/_gruvbox-light.css';
-@import './themes/_solarized-dark.css';
-@import './themes/_solarized-light.css';
+@import './themes/_tokyo-night-day.css';
 @import './themes/_dracula.css';
-@import './themes/_red.css';
-@import './themes/_red-light.css';
-@import './themes/_blue.css';
-@import './themes/_blue-light.css';
-@import './themes/_purple.css';
-@import './themes/_purple-light.css';
-@import './themes/_rust.css';
-@import './themes/_rust-dark.css';
+@import './themes/_alucard.css';
+@import './themes/_kanagawa.css';
+@import './themes/_kanagawa-lotus.css';
+@import './themes/_one-dark.css';
+@import './themes/_one-light.css';
+@import './themes/_ayu.css';
+@import './themes/_ayu-light.css';
+@import './themes/_everforest.css';
+@import './themes/_everforest-light.css';
+@import './themes/_solarized.css';
+@import './themes/_solarized-light.css';
 
 @theme {
   --color-bg: var(--color-bg);
@@ -62,4 +58,7 @@
   --color-badge-text: var(--color-badge-text);
   --color-secondary-btn: var(--color-secondary-btn);
   --color-secondary-btn-text: var(--color-secondary-btn-text);
+  --color-secondary: var(--color-secondary-btn);
+  --color-text-heading: var(--color-heading);
+  --color-text-muted: var(--color-muted);
 }

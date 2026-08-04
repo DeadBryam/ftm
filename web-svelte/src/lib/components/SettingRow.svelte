@@ -23,25 +23,40 @@
   }: Props = $props();
 </script>
 
-<div class="flex items-center justify-between gap-4">
-  <div class="flex items-center gap-3">
+<div
+  role="presentation"
+  onclick={() => {
+    if (disabled) return;
+    onchange?.(!active);
+  }}
+  class={cn(
+    "flex w-full items-center justify-between gap-4 rounded-control",
+    disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
+  )}
+>
+  <div class="flex min-w-0 items-center gap-3">
     <div
       class={cn(
-        "w-10 h-10 rounded-lg flex items-center justify-center transition-colors",
+        "flex h-9 w-9 shrink-0 items-center justify-center rounded-control transition-colors",
         active ? "bg-primary/20" : "bg-secondary",
       )}
     >
       {#if active && IconActive}
-        <IconActive size={20} class="text-primary" />
-      {:else}
-        <Icon size={20} class="text-text-muted" />
+        <IconActive size={18} class="text-primary" />
+      {:else if Icon}
+        <Icon size={18} class="text-text-muted" />
       {/if}
     </div>
-    <span class="font-medium">{label}</span>
+    <span class="text-sm font-medium">{label}</span>
   </div>
-  <SettingsToggle
-    {disabled}
-    checked={active}
-    onchange={onchange ? (v) => onchange(v) : undefined}
-  />
+  <div
+    role="presentation"
+    onclick={(e) => e.stopPropagation()}
+  >
+    <SettingsToggle
+      {disabled}
+      checked={active}
+      onchange={onchange ? (v) => onchange(v) : undefined}
+    />
+  </div>
 </div>

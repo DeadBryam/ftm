@@ -15,13 +15,8 @@ const (
 	NotificationGranted  = "granted"
 	NotificationRejected = "rejected"
 
-	// ConfigVersion is the current on-disk schema version. Bump it whenever a
-	// stored config needs rewriting on load, and add a step to migrate.
 	ConfigVersion = 2
 
-	// LanguageAuto follows the operating system language. It is the default so
-	// that a config which was never touched does not look like a deliberate
-	// choice of English.
 	LanguageAuto = "auto"
 )
 
@@ -56,16 +51,9 @@ func DefaultConfig() *Config {
 	}
 }
 
-// migrate brings a stored config up to ConfigVersion, reporting whether
-// anything changed and therefore needs writing back.
 func (c *Config) migrate() bool {
 	changed := false
 
-	// v1 wrote `language: en` as its default. Because InitFromConfig only
-	// detected the system language when the field was empty, that default made
-	// every install look like the user had explicitly chosen English and left
-	// detection permanently dead. A v1 config never offered that choice, so
-	// hand these back to auto-detection.
 	if c.Version < 2 {
 		if c.Language == "" || c.Language == "en" {
 			c.Language = LanguageAuto

@@ -1,29 +1,56 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { cn } from '$lib/utils/cn';
+  import { goto } from '$app/navigation';
   import { t } from '$lib/stores/i18n.svelte';
-  import { Settings } from 'lucide-svelte';
+  import { Settings, ChevronLeft } from 'lucide-svelte';
 
-  let isSettings = $derived($page.url.pathname === '/settings');
+  const isHome = $derived($page.url.pathname === '/');
+  const isSettings = $derived($page.url.pathname === '/settings');
+
+  function handleBack() {
+    if (history.length > 1) {
+      history.back();
+    } else {
+      goto('/');
+    }
+  }
 </script>
 
-<header class="flex justify-between items-center mb-6 pb-5 border-b flex-shrink-0 z-10 border-border">
-  <div class="flex items-center gap-4">
-    <img src="/favicon.png" alt={t('app_name')} class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-cover" />
-    <div class="text">
-      <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold m-0 mb-1 tracking-tight text-text-heading">{t('app_name')}</h1>
-      <p class="text-xs sm:text-sm m-0 font-medium text-text-muted">{t('app_tagline')}</p>
-    </div>
-  </div>
-  
+<header class="z-10 mb-3 flex shrink-0 items-center justify-between border-b border-border pb-3">
   <a
-    href="/settings"
-    class={cn(
-      "p-2 rounded-lg transition-colors",
-      isSettings ? "bg-primary/20 text-primary" : "hover:bg-secondary"
-    )}
-    aria-label={t('settings')}
+    href="/"
+    class="flex min-w-0 items-center gap-3 rounded-control pr-1 transition-opacity hover:opacity-80"
+    aria-label={t('go_home')}
   >
-    <Settings size={20} />
+    <img
+      src="/favicon.png"
+      alt={t('app_name')}
+      class="h-9 w-9 shrink-0 rounded-control object-cover sm:h-10 sm:w-10"
+    />
+    <div class="min-w-0">
+      <h1 class="m-0 font-serif text-xl font-bold tracking-tight text-text-heading sm:text-2xl">
+        {t('app_name')}
+      </h1>
+      <p class="m-0 truncate text-xs font-medium text-text-muted">{t('app_tagline')}</p>
+    </div>
   </a>
+
+  {#if isSettings}
+    <button
+      type="button"
+      onclick={handleBack}
+      class="inline-flex cursor-pointer items-center gap-1.5 rounded-control px-3 py-1.5 text-sm text-text-muted transition-colors hover:bg-secondary hover:text-text-heading"
+    >
+      <ChevronLeft size={14} />
+      {t('go_home')}
+    </button>
+  {:else if isHome}
+    <a
+      href="/settings"
+      class="rounded-control p-2 transition-colors hover:bg-secondary"
+      aria-label={t('settings')}
+    >
+      <Settings size={18} />
+    </a>
+  {/if}
 </header>

@@ -3,7 +3,7 @@
    Based on github.com/morhetz/gruvbox
    =========================================== */
 
-:root[data-theme="gruvbox"] {
+[data-theme="gruvbox"] {
   --color-bg: #282828;
   --color-card: #3c3836;
   --color-text: #ebdbb2;

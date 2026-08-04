@@ -191,6 +191,7 @@ func (m *Manager) Start(tunnel config.TunnelConfig, onUpdate func(config.TunnelS
 	mp.Process = proc
 	mp.Status.State = config.TunnelStateStarting
 	mp.Status.ExpiresAt = m.expiresAtLocked(tunnel.Provider, startedAt)
+	mp.Status.StartedAt = startedAt.UnixMilli()
 
 	m.processes[tunnel.ID] = mp
 
@@ -351,6 +352,11 @@ func (m *Manager) updateURL(tunnelID, url string) {
 
 	mp, ok := m.processes[tunnelID]
 	if !ok {
+		m.mu.Unlock()
+		return
+	}
+
+	if mp.Status.PublicURL == url && mp.Status.State == config.TunnelStateOnline {
 		m.mu.Unlock()
 		return
 	}

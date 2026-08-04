@@ -3,7 +3,7 @@
    Based on catppuccin.com
    =========================================== */
 
-:root[data-theme="catppuccin-mocha"] {
+[data-theme="catppuccin-mocha"] {
   --color-bg: #1e1e2e;
   --color-card: #313244;
   --color-text: #cdd6f4;

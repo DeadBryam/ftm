@@ -14,8 +14,7 @@ func TestDetectSystemLangEnvPrecedence(t *testing.T) {
 		skipMac bool
 	}{
 		{
-			name: "LC_ALL wins over everything",
-			// POSIX precedence: LC_ALL is the override that beats the rest.
+			name:  "LC_ALL wins over everything",
 			lcAll: "es_ES.UTF-8",
 			lcMsg: "en_US.UTF-8",
 			lang:  "en_US.UTF-8",
@@ -38,6 +37,11 @@ func TestDetectSystemLangEnvPrecedence(t *testing.T) {
 			want: LangEN,
 		},
 		{
+			name: "brazilian portuguese resolves to pt",
+			lang: "pt_BR.UTF-8",
+			want: LangPT,
+		},
+		{
 			name: "untranslated language falls back to the default",
 			lang: "fr_FR.UTF-8",
 			want: DefaultLang,
@@ -49,9 +53,7 @@ func TestDetectSystemLangEnvPrecedence(t *testing.T) {
 			want:  LangES,
 		},
 		{
-			name: "empty environment falls back to the default",
-			// On macOS this consults AppleLanguages instead, which depends on
-			// the machine running the test.
+			name:    "empty environment falls back to the default",
 			want:    DefaultLang,
 			skipMac: true,
 		},

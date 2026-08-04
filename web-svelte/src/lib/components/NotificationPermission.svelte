@@ -1,86 +1,54 @@
 <script lang="ts">
-  import { useNotifications } from '$lib/stores/notification.svelte.js';
-  import { cn } from '$lib/utils/cn';
-  import { t } from '$lib/stores/i18n.svelte';
-    import { animate } from 'motion';
+  import { useNotifications } from "$lib/stores/notification.svelte.js";
+  import { cn } from "$lib/utils/cn";
+  import { t } from "$lib/stores/i18n.svelte";
 
   const notifications = useNotifications();
 
-  let show = $derived(notifications.status === 'pending');
-  let cardRef: HTMLDivElement | undefined = $state();
-  let isAnimatingOut = $state(false);
-
-  $effect(() => {
-    if (show && cardRef) {
-      cardRef.style.opacity = '0';
-      cardRef.style.transform = 'translateY(16px) scale(0.96)';
-      requestAnimationFrame(() => {
-        animate(
-          cardRef!,
-          { opacity: 1, y: 0, scale: 1 },
-          { type: 'spring', stiffness: 300, damping: 26 }
-        );
-      });
-    }
-  });
-
-  function animateOut(): Promise<void> {
-    if (!cardRef) return Promise.resolve();
-    return animate(
-      cardRef,
-      { opacity: 0, y: 16, scale: 0.96 },
-      { type: 'spring', stiffness: 500, damping: 35 }
-    ).finished.then(() => {});
-  }
+  let show = $derived(notifications.status === "pending");
 
   async function request() {
-    if (isAnimatingOut) return;
-    isAnimatingOut = true;
-    await animateOut();
     await notifications.requestPermission();
-    isAnimatingOut = false;
   }
 
-  async function later() {
-    if (isAnimatingOut) return;
-    isAnimatingOut = true;
-    await animateOut();
+  function later() {
     notifications.reject();
-    isAnimatingOut = false;
   }
 </script>
 
-{#if show || isAnimatingOut}
+{#if show}
   <div
-    bind:this={cardRef}
     class={cn(
-      'fixed bottom-4 right-4 max-w-[320px] rounded-xl p-5 z-50',
-      'bg-card border border-border shadow-lg'
+      "ftm-enter fixed bottom-3 right-3 z-50 max-w-[300px] rounded-panel border border-border bg-card p-3.5 shadow-lg",
     )}
   >
     <div class="flex flex-col gap-2">
-      <h3 class="m-0 text-[1.1rem] font-semibold text-text-heading">{t('enable_notifications_web')}</h3>
-      <p class="m-0 text-sm leading-relaxed text-text-muted">{t('notifications_prompt')}</p>
-      <div class="flex gap-2 mt-1">
+      <h3 class="m-0 text-[1.1rem] font-semibold text-text-heading">
+        {t("enable_notifications_web")}
+      </h3>
+      <p class="m-0 text-sm leading-relaxed text-text-muted">
+        {t("notifications_prompt")}
+      </p>
+      <div class="mt-1 flex gap-2">
         <button
+          type="button"
           onclick={request}
           class={cn(
-            'inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium flex-1 cursor-pointer',
-            'transition-all duration-150 hover:-translate-y-px',
-            'bg-primary text-heading border-none'
+            "inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border-none px-3 py-2 text-sm font-medium",
+            "bg-primary text-heading transition-all duration-150 hover:-translate-y-px",
           )}
         >
-          {t('enable_notifications')}
+          {t("enable_notifications")}
         </button>
         <button
+          type="button"
           onclick={later}
           class={cn(
-            'inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium flex-1 cursor-pointer',
-            'transition-all duration-150 hover:-translate-y-px',
-            'bg-secondary-btn text-secondary-btn-text border border-border'
+            "inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium",
+            "bg-secondary-btn text-secondary-btn-text transition-all duration-150 hover:-translate-y-px",
           )}
         >
-          {t('not_now')}
+          {t("not_now")}
         </button>
       </div>
     </div>

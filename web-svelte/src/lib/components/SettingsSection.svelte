@@ -1,13 +1,22 @@
 <script lang="ts">
   interface Props {
     title: string;
-    children: import('svelte').Snippet;
+    description?: string;
+    children: import("svelte").Snippet;
   }
 
-  let { title, children }: Props = $props();
+  let { title, description, children }: Props = $props();
 </script>
 
-<section class="p-6 rounded-2xl bg-card border border-border space-y-4">
-  <h2 class="text-sm uppercase tracking-wider text-text-muted font-medium">{title}</h2>
-  {@render children()}
-</section>
+<header class="mb-2.5 flex items-baseline gap-3 px-1">
+  <h2
+    class="font-serif text-sm font-semibold tracking-tight text-text-heading"
+  >
+    {title}
+  </h2>
+  {#if description}
+    <span class="truncate text-xs text-text-muted">{description}</span>
+  {/if}
+</header>
+
+<div>{@render children()}</div>

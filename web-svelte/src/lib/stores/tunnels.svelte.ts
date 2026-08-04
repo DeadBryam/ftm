@@ -18,6 +18,7 @@ interface TunnelMessage {
   publicUrl?: string;
   errorMessage?: string;
   expiresAt?: number;
+  startedAt?: number;
   done?: boolean;
   install?: { provider: string; percent: number; step: string };
   notification?: {
@@ -85,6 +86,7 @@ function processStateMessage(msg: TunnelMessage) {
   if (msg.provider !== undefined) updated.provider = msg.provider;
   if (msg.port !== undefined) updated.port = msg.port;
   if (msg.expiresAt !== undefined) updated.expiresAt = msg.expiresAt;
+  if (msg.startedAt !== undefined) updated.startedAt = msg.startedAt;
 
   tunnelsById = { ...tunnelsById, [msg.id]: updated };
 

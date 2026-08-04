@@ -6,6 +6,8 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/sthbryan/ftm/internal/config"
+	"github.com/sthbryan/ftm/internal/i18n"
 	"github.com/sthbryan/ftm/internal/version"
 )
 
@@ -18,13 +20,13 @@ func (h *Handlers) handleStatus(w http.ResponseWriter) {
 }
 
 func (h *Handlers) handleProviders(w http.ResponseWriter) {
-	providers := []map[string]string{
-		{"id": "cloudflared", "name": "Cloudflared"},
-		{"id": "tunnelmole", "name": "Tunnelmole"},
-		{"id": "localhostrun", "name": "localhost.run"},
-		{"id": "serveo", "name": "Serveo"},
-		{"id": "pinggy", "name": "Pinggy"},
-		{"id": "bore", "name": "bore"},
+	all := config.AllProviders()
+	providers := make([]map[string]string, 0, len(all))
+	for _, p := range all {
+		providers = append(providers, map[string]string{
+			"id":   string(p),
+			"name": i18n.ProviderText(string(p)),
+		})
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(providers)

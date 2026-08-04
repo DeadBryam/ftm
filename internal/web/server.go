@@ -195,6 +195,7 @@ func (s *Server) statusUpdateLoop() {
 			"publicUrl":    status.PublicURL,
 			"errorMessage": status.ErrorMessage,
 			"expiresAt":    status.ExpiresAt,
+			"startedAt":    status.StartedAt,
 		}
 		data, _ := MarshalJSON(update)
 		s.broadcast(string(data))
@@ -205,13 +206,14 @@ func (s *Server) statusUpdateLoop() {
 func (s *Server) BroadcastTunnelUpdate(t config.TunnelConfig) {
 	state := "stopped"
 	var publicURL, errorMessage string
-	var expiresAt int64
+	var expiresAt, startedAt int64
 
 	if status, ok := s.manager.GetStatus(t.ID); ok {
 		state = string(status.State)
 		publicURL = status.PublicURL
 		errorMessage = status.ErrorMessage
 		expiresAt = status.ExpiresAt
+		startedAt = status.StartedAt
 	}
 
 	update := map[string]interface{}{
@@ -224,6 +226,7 @@ func (s *Server) BroadcastTunnelUpdate(t config.TunnelConfig) {
 		"publicUrl":    publicURL,
 		"errorMessage": errorMessage,
 		"expiresAt":    expiresAt,
+		"startedAt":    startedAt,
 	}
 	data, _ := MarshalJSON(update)
 	s.broadcast(string(data))

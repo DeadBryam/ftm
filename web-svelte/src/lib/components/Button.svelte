@@ -42,14 +42,14 @@
   };
 
   const SIZE_CLASSES: Record<ButtonSize, string> = {
-    sm: "h-8 px-2.5 text-xs gap-1.5",
+    sm: "h-7.5 px-2.5 text-xs gap-1.5",
     md: "h-9 px-3.5 text-sm gap-2",
     lg: "h-11 px-5 text-sm gap-2",
   };
 
   let {
     variant = "default",
-    size = "md",
+    size = "sm",
     disabled = false,
     type = "button",
     class: className = "",
@@ -75,7 +75,7 @@
   {onclick}
   class={cn(
     "inline-flex items-center justify-center border font-medium cursor-pointer",
-    "transition-all duration-150 rounded-xl",
+    "transition-all duration-150 rounded-control",
     "disabled:opacity-50 disabled:cursor-not-allowed",
     "active:scale-[0.98]",
     variantClasses.base,

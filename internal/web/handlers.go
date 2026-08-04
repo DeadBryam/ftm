@@ -95,6 +95,7 @@ func (h *Handlers) tunnelToMap(t config.TunnelConfig) map[string]interface{} {
 		item["errorMessage"] = status.ErrorMessage
 		item["state"] = string(status.State)
 		item["expiresAt"] = status.ExpiresAt
+		item["startedAt"] = status.StartedAt
 	}
 
 	if item["state"] == "stopped" {
@@ -109,13 +110,14 @@ func (h *Handlers) tunnelToMap(t config.TunnelConfig) map[string]interface{} {
 func (h *Handlers) writeTunnelJSON(w http.ResponseWriter, t config.TunnelConfig) {
 	state := "stopped"
 	var publicURL, errorMessage string
-	var expiresAt int64
+	var expiresAt, startedAt int64
 
 	if tunnelStatus, ok := h.manager.GetStatus(t.ID); ok {
 		publicURL = tunnelStatus.PublicURL
 		errorMessage = tunnelStatus.ErrorMessage
 		state = string(tunnelStatus.State)
 		expiresAt = tunnelStatus.ExpiresAt
+		startedAt = tunnelStatus.StartedAt
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -128,6 +130,7 @@ func (h *Handlers) writeTunnelJSON(w http.ResponseWriter, t config.TunnelConfig)
 		"publicUrl":    publicURL,
 		"errorMessage": errorMessage,
 		"expiresAt":    expiresAt,
+		"startedAt":    startedAt,
 	})
 }
 
