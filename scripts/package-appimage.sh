@@ -92,10 +92,26 @@ fi
   --deploy-deps-only "$WEBKIT_LIBEXEC" \
   --plugin gtk
 
+WK_LINK="/tmp/ftm-webkit-4.1"
+for wk_lib in "$APPDIR"/usr/lib/libwebkit2gtk-4.1.so.0*; do
+  [ -e "$wk_lib" ] || continue
+  python3 "$(dirname "$0")/relocate-webkit.py" "$wk_lib" "$WK_LINK"
+done
+
 mkdir -p "$APPDIR/apprun-hooks"
-cat > "$APPDIR/apprun-hooks/webkit.sh" <<'HOOK'
-export WEBKIT_EXEC_PATH="$APPDIR/usr/lib/webkit2gtk-4.1"
+cat > "$APPDIR/apprun-hooks/webkit.sh" <<HOOK
+export WEBKIT_LINK="$WK_LINK"
+export WEBKIT_TARGET="\$APPDIR/usr/lib/webkit2gtk-4.1"
 export WEBKIT_DISABLE_COMPOSITING_MODE=1
+if [ -L "\$WEBKIT_LINK" ] || [ -e "\$WEBKIT_LINK" ]; then
+  link_uid="\$(stat -c %u "\$WEBKIT_LINK" 2>/dev/null || echo unknown)"
+  if [ ! -L "\$WEBKIT_LINK" ] || [ "\$link_uid" != "\$(id -u)" ]; then
+    echo "ftm: \$WEBKIT_LINK exists and is not owned by you; cannot set up WebKit helpers." >&2
+    exit 1
+  fi
+fi
+ln -sfn "\$WEBKIT_TARGET" "\$WEBKIT_LINK"
+export WEBKIT_INJECTED_BUNDLE_PATH="\$WEBKIT_TARGET/injected-bundle"
 HOOK
 
 OUTPUT_NAME="ftm-desktop-linux-${ARCH}.AppImage"
