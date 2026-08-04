@@ -79,13 +79,13 @@
 <div
   role="radiogroup"
   aria-label={t('theme_match_system')}
-  class="grid grid-cols-3 gap-2 sm:grid-cols-4"
+  class="grid grid-cols-3 gap-1.5 sm:grid-cols-4"
 >
   {#each families as family (family.id)}
     {@const active = activeFamily?.id === family.id}
     <div
       class={cn(
-        'flex cursor-pointer flex-col items-stretch gap-1.5 rounded-control border p-2 transition-colors',
+        'flex cursor-pointer flex-col items-stretch gap-1 rounded-control border p-1.5 transition-colors',
         active
           ? 'border-primary bg-primary/5'
           : 'border-border-light bg-bg/40 hover:border-primary/40 hover:bg-hover',
@@ -98,14 +98,14 @@
         (e.key === 'Enter' || e.key === ' ') &&
         (e.preventDefault(), pickFamily(family))}
     >
-      <div class="relative h-6 overflow-hidden rounded">
+      <div class="relative h-4 overflow-hidden rounded-sm">
         <span class="absolute inset-y-0 left-0 w-1/2" style="background: {family.dark.color}"></span>
         <span class="absolute inset-y-0 right-0 w-1/2" style="background: {family.light.color}"></span>
         <span class="absolute inset-y-0 left-1/2 w-px bg-bg/60 mix-blend-overlay"></span>
       </div>
       <span
         class={cn(
-          'truncate text-center text-xs',
+          'truncate text-center text-[10px]',
           active ? 'font-semibold text-text-heading' : 'text-text-heading',
         )}
       >
@@ -117,7 +117,7 @@
 
 {#if !theme.isAuto && activeFamily}
   <div
-    class="mt-3 flex items-center justify-center gap-1 rounded-control border border-border-light bg-bg/40 p-1"
+    class="mt-3 flex flex-wrap gap-1.5"
     role="radiogroup"
     aria-label={t('theme_dark')}
   >
@@ -127,13 +127,13 @@
       aria-checked={activeMode === 'dark'}
       onclick={() => theme.setManual(activeFamily.dark.id)}
       class={cn(
-        'flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded px-3 py-1.5 text-xs transition-colors',
+        'cursor-pointer rounded-control border px-3 py-1.5 text-sm transition-all',
         activeMode === 'dark'
-          ? 'bg-card text-text-heading shadow-sm'
-          : 'text-text-muted hover:text-text-heading',
+          ? 'border-primary bg-primary text-btn-text shadow-sm'
+          : 'border-border bg-input-bg text-text hover:border-primary/50 hover:bg-hover',
       )}
     >
-      <Moon size={12} />
+      <Moon size={12} class="mr-1.5 inline-block align-middle" />
       {t('theme_dark')}
     </button>
     <button
@@ -142,13 +142,13 @@
       aria-checked={activeMode === 'light'}
       onclick={() => theme.setManual(activeFamily.light.id)}
       class={cn(
-        'flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded px-3 py-1.5 text-xs transition-colors',
+        'cursor-pointer rounded-control border px-3 py-1.5 text-sm transition-all',
         activeMode === 'light'
-          ? 'bg-card text-text-heading shadow-sm'
-          : 'text-text-muted hover:text-text-heading',
+          ? 'border-primary bg-primary text-btn-text shadow-sm'
+          : 'border-border bg-input-bg text-text hover:border-primary/50 hover:bg-hover',
       )}
     >
-      <Sun size={12} />
+      <Sun size={12} class="mr-1.5 inline-block align-middle" />
       {t('theme_light')}
     </button>
   </div>
