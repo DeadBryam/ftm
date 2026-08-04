@@ -108,7 +108,17 @@ chmod +x ftm-desktop-linux-x86_64.AppImage
 ./ftm-desktop-linux-x86_64.AppImage
 ```
 
-One file, no install step, and it carries GTK and WebKitGTK inside, so it runs on any distro with glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+, recent Arch). The icon and menu entry come with it.
+One file, no install step, icon and menu entry included. Runs on any distro with glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+, recent Arch).
+
+It uses the system's WebKitGTK 4.1 rather than bundling it, because WebKitGTK resolves its helper processes from a path fixed at compile time and a bundled copy only works on the distro it was built on. Most desktops already have it; if not:
+
+```bash
+sudo apt install libwebkit2gtk-4.1-0   # Debian/Ubuntu
+sudo pacman -S webkit2gtk-4.1          # Arch
+sudo dnf install webkit2gtk4.1         # Fedora
+```
+
+The app checks on startup and prints the right command for your distro if it is missing.
 
 | | |
 |---|---|

@@ -34,8 +34,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev pkg-config gcc \
-            libayatana-appindicator3-dev librsvg2-common libgdk-pixbuf2.0-0 \
-            gsettings-desktop-schemas adwaita-icon-theme imagemagick
+            libayatana-appindicator3-dev imagemagick
 
       - name: Build web assets
         run: |
@@ -62,12 +61,19 @@ jobs:
           APPIMAGE_EXTRACT_AND_RUN=1 "$APPIMAGE" --appimage-extract >/dev/null
           test -f squashfs-root/ftm-desktop.desktop
           test -f squashfs-root/ftm-desktop.png
-          test -f squashfs-root/usr/lib/libwebkit2gtk-4.1.so.0
-          test -f squashfs-root/usr/lib/libgtk-3.so.0
-          test -x squashfs-root/usr/lib/webkit2gtk-4.1/WebKitNetworkProcess
-          test -x squashfs-root/usr/lib/webkit2gtk-4.1/WebKitWebProcess
-          grep -q WEBKIT_EXEC_PATH squashfs-root/apprun-hooks/webkit.sh
-          echo "AppImage is self-contained"
+          test -x squashfs-root/usr/bin/ftm-desktop
+
+          # A bundled GTK or WebKit would resolve its helper processes from the
+          # build host's absolute paths and crash on every other distro.
+          for lib in libwebkit2gtk libjavascriptcoregtk libgtk-3 libgdk-3; do
+            if find squashfs-root/usr/lib -name "$lib*" | grep -q .; then
+              echo "$lib must not be bundled" >&2
+              exit 1
+            fi
+          done
+
+          grep -q libwebkit2gtk-4.1 squashfs-root/apprun-hooks/webkit.sh
+          echo "AppImage uses the system GTK/WebKit"
 
       - name: Upload AppImage
         uses: actions/upload-artifact@v4
