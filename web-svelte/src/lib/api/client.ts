@@ -1,18 +1,20 @@
 import ky from 'ky';
 import type { HTTPError } from 'ky';
 
-export function extractErrorMessage(body: string): string {
+export function extractErrorMessage(body: unknown): string {
+  if (body && typeof body === 'object') {
+    const record = body as Record<string, unknown>;
+    const value = record.error ?? record.message;
+    return typeof value === 'string' ? value.trim() : '';
+  }
+
+  if (typeof body !== 'string') return '';
+
   const text = body.trim();
   if (!text) return '';
 
   try {
-    const parsed = JSON.parse(text);
-    if (typeof parsed === 'string') return parsed.trim();
-    if (parsed && typeof parsed === 'object') {
-      const value = (parsed as Record<string, unknown>).error ?? (parsed as Record<string, unknown>).message;
-      if (typeof value === 'string' && value.trim()) return value.trim();
-    }
-    return text;
+    return extractErrorMessage(JSON.parse(text)) || text;
   } catch {
     return text;
   }
@@ -33,15 +35,19 @@ export const api = ky.create({
   hooks: {
     beforeError: [
       async ({ error }) => {
-        const response = (error as HTTPError).response;
-        if (!response) return error;
+        const { data, response } = error as HTTPError;
 
-        try {
-          const message = extractErrorMessage(await response.clone().text());
-          if (message) error.message = message;
-        } catch {
-          return error;
+        let message = extractErrorMessage(data);
+
+        if (!message && response && !response.bodyUsed) {
+          try {
+            message = extractErrorMessage(await response.clone().text());
+          } catch {
+            message = '';
+          }
         }
+
+        if (message) error.message = message;
 
         return error;
       },

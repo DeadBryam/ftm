@@ -24,7 +24,17 @@ describe('extractErrorMessage', () => {
     expect(extractErrorMessage('{"code":500}')).toBe('{"code":500}');
   });
 
+  it('reads an already parsed body object', () => {
+    expect(extractErrorMessage({ error: 'tunnel tunnel-1 is not running' })).toBe(
+      'tunnel tunnel-1 is not running'
+    );
+  });
+
   it('returns nothing for an empty body', () => {
     expect(extractErrorMessage('   ')).toBe('');
+  });
+
+  it('returns nothing when there is no body at all', () => {
+    expect(extractErrorMessage(undefined)).toBe('');
   });
 });
