@@ -1,5 +1,4 @@
 <script lang="ts">
-  import ThemeButton from "./ThemeButton.svelte";
   import SettingsToggle from "./SettingsToggle.svelte";
   import { useTheme } from "$lib/stores/theme.svelte";
   import { t } from "$lib/stores/i18n.svelte";
@@ -134,24 +133,33 @@
           "flex flex-col items-stretch gap-1.5 rounded-control border p-2 transition-colors",
           darkSelected || lightSelected
             ? "border-primary/40 bg-primary/5"
-            : "border-border-light bg-bg/40",
+            : "border-border-light bg-bg/40 hover:border-primary/30",
         )}
       >
-        <div class="flex gap-1">
-          <ThemeButton
-            id={family.dark.id}
-            color={family.dark.color}
-            selected={darkSelected}
-            label={`${family.name} ${t("theme_dark")}`}
+        <div class="relative h-7 overflow-hidden rounded-control shadow-sm">
+          <span class="absolute inset-y-0 left-0 w-1/2" style="background: {family.dark.color}"></span>
+          <span class="absolute inset-y-0 right-0 w-1/2" style="background: {family.light.color}"></span>
+          <span class="absolute inset-y-0 left-1/2 w-px bg-bg/60 mix-blend-overlay"></span>
+          <button
+            type="button"
             onclick={() => theme.setManual(family.dark.id)}
-          />
-          <ThemeButton
-            id={family.light.id}
-            color={family.light.color}
-            selected={lightSelected}
-            label={`${family.name} ${t("theme_light")}`}
+            aria-label={`${family.name} ${t("theme_dark")}`}
+            aria-pressed={darkSelected}
+            class={cn(
+              "absolute inset-y-0 left-0 w-1/2 cursor-pointer transition-all",
+              darkSelected ? "ring-2 ring-primary ring-inset" : "hover:brightness-110",
+            )}
+          ></button>
+          <button
+            type="button"
             onclick={() => theme.setManual(family.light.id)}
-          />
+            aria-label={`${family.name} ${t("theme_light")}`}
+            aria-pressed={lightSelected}
+            class={cn(
+              "absolute inset-y-0 right-0 w-1/2 cursor-pointer transition-all",
+              lightSelected ? "ring-2 ring-primary ring-inset" : "hover:brightness-110",
+            )}
+          ></button>
         </div>
         <span class="truncate text-center text-xs font-medium text-text-heading">
           {family.name}
