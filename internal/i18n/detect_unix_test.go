@@ -38,6 +38,11 @@ func TestDetectSystemLangEnvPrecedence(t *testing.T) {
 			want: LangEN,
 		},
 		{
+			name: "brazilian portuguese resolves to pt",
+			lang: "pt_BR.UTF-8",
+			want: LangPT,
+		},
+		{
 			name: "untranslated language falls back to the default",
 			lang: "fr_FR.UTF-8",
 			want: DefaultLang,

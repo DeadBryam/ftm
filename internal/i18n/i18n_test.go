@@ -128,24 +128,31 @@ func TestEmbeddedLocalesLoadWithMatchingKeys(t *testing.T) {
 		t.Fatalf("Load() failed: %v", err)
 	}
 
-	en := GetTranslations(LangEN)
-	es := GetTranslations(LangES)
-
+	en := GetTranslations(DefaultLang)
 	if len(en) == 0 {
-		t.Fatal("English locale loaded no keys")
-	}
-	if len(es) == 0 {
-		t.Fatal("Spanish locale loaded no keys")
+		t.Fatal("default locale loaded no keys")
 	}
 
-	for key := range en {
-		if _, ok := es[key]; !ok {
-			t.Errorf("key %q is missing from es.yaml", key)
+	for _, lang := range SupportedLanguages() {
+		if lang == DefaultLang {
+			continue
 		}
-	}
-	for key := range es {
-		if _, ok := en[key]; !ok {
-			t.Errorf("key %q is in es.yaml but not en.yaml", key)
+
+		other := GetTranslations(lang)
+		if len(other) == 0 {
+			t.Errorf("%s.yaml loaded no keys", lang)
+			continue
+		}
+
+		for key := range en {
+			if _, ok := other[key]; !ok {
+				t.Errorf("key %q is missing from %s.yaml", key, lang)
+			}
+		}
+		for key := range other {
+			if _, ok := en[key]; !ok {
+				t.Errorf("key %q is in %s.yaml but not %s.yaml", key, lang, DefaultLang)
+			}
 		}
 	}
 }
