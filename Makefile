@@ -157,6 +157,18 @@ uninstall:
 	@echo "Uninstalling $(BINARY_NAME)..."
 	@rm -f $(INSTALL_PATH)
 
+# Release: bump version, commit, tag, push.
+# Forward all args to scripts/bump-version.sh, e.g.
+#   make version                 # interactive menu
+#   make version ARGS="patch"    # bump patch
+#   make version ARGS="0.11.0 --dry-run"
+.PHONY: version
+version:
+	@./scripts/bump-version.sh $(ARGS)
+
+.PHONY: release
+release: version
+
 # Help target
 .PHONY: help
 help:
@@ -176,4 +188,6 @@ help:
 	@echo "  clean                     - Remove build artifacts"
 	@echo "  install                   - Build web + binary, copy to \$$BINDIR (BINDIR=... override; default \$$(go env GOPATH)/bin)"
 	@echo "  uninstall                 - Remove installed binary from \$$BINDIR"
+	@echo "  version [ARGS=...]        - Bump version (interactive). ARGS forwarded to scripts/bump-version.sh"
+	@echo "  release                   - Alias of version"
 	@echo "  help                      - Show this help message"
