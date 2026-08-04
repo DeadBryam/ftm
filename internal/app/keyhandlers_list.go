@@ -10,6 +10,7 @@ import (
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/i18n"
 	"github.com/sthbryan/ftm/internal/notifications"
+	"github.com/sthbryan/ftm/internal/updater"
 )
 
 func (m *Model) handleListKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
@@ -185,6 +186,10 @@ func (m *Model) openConfigDir() {
 
 func (m *Model) handleListUpdate() (tea.Model, tea.Cmd) {
 	if m.UpdateAvailable == nil {
+		return m, nil
+	}
+	if m.UpdateAvailable.Method != updater.MethodSelf {
+		m.showMessage(i18n.T(m.UpdateAvailable.Method.HintKey()))
 		return m, nil
 	}
 	m.showMessage(i18n.T("update_applying"))

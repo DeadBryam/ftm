@@ -8,7 +8,7 @@ set -euo pipefail
 
 BIN="${1:?usage: package-macos-app.sh <binary> [out-dir]}"
 OUT_DIR="${2:-$(dirname "$BIN")}"
-VERSION="${VERSION:-0.10.0}"
+VERSION="${VERSION:-$(sed -nE 's/^var Version = "([^"]+)"$/\1/p' internal/version/version.go)}"
 
 # Outer zip name (URL slug — never change without a release tag bump).
 ZIP_SLUG="ftm-desktop-macos.app"

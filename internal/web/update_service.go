@@ -92,6 +92,7 @@ func (s *updateService) broadcastUpdate(info *updater.Info) {
 		"tag":        info.Tag,
 		"assetName":  info.AssetName,
 		"releaseUrl": info.ReleaseURL,
+		"method":     string(info.Method),
 	}
 	data, _ := MarshalJSON(payload)
 	s.broadcast(string(data))

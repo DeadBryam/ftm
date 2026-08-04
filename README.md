@@ -101,10 +101,20 @@ curl -fsSL https://raw.githubusercontent.com/sthbryan/ftm/main/install.sh | bash
 
 Detects OS and arch, installs the CLI to `~/.local/bin` (override with `INSTALL_DIR`), and clears macOS quarantine when needed.
 
+**Linux desktop app (AppImage)**
+
+```bash
+chmod +x ftm-desktop-linux-x86_64.AppImage
+./ftm-desktop-linux-x86_64.AppImage
+```
+
+One file, no install step, and it carries GTK and WebKitGTK inside, so it runs on any distro with glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+, recent Arch). The icon and menu entry come with it.
+
 | | |
 |---|---|
 | **Homebrew** | `brew install sthbryan/tap/ftm-cli` (CLI) or `--cask` for desktop |
 | **Install script** | The one-liner above — macOS and Linux |
+| **AppImage** | Linux desktop app — one file, no install |
 | **Download** | [Releases](https://github.com/sthbryan/ftm/releases/latest) — CLI + desktop apps |
 | **From source** | `make install` — needs Go 1.22+ and Bun |
 

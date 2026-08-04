@@ -305,6 +305,11 @@ update_applying: "Descargando e instalando actualización... ftm se reiniciará.
 update_web_banner: "Actualización disponible: v{latest}"
 update_web_button: "Actualizar"
 update_web_notes: "Notas del release"
+update_manual_store: "La Microsoft Store mantiene esta app actualizada."
+update_manual_homebrew: "Instalado con Homebrew. Ejecuta: brew upgrade ftm"
+update_manual_download: "Descarga la nueva versión desde la página del release."
+update_web_download: "Descargar"
+update_web_restart: "ftm se reiniciará cuando termine la actualización."
 toggle_on: "SÍ"
 toggle_off: "NO"
 

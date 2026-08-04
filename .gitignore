@@ -57,3 +57,5 @@ desktop/frontend/
 
 AGENTS.md
 PLAN.md
+# Generated Windows resources
+desktop/*.syso

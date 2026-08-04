@@ -42,6 +42,7 @@ type Info struct {
 	AssetName      string
 	HasUpdate      bool
 	ReleaseURL     string
+	Method         Method
 }
 
 type Updater struct {
@@ -68,6 +69,8 @@ func (u *Updater) Check(currentVersion string) (*Info, error) {
 	latestVersion := strings.TrimPrefix(rel.TagName, "v")
 	cur := strings.TrimPrefix(currentVersion, "v")
 
+	method := DetectMethod()
+
 	assetName := platformAssetName()
 	assetURL := ""
 	for _, a := range rel.Assets {
@@ -76,7 +79,7 @@ func (u *Updater) Check(currentVersion string) (*Info, error) {
 			break
 		}
 	}
-	if assetURL == "" {
+	if assetURL == "" && method == MethodSelf {
 		return nil, fmt.Errorf("no asset %q in release %s (available: %s)",
 			assetName, rel.TagName, listAssetNames(rel.Assets))
 	}
@@ -89,6 +92,7 @@ func (u *Updater) Check(currentVersion string) (*Info, error) {
 		AssetName:      assetName,
 		HasUpdate:      compareSemver(latestVersion, cur) > 0,
 		ReleaseURL:     rel.HTMLURL,
+		Method:         method,
 	}, nil
 }
 
@@ -126,6 +130,10 @@ func (u *Updater) fetchLatest() (*Release, error) {
 }
 
 func (u *Updater) Apply(info *Info) error {
+	if info.Method != MethodSelf {
+		return ErrNotSelfUpdatable
+	}
+
 	execPath, err := os.Executable()
 	if err != nil {
 		return fmt.Errorf("locate binary: %w", err)

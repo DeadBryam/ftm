@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Package version (e.g. 0.10.0). Defaults to 0.0.0+run_id'
+        description: 'Package version (e.g. 0.11.0). Revision is always 0. Defaults to 0.0.<run_number>.0'
         required: false
         default: ''
       identity_name:
@@ -60,7 +60,11 @@ jobs:
         shell: bash
         run: |
           mkdir -p desktop/build/bin
-          CGO_ENABLED=1 go build -tags production -ldflags "-s -w" \
+          WINRES_VERSION=$(grep -m1 '"productVersion"' desktop/wails.json | sed -E 's/.*"([0-9.]+)".*/\1/')
+          go run github.com/tc-hib/go-winres@v0.3.3 make \
+            --in desktop/winres/winres.json --out desktop/rsrc --arch amd64 \
+            --product-version "$WINRES_VERSION" --file-version "$WINRES_VERSION"
+          CGO_ENABLED=1 go build -tags production -ldflags "-s -w -H windowsgui" \
             -o desktop/build/bin/ftm-desktop-windows.exe ./desktop
 
       - name: Package MSIX
@@ -74,7 +78,7 @@ jobs:
         run: |
           $ver = $env:INPUT_VERSION
           if ([string]::IsNullOrWhiteSpace($ver)) {
-            $ver = "0.0.0.${{ github.run_number }}"
+            $ver = "0.0.${{ github.run_number }}.0"
           }
           $id = $env:INPUT_IDENTITY
           if ([string]::IsNullOrWhiteSpace($id)) { $id = $env:SECRET_IDENTITY }

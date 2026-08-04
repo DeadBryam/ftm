@@ -31,6 +31,11 @@ func Update(checkOnly bool) error {
 		return nil
 	}
 
+	if info.Method != updater.MethodSelf {
+		fmt.Println(i18n.T(info.Method.HintKey()))
+		return nil
+	}
+
 	fmt.Println(i18n.TF("update_downloading", info.AssetName))
 	if err := u.Apply(info); err != nil {
 		return fmt.Errorf("%s", i18n.TF("update_apply_failed", err.Error()))

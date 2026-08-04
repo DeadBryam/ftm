@@ -2,10 +2,13 @@ package web
 
 import (
 	"encoding/json"
+	"errors"
+	"log"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/sthbryan/ftm/internal/updater"
 	"github.com/sthbryan/ftm/internal/version"
 )
 
@@ -28,6 +31,7 @@ func (h *Handlers) getUpdate(w http.ResponseWriter) {
 		"assetName":  "",
 		"releaseUrl": "",
 		"hasUpdate":  false,
+		"method":     string(updater.DetectMethod()),
 	}
 	if info := h.server.updateSvc.Info(); info != nil {
 		resp["latest"] = info.LatestVersion
@@ -35,6 +39,7 @@ func (h *Handlers) getUpdate(w http.ResponseWriter) {
 		resp["assetName"] = info.AssetName
 		resp["releaseUrl"] = info.ReleaseURL
 		resp["hasUpdate"] = info.HasUpdate
+		resp["method"] = string(info.Method)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(resp)
@@ -47,13 +52,22 @@ func (h *Handlers) postUpdate(w http.ResponseWriter) {
 		return
 	}
 	if err := h.server.updateSvc.Apply(); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		status := http.StatusInternalServerError
+		if errors.Is(err, updater.ErrNotSelfUpdatable) {
+			status = http.StatusConflict
+		}
+		http.Error(w, err.Error(), status)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(map[string]interface{}{"ok": true})
 	go func() {
 		time.Sleep(500 * time.Millisecond)
+		h.server.manager.StopAll()
+
+		if err := updater.Relaunch(); err != nil {
+			log.Printf("relaunch after update failed: %v", err)
+		}
 		os.Exit(0)
 	}()
 }
