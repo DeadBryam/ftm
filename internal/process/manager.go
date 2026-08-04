@@ -27,6 +27,7 @@ type Manager struct {
 	DownloadProgress    chan providers.DownloadProgress
 	StatusChannel       chan config.TunnelStatus
 	NotificationHandler func(status config.TunnelStatus)
+	VisitorHandler      func(status config.TunnelStatus)
 	ExpirationCallbacks struct {
 		OnStart func(tunnelID, name, provider string, startedAt time.Time)
 		OnStop  func(tunnelID string)
@@ -51,6 +52,26 @@ func (m *Manager) SetNotificationHandler(handler func(config.TunnelStatus)) {
 func (m *Manager) callNotificationHandler(status config.TunnelStatus) {
 	if m.NotificationHandler != nil {
 		m.NotificationHandler(status)
+	}
+}
+
+func (m *Manager) SetVisitorHandler(handler func(config.TunnelStatus)) {
+	m.mu.Lock()
+	m.VisitorHandler = handler
+	m.mu.Unlock()
+}
+
+func (m *Manager) reportNewVisitor(tunnelID string) {
+	m.mu.RLock()
+	handler := m.VisitorHandler
+	m.mu.RUnlock()
+
+	if handler == nil {
+		return
+	}
+
+	if status, ok := m.GetStatus(tunnelID); ok && status.State == config.TunnelStateOnline {
+		handler(status)
 	}
 }
 
@@ -189,7 +210,12 @@ func (m *Manager) Start(tunnel config.TunnelConfig, onUpdate func(config.TunnelS
 
 	exposed := tunnel
 	if m.visitorTracking {
-		if counter, err := proxy.Start(tunnel.LocalPort, visitorWindow); err != nil {
+		opts := proxy.Options{
+			Window:       visitorWindow,
+			OnNewVisitor: func() { m.reportNewVisitor(tunnel.ID) },
+		}
+
+		if counter, err := proxy.Start(tunnel.LocalPort, opts); err != nil {
 			log.Printf("visitor counting disabled for %s: %v", tunnel.Name, err)
 		} else {
 			mp.Proxy = counter

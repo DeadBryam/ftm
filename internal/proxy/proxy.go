@@ -16,14 +16,20 @@ type Stats struct {
 	Requests       int64
 }
 
+type Options struct {
+	Window       time.Duration
+	OnNewVisitor func()
+}
+
 type Proxy struct {
 	listener net.Listener
 	server   *http.Server
 	counter  *counter
 	port     int
+	onNew    func()
 }
 
-func Start(targetPort int, window time.Duration) (*Proxy, error) {
+func Start(targetPort int, opts Options) (*Proxy, error) {
 	target, err := url.Parse(fmt.Sprintf("http://127.0.0.1:%d", targetPort))
 	if err != nil {
 		return nil, err
@@ -34,7 +40,7 @@ func Start(targetPort int, window time.Duration) (*Proxy, error) {
 		return nil, fmt.Errorf("failed to listen: %w", err)
 	}
 
-	c := newCounter(window)
+	c := newCounter(opts.Window)
 	reverse := httputil.NewSingleHostReverseProxy(target)
 	reverse.ErrorHandler = func(w http.ResponseWriter, _ *http.Request, _ error) {
 		w.WriteHeader(http.StatusBadGateway)
@@ -44,6 +50,7 @@ func Start(targetPort int, window time.Duration) (*Proxy, error) {
 		listener: listener,
 		counter:  c,
 		port:     listener.Addr().(*net.TCPAddr).Port,
+		onNew:    opts.OnNewVisitor,
 	}
 	p.server = &http.Server{
 		Handler:           p.handler(reverse),
@@ -57,7 +64,9 @@ func Start(targetPort int, window time.Duration) (*Proxy, error) {
 
 func (p *Proxy) handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p.counter.seen(clientKey(r))
+		if p.counter.seen(clientKey(r)) && p.onNew != nil {
+			go p.onNew()
+		}
 
 		if isUpgrade(r) {
 			p.counter.openSession()

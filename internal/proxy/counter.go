@@ -9,6 +9,7 @@ type counter struct {
 	mu       sync.Mutex
 	window   time.Duration
 	lastSeen map[string]time.Time
+	known    map[string]struct{}
 	sessions int
 	requests int64
 	now      func() time.Time
@@ -22,17 +23,26 @@ func newCounter(window time.Duration) *counter {
 	return &counter{
 		window:   window,
 		lastSeen: make(map[string]time.Time),
+		known:    make(map[string]struct{}),
 		now:      time.Now,
 	}
 }
 
-func (c *counter) seen(key string) {
+func (c *counter) seen(key string) (isNew bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	c.requests++
 	c.lastSeen[key] = c.now()
 	c.pruneLocked()
+
+	if _, ok := c.known[key]; ok {
+		return false
+	}
+
+	c.known[key] = struct{}{}
+
+	return true
 }
 
 func (c *counter) openSession() {

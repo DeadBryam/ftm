@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"sync"
+
+	"github.com/sthbryan/ftm/internal/i18n"
 )
 
 type Notifier interface {
@@ -161,6 +163,10 @@ func NotifyTunnelTimeout(name string) {
 func NotifyTunnelStopped(name string) {
 	Notify("Tunnel Stopped", fmt.Sprintf("%s has been stopped", name))
 	PlaySound(SoundInfo)
+}
+
+func NotifyNewVisitor(name string, visitors int) {
+	Notify(i18n.T("notify_visitor_title"), i18n.TF("notify_visitor_body", name, visitors))
 }
 
 func NotifyTunnelExpiring(name string, minutes int) {

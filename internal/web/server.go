@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/sthbryan/ftm/internal/config"
+	"github.com/sthbryan/ftm/internal/i18n"
 	"github.com/sthbryan/ftm/internal/process"
 )
 
@@ -305,6 +306,20 @@ func (s *Server) broadcastInstallingNotification(tunnel config.TunnelConfig) {
 }
 
 func (s *Server) broadcastNotification(_ string, title, body, toastType, soundType string) {
+	s.broadcastNotificationWithSound(title, body, toastType, soundType, s.config.NotificationSound)
+}
+
+func (s *Server) BroadcastNewVisitor(status config.TunnelStatus) {
+	s.broadcastNotificationWithSound(
+		i18n.T("notify_visitor_title"),
+		i18n.TF("notify_visitor_body", status.Name, status.Visitors),
+		"info",
+		"info",
+		false,
+	)
+}
+
+func (s *Server) broadcastNotificationWithSound(title, body, toastType, soundType string, sound bool) {
 	channel := "toast"
 	if s.config.NotificationsStatus == config.NotificationGranted {
 		channel = "os"
@@ -318,7 +333,7 @@ func (s *Server) broadcastNotification(_ string, title, body, toastType, soundTy
 			"body":         body,
 			"toastType":    toastType,
 			"soundType":    soundType,
-			"soundEnabled": s.config.NotificationSound,
+			"soundEnabled": sound,
 		},
 	}
 	data, _ := MarshalJSON(update)

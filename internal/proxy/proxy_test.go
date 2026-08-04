@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"strconv"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -36,7 +37,7 @@ func TestProxyForwardsRequests(t *testing.T) {
 		fmt.Fprintf(w, "origin:%s", r.URL.Path)
 	}))
 
-	p, err := Start(port, time.Minute)
+	p, err := Start(port, Options{Window: time.Minute})
 	if err != nil {
 		t.Fatalf("Start: %v", err)
 	}
@@ -59,7 +60,7 @@ func TestProxyCountsDistinctVisitors(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
-	p, err := Start(port, time.Minute)
+	p, err := Start(port, Options{Window: time.Minute})
 	if err != nil {
 		t.Fatalf("Start: %v", err)
 	}
@@ -102,7 +103,7 @@ func TestProxyTracksLiveWebsocketSessions(t *testing.T) {
 		<-released
 	}))
 
-	p, err := Start(port, time.Minute)
+	p, err := Start(port, Options{Window: time.Minute})
 	if err != nil {
 		t.Fatalf("Start: %v", err)
 	}
@@ -136,6 +137,59 @@ func waitFor(t *testing.T, cond func() bool) {
 	}
 
 	t.Fatal("condition not met before the deadline")
+}
+
+func TestNewVisitorFiresOncePerClient(t *testing.T) {
+	port := startOrigin(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	var announced int32
+	p, err := Start(port, Options{
+		Window:       time.Minute,
+		OnNewVisitor: func() { atomic.AddInt32(&announced, 1) },
+	})
+	if err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+	t.Cleanup(func() { _ = p.Close() })
+
+	for _, ip := range []string{"1.1.1.1", "1.1.1.1", "1.1.1.1", "2.2.2.2"} {
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/", p.Port()), nil)
+		if err != nil {
+			t.Fatalf("new request: %v", err)
+		}
+		req.Header.Set("X-Forwarded-For", ip)
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatalf("do: %v", err)
+		}
+		resp.Body.Close()
+	}
+
+	waitFor(t, func() bool { return atomic.LoadInt32(&announced) == 2 })
+
+	time.Sleep(200 * time.Millisecond)
+	if got := atomic.LoadInt32(&announced); got != 2 {
+		t.Errorf("announced %d visitors, want 2", got)
+	}
+}
+
+func TestKnownVisitorIsNotAnnouncedAfterTheWindowExpires(t *testing.T) {
+	c := newCounter(time.Minute)
+	base := time.Now()
+	c.now = func() time.Time { return base }
+
+	if !c.seen("1.1.1.1") {
+		t.Fatal("the first request was not treated as a new visitor")
+	}
+
+	c.now = func() time.Time { return base.Add(10 * time.Minute) }
+
+	if c.seen("1.1.1.1") {
+		t.Error("a returning visitor was announced as new")
+	}
 }
 
 func TestVisitorsExpireAfterTheWindow(t *testing.T) {

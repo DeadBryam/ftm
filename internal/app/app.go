@@ -86,6 +86,16 @@ func New() (*App, error) {
 		}
 	})
 
+	app.Manager.SetVisitorHandler(func(status config.TunnelStatus) {
+		if app.WebServer != nil {
+			app.WebServer.BroadcastNewVisitor(status)
+		}
+		if !app.shouldUseNativeNotifications() {
+			return
+		}
+		notifications.NotifyNewVisitor(status.Name, status.Visitors)
+	})
+
 	app.Manager.SetExpirationCallbacks(
 		app.ExpirationMonitor.Start,
 		func(id string) { app.ExpirationMonitor.Stop(id) },
