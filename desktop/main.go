@@ -51,6 +51,8 @@ func main() {
 		Title:            "Foundry Tunnel Manager",
 		Width:            1200,
 		Height:           800,
+		MinWidth:         900,
+		MinHeight:        620,
 		URL:              webURL,
 		BackgroundColour: application.NewRGB(255, 255, 255),
 		DevToolsEnabled:  false,
