@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/process"
@@ -94,6 +95,7 @@ func (s *Server) Start() error {
 	s.updateSvc.Start(s.updateCtx)
 	go s.installProgressLoop()
 	go s.statusUpdateLoop()
+	go s.statsLoop()
 	go func() {
 		if err := s.httpServer.Serve(ln); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Printf("web: server stopped: %v", err)
@@ -200,6 +202,43 @@ func (s *Server) statusUpdateLoop() {
 		data, _ := MarshalJSON(update)
 		s.broadcast(string(data))
 		s.broadcastTunnelNotification(status)
+	}
+}
+
+const statsInterval = 5 * time.Second
+
+func (s *Server) statsLoop() {
+	ticker := time.NewTicker(statsInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-s.updateCtx.Done():
+			return
+		case <-ticker.C:
+			s.broadcastStats()
+		}
+	}
+}
+
+func (s *Server) broadcastStats() {
+	if s.ClientCount() == 0 {
+		return
+	}
+
+	for _, t := range s.config.Tunnels {
+		status, ok := s.manager.GetStatus(t.ID)
+		if !ok || status.State != config.TunnelStateOnline {
+			continue
+		}
+
+		data, _ := MarshalJSON(map[string]interface{}{
+			"type":           "tunnel_stats",
+			"id":             t.ID,
+			"visitors":       status.Visitors,
+			"activeSessions": status.ActiveSessions,
+		})
+		s.broadcast(string(data))
 	}
 }
 
