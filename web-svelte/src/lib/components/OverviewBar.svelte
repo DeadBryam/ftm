@@ -1,32 +1,21 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Activity, Copy, LayoutDashboard, Radio } from "lucide-svelte";
+  import { Activity, Hourglass, Radio, Timer } from "lucide-svelte";
   import { useTunnels } from "$lib/stores/tunnels.svelte";
-  import { useToast } from "$lib/stores/toast.svelte";
-  import { statusApi } from "$lib/api/endpoints/status";
+  import { useClock } from "$lib/stores/clock.svelte";
   import { t } from "$lib/stores/i18n.svelte";
   import { cn } from "$lib/utils/cn";
+  import { formatDuration } from "$lib/utils/duration";
 
   const store = useTunnels();
-  const toast = useToast();
+  const clock = useClock();
+
+  onMount(() => clock.subscribe());
 
   const ACTIVE = ["online", "starting", "connecting"];
 
-  let port = $state(0);
-  let version = $state("");
-
-  onMount(() => {
-    statusApi
-      .get()
-      .then((status) => {
-        port = status.port;
-        version = status.version;
-      })
-      .catch(() => {});
-  });
-
-  const online = $derived(
-    store.tunnels.filter((tunnel) => ACTIVE.includes(tunnel.state)).length,
+  const active = $derived(
+    store.tunnels.filter((tunnel) => ACTIVE.includes(tunnel.state)),
   );
 
   const failing = $derived(
@@ -35,95 +24,93 @@
     ).length,
   );
 
-  const dashboard = $derived(port ? `${location.hostname}:${port}` : "");
+  const nextExpiry = $derived(
+    active
+      .filter((tunnel) => (tunnel.expiresAt ?? 0) > clock.now)
+      .sort((a, b) => (a.expiresAt ?? 0) - (b.expiresAt ?? 0))[0] ?? null,
+  );
 
-  async function copyDashboard() {
-    if (!dashboard) return;
-    await navigator.clipboard.writeText(`http://${dashboard}`);
-    toast.success(t("overview_dashboard_copied"));
-  }
+  const oldestStart = $derived(
+    active
+      .filter((tunnel) => tunnel.startedAt)
+      .sort((a, b) => (a.startedAt ?? 0) - (b.startedAt ?? 0))[0] ?? null,
+  );
+
+  const third = $derived.by(() => {
+    if (nextExpiry) {
+      return {
+        icon: Hourglass,
+        value: formatDuration((nextExpiry.expiresAt ?? 0) - clock.now),
+        label: t("overview_next_expiry", { name: nextExpiry.name }),
+        urgent: (nextExpiry.expiresAt ?? 0) - clock.now < 5 * 60 * 1000,
+      };
+    }
+    if (oldestStart) {
+      return {
+        icon: Timer,
+        value: formatDuration(clock.now - (oldestStart.startedAt ?? 0)),
+        label: t("overview_session"),
+        urgent: false,
+      };
+    }
+    return {
+      icon: Timer,
+      value: "—",
+      label: t("overview_idle"),
+      urgent: false,
+    };
+  });
 </script>
+
+{#snippet tile(
+  Icon: typeof Radio,
+  value: string,
+  label: string,
+  tone: "muted" | "good" | "bad",
+)}
+  <div
+    class="flex flex-1 basis-40 items-center gap-2.5 rounded-card border border-border bg-card px-3 py-2"
+  >
+    <span
+      class={cn(
+        "flex h-7 w-7 shrink-0 items-center justify-center rounded-control",
+        tone === "good" && "bg-status-running/15 text-status-running",
+        tone === "bad" && "bg-status-error/15 text-status-error",
+        tone === "muted" && "bg-secondary text-text-muted",
+      )}
+    >
+      <Icon size={15} />
+    </span>
+    <span class="min-w-0">
+      <span class="block leading-tight font-semibold text-text-heading"
+        >{value}</span
+      >
+      <span class="block truncate text-xs text-text-muted">{label}</span>
+    </span>
+  </div>
+{/snippet}
 
 <section
   class="ftm-enter mb-3 flex shrink-0 flex-wrap items-stretch gap-2 text-sm"
 >
-  <div
-    class="flex flex-1 basis-32 items-center gap-2.5 rounded-card border border-border bg-card px-3 py-2"
-  >
-    <span
-      class={cn(
-        "flex h-7 w-7 shrink-0 items-center justify-center rounded-control",
-        online > 0
-          ? "bg-status-running/15 text-status-running"
-          : "bg-secondary text-text-muted",
-      )}
-    >
-      <Radio size={15} />
-    </span>
-    <span class="min-w-0">
-      <span class="block leading-tight font-semibold text-text-heading"
-        >{online}</span
-      >
-      <span class="block truncate text-xs text-text-muted"
-        >{t("overview_online")}</span
-      >
-    </span>
-  </div>
+  {@render tile(
+    Radio,
+    String(active.length),
+    t("overview_online"),
+    active.length > 0 ? "good" : "muted",
+  )}
 
-  <div
-    class="flex flex-1 basis-32 items-center gap-2.5 rounded-card border border-border bg-card px-3 py-2"
-  >
-    <span
-      class={cn(
-        "flex h-7 w-7 shrink-0 items-center justify-center rounded-control",
-        failing > 0
-          ? "bg-status-error/15 text-status-error"
-          : "bg-secondary text-text-muted",
-      )}
-    >
-      <Activity size={15} />
-    </span>
-    <span class="min-w-0">
-      <span class="block leading-tight font-semibold text-text-heading">
-        {failing > 0 ? failing : store.tunnels.length}
-      </span>
-      <span class="block truncate text-xs text-text-muted">
-        {failing > 0 ? t("overview_failing") : t("overview_total")}
-      </span>
-    </span>
-  </div>
+  {@render tile(
+    Activity,
+    String(failing > 0 ? failing : store.tunnels.length),
+    failing > 0 ? t("overview_failing") : t("overview_total"),
+    failing > 0 ? "bad" : "muted",
+  )}
 
-  {#if dashboard}
-    <button
-      type="button"
-      onclick={copyDashboard}
-      title={t("overview_dashboard_hint")}
-      class="flex flex-1 basis-56 cursor-pointer items-center gap-2.5 rounded-card border border-border bg-card px-3 py-2 text-left transition-colors hover:border-primary/40"
-    >
-      <span
-        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-control bg-primary/15 text-primary"
-      >
-        <LayoutDashboard size={15} />
-      </span>
-      <span class="min-w-0 flex-1">
-        <span
-          class="block truncate font-mono text-xs leading-tight text-text-heading"
-          >{dashboard}</span
-        >
-        <span class="block truncate text-xs text-text-muted"
-          >{t("overview_dashboard")}</span
-        >
-      </span>
-      <Copy size={13} class="shrink-0 text-text-muted" />
-    </button>
-  {/if}
-
-  {#if version}
-    <div
-      class="flex items-center rounded-card border border-border bg-card px-3 py-2 font-mono text-xs text-text-muted max-sm:hidden"
-    >
-      v{version}
-    </div>
-  {/if}
+  {@render tile(
+    third.icon,
+    third.value,
+    third.label,
+    third.urgent ? "bad" : "muted",
+  )}
 </section>
-
