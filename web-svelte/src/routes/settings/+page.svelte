@@ -107,9 +107,10 @@
       </div>
     {:else}
       <section
-        class="overflow-hidden rounded-card border border-border bg-card"
+        class="relative overflow-hidden rounded-card border border-border bg-card"
       >
-        <header class="flex items-baseline justify-between gap-3 px-5 pt-5 pb-3">
+        <div class="panel-pattern" aria-hidden="true"></div>
+        <header class="relative z-10 flex items-baseline justify-between gap-3 px-5 pt-5 pb-3">
           <h2
             class="font-serif text-base font-semibold tracking-tight text-text-heading"
           >
@@ -119,7 +120,7 @@
         </header>
 
         <div
-          class="border-t border-border-light cursor-pointer transition-colors hover:bg-hover"
+          class="relative z-10 border-t border-border-light cursor-pointer transition-colors hover:bg-hover"
           role="button"
           tabindex="0"
           onclick={toggleNotifications}
@@ -163,7 +164,7 @@
         </div>
 
         <div
-          class="border-t border-border-light cursor-pointer transition-colors hover:bg-hover"
+          class="relative z-10 border-t border-border-light cursor-pointer transition-colors hover:bg-hover"
           role="button"
           tabindex="0"
           onclick={toggleSound}
@@ -206,7 +207,7 @@
           </div>
         </div>
 
-        <div class="border-t border-border-light">
+        <div class="relative z-10 border-t border-border-light">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4 px-5 pt-3.5 pb-2">
               <div
                 class="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-secondary text-text-muted"
@@ -251,9 +252,10 @@
       </section>
 
       <section
-        class="mt-4 overflow-hidden rounded-card border border-border bg-card"
+        class="relative mt-4 overflow-hidden rounded-card border border-border bg-card"
       >
-        <header class="flex items-baseline justify-between gap-3 px-5 pt-5 pb-3">
+        <div class="panel-pattern" aria-hidden="true"></div>
+        <header class="relative z-10 flex items-baseline justify-between gap-3 px-5 pt-5 pb-3">
           <h2
             class="font-serif text-base font-semibold tracking-tight text-text-heading"
           >
@@ -262,7 +264,9 @@
           <span class="text-xs text-text-muted">{t("themes_hint")}</span>
         </header>
 
-        <ThemeSelector families={themeFamilies} />
+        <div class="relative z-10">
+          <ThemeSelector families={themeFamilies} />
+        </div>
       </section>
 
       <footer
