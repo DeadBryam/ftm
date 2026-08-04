@@ -1,5 +1,7 @@
 import { api } from '../client';
 
+export type UpdateMethod = 'self' | 'store' | 'homebrew' | 'download';
+
 export interface UpdateInfo {
   current: string;
   latest: string;
@@ -7,6 +9,7 @@ export interface UpdateInfo {
   assetName: string;
   releaseUrl: string;
   hasUpdate: boolean;
+  method: UpdateMethod;
 }
 
 export const updateApi = {
