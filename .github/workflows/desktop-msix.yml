@@ -60,8 +60,10 @@ jobs:
         shell: bash
         run: |
           mkdir -p desktop/build/bin
+          WINRES_VERSION=$(grep -m1 '"productVersion"' desktop/wails.json | sed -E 's/.*"([0-9.]+)".*/\1/')
           go run github.com/tc-hib/go-winres@v0.3.3 make \
-            --in desktop/winres/winres.json --out desktop/rsrc --arch amd64
+            --in desktop/winres/winres.json --out desktop/rsrc --arch amd64 \
+            --product-version "$WINRES_VERSION" --file-version "$WINRES_VERSION"
           CGO_ENABLED=1 go build -tags production -ldflags "-s -w -H windowsgui" \
             -o desktop/build/bin/ftm-desktop-windows.exe ./desktop
 

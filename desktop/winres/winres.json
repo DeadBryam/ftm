@@ -8,8 +8,7 @@
     "#1": {
       "0409": {
         "identity": {
-          "name": "sthbryan.ftm",
-          "version": "0.11.0.0"
+          "name": "sthbryan.ftm"
         },
         "description": "Share your Foundry VTT world without port forwarding",
         "minimum-os": "win10",
@@ -21,10 +20,6 @@
   "RT_VERSION": {
     "#1": {
       "0000": {
-        "fixed": {
-          "file_version": "0.11.0.0",
-          "product_version": "0.11.0.0"
-        },
         "info": {
           "0409": {
             "CompanyName": "sthbryan",
@@ -32,8 +27,7 @@
             "InternalName": "ftm-desktop",
             "LegalCopyright": "Copyright (c) Bryan Villafuerte",
             "OriginalFilename": "ftm-desktop.exe",
-            "ProductName": "Foundry Tunnel Manager",
-            "ProductVersion": "0.11.0"
+            "ProductName": "Foundry Tunnel Manager"
           }
         }
       }
