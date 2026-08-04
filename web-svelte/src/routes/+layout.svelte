@@ -3,16 +3,19 @@
   import Toasts from "$lib/components/Toasts.svelte";
   import { subscribeWsMessages } from "$lib/api/ws";
   import { useI18n } from "$lib/stores/i18n.svelte";
+  import { useTheme } from "$lib/stores/theme.svelte";
 
   import "../styles/app.css";
 
   let { children } = $props();
 
   const i18n = useI18n();
+  const theme = useTheme();
 
   let unsubscribeWs: (() => void) | null = null;
 
   onMount(async () => {
+    theme.init();
     unsubscribeWs = subscribeWsMessages(() => {});
     await i18n.init();
   });
