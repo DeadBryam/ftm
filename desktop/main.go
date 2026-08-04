@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/sthbryan/ftm/internal/app"
+	"github.com/sthbryan/ftm/internal/updater"
 	"github.com/sthbryan/ftm/internal/version"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
@@ -15,6 +16,8 @@ func main() {
 	var port int
 	flag.IntVar(&port, "port", 0, "Web server port")
 	flag.Parse()
+
+	updater.MarkDesktop()
 
 	ftmApp, err := app.New()
 	if err != nil {
