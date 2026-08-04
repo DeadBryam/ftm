@@ -2,6 +2,7 @@ package tunnelmole
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -14,7 +15,7 @@ import (
 	"github.com/sthbryan/ftm/internal/providers"
 )
 
-const errRosettaNeeded = "tunnelmole requires Rosetta 2 to run on Apple Silicon. Install it with: softwareupdate --install-rosetta"
+var ErrRosettaRequired = errors.New("tunnelmole requires Rosetta 2 to run on Apple Silicon. Install it with: softwareupdate --install-rosetta")
 
 func RosettaInstalled() bool {
 	_, err := os.Stat("/Library/Apple/usr/libexec/oah")
@@ -120,7 +121,7 @@ func (p *TunnelmoleProvider) Start(ctx context.Context, tunnel config.TunnelConf
 	}
 
 	if !RosettaInstalled() {
-		return nil, fmt.Errorf("%w: %s", fmt.Errorf("rosetta required"), errRosettaNeeded)
+		return nil, ErrRosettaRequired
 	}
 
 	ctx, cancel = context.WithCancel(baseCtx)
