@@ -7,6 +7,7 @@ export interface Tunnel {
   publicUrl?: string;
   errorMessage?: string;
   expiresAt?: number;
+  startedAt?: number;
 }
 
 export type TunnelState = 

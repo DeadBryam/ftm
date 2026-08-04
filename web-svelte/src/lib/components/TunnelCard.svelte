@@ -14,8 +14,11 @@
   } from "lucide-svelte";
   import { logsApi } from "$lib/api";
   import { t } from "$lib/stores/i18n.svelte";
+  import { useClock } from "$lib/stores/clock.svelte";
   import { cn } from "$lib/utils/cn";
+  import { formatDuration } from "$lib/utils/duration";
   import { formatLogs } from "$lib/utils/logs";
+  import { onMount } from "svelte";
   import Button from "./Button.svelte";
   import Dropdown from "./Dropdown.svelte";
   import type {
@@ -56,6 +59,9 @@
 
   const toast = useToast();
   const providerStore = useProviders();
+  const clock = useClock();
+
+  onMount(() => clock.subscribe());
 
   let showLogs = $state(false);
   let logs = $state("");
@@ -126,6 +132,24 @@
   const providerLabel = $derived(
     providerStore.providers.find((p) => p.id === tunnel.provider)?.name ??
       tunnel.provider,
+  );
+
+  const uptime = $derived(
+    tunnel.startedAt && isRunning
+      ? formatDuration(clock.now - tunnel.startedAt)
+      : "",
+  );
+
+  const remaining = $derived(
+    tunnel.expiresAt && isRunning ? tunnel.expiresAt - clock.now : 0,
+  );
+
+  const expiryLabel = $derived(
+    tunnel.expiresAt && isRunning
+      ? remaining > 0
+        ? t("card_expires", { 0: formatDuration(remaining) })
+        : t("card_expired")
+      : "",
   );
 
   const actionLabel = $derived(
@@ -239,20 +263,38 @@
         >
           {tunnel.name}
         </div>
-        <div class="mb-1.5 text-xs text-muted">
-          {providerLabel} · {t("port")} {tunnel.port}
+        <div class="mb-1.5 text-xs text-text-muted">
+          {providerLabel} · <span class="font-mono">localhost:{tunnel.port}</span>
         </div>
-        <div
-          class={cn(
-            "inline-flex items-center gap-1.5 rounded-control px-2 py-0.5 text-xs font-medium",
-            statusColors.bg,
-            statusColors.text,
-          )}
-        >
-          <span class={cn("h-1.5 w-1.5 rounded-full", statusColors.dot)}></span>
-          <span>{t(statusInfo.textKey)}</span>
-          {#if tunnelState === "installing" && installProgress}
-            <span class="ml-1 font-semibold">{installPercent}%</span>
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <div
+            class={cn(
+              "inline-flex items-center gap-1.5 rounded-control px-2 py-0.5 text-xs font-medium",
+              statusColors.bg,
+              statusColors.text,
+            )}
+          >
+            <span class={cn("h-1.5 w-1.5 rounded-full", statusColors.dot)}
+            ></span>
+            <span>{t(statusInfo.textKey)}</span>
+            {#if tunnelState === "installing" && installProgress}
+              <span class="ml-1 font-semibold">{installPercent}%</span>
+            {/if}
+          </div>
+          {#if uptime}
+            <span class="text-xs text-text-muted">
+              {t("card_uptime", { 0: uptime })}
+            </span>
+          {/if}
+          {#if expiryLabel}
+            <span
+              class={cn(
+                "text-xs",
+                remaining > 0 ? "text-text-muted" : "text-status-error",
+              )}
+            >
+              {expiryLabel}
+            </span>
           {/if}
         </div>
         {#if tunnelState === "installing" && installProgress}
