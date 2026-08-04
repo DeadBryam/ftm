@@ -95,7 +95,7 @@ function loadPreference(): Preference {
         return { kind: 'manual', theme: parsed.theme };
       }
     } catch {
-      // fall through to legacy handling
+      
     }
   }
 

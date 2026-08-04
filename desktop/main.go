@@ -35,8 +35,6 @@ func main() {
 	fmt.Printf("Foundry Tunnel Manager v%s\n", version.Version)
 	fmt.Printf("Desktop app running at: %s\n", webURL)
 
-	// Load the embedded HTTP dashboard directly in the webview (no asset proxy).
-	// Origins already allow loopback; see internal/web/origin.go.
 	wailsApp := application.New(application.Options{
 		Name:        "Foundry Tunnel Manager",
 		Description: "Share your Foundry VTT world without port forwarding",

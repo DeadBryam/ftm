@@ -20,8 +20,6 @@ func (h *Handlers) handleSettings(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// isSelectableLanguage reports whether a value may be stored as the language
-// preference: a translated language, or "auto" to follow the system.
 func isSelectableLanguage(lang string) bool {
 	if lang == config.LanguageAuto {
 		return true
@@ -41,11 +39,8 @@ func (h *Handlers) handleGetSettings(w http.ResponseWriter) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"notifications_enabled": h.config.NotificationsStatus,
 		"notification_sound":    h.config.NotificationSound,
-		// language is the stored preference, which may be "auto";
-		// language_resolved is what "auto" currently resolves to, so the UI can
-		// label the option as "Auto (Espanol)" rather than guessing.
-		"language":          h.config.Language,
-		"language_resolved": i18n.CurrentLanguage(),
+		"language":              h.config.Language,
+		"language_resolved":     i18n.CurrentLanguage(),
 	})
 }
 
@@ -76,8 +71,7 @@ func (h *Handlers) handlePatchSettings(w http.ResponseWriter, r *http.Request) {
 		}
 
 		h.config.Language = *req.Language
-		// Store the choice as given ("auto" stays "auto" so it keeps following
-		// the system), but apply the language it currently resolves to.
+
 		i18n.ChangeLanguage(i18n.ResolveLanguage(*req.Language))
 	}
 
@@ -92,9 +86,7 @@ func (h *Handlers) handlePatchSettings(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"notifications_enabled": h.config.NotificationsStatus,
 		"notification_sound":    h.config.NotificationSound,
-		// language is the stored preference, which may be "auto";
-		// language_resolved is what "auto" currently resolves to, so the UI can
-		// label the option as "Auto (Espanol)" rather than guessing.
+
 		"language":          h.config.Language,
 		"language_resolved": i18n.CurrentLanguage(),
 	})

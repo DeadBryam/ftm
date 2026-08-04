@@ -31,8 +31,6 @@ func writeConfig(t *testing.T, home, body string) {
 	}
 }
 
-// --version, --update and --uninstall run entirely inside Init, so the
-// configured language has to be applied here or they always print English.
 func TestInitAppliesConfiguredLanguage(t *testing.T) {
 	home := isolateHome(t)
 	writeConfig(t, home, "version: 2\nlanguage: es\ntunnels: []\n")
@@ -67,7 +65,6 @@ func TestInitLoadsTranslations(t *testing.T) {
 		t.Fatalf("Init() failed: %v", err)
 	}
 
-	// A loaded catalogue returns a real string; an unloaded one echoes the key.
 	if got := i18n.T("connections"); got == "connections" {
 		t.Fatal("translations were not loaded: T(connections) echoed the key")
 	}
