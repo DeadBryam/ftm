@@ -58,4 +58,7 @@
   --color-badge-text: var(--color-badge-text);
   --color-secondary-btn: var(--color-secondary-btn);
   --color-secondary-btn-text: var(--color-secondary-btn-text);
+  --color-secondary: var(--color-secondary-btn);
+  --color-text-heading: var(--color-heading);
+  --color-text-muted: var(--color-muted);
 }
