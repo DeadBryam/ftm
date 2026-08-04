@@ -9,6 +9,7 @@
   import NotificationPermission from "$lib/components/NotificationPermission.svelte";
   import ConnectionsPanel from "$lib/components/ConnectionsPanel.svelte";
   import ConnectionForm from "$lib/components/ConnectionForm.svelte";
+  import OverviewBar from "$lib/components/OverviewBar.svelte";
   import type { Tunnel } from "$lib/types";
   import { cn } from "$lib/utils/cn";
   import { t } from "$lib/stores/i18n.svelte";
@@ -88,6 +89,7 @@
 
 <div class="flex min-h-0 flex-1 flex-col">
   <UpdateBanner />
+  <OverviewBar />
 
   <main
     class={cn(
