@@ -39,12 +39,12 @@
     <button
       type="button"
       onclick={handleBack}
-      class="inline-flex cursor-pointer items-center gap-1.5 rounded-control border border-border bg-input-bg px-3 py-1.5 text-sm text-text transition-colors hover:border-primary/50 hover:bg-hover"
+      class="inline-flex cursor-pointer items-center gap-1.5 rounded-control px-3 py-1.5 text-sm text-text-muted transition-colors hover:bg-secondary hover:text-text-heading"
     >
       <ChevronLeft size={14} />
       {t('go_home')}
     </button>
-  {:else if !isHome}
+  {:else if isHome}
     <a
       href="/settings"
       class="rounded-control p-2 transition-colors hover:bg-secondary"
