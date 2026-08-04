@@ -7,8 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
-	"strings"
 
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/providers"
@@ -132,62 +130,17 @@ func (p *SSHProvider) Start(ctx context.Context, tunnel config.TunnelConfig, log
 	return proc, nil
 }
 
-var ansiEscape = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
-
-func stripANSI(s string) string {
-	return ansiEscape.ReplaceAllString(s, "")
-}
-
-var localhostRunRegex = regexp.MustCompile(`https?://[a-z0-9]+\.lhr\.life`)
-var serveoRegex = regexp.MustCompile(`https?://[a-z0-9-]+\.serveousercontent\.com`)
-
 func (p *SSHProvider) ParseURL(line string) string {
-	clean := stripANSI(line)
-	cleanLower := strings.ToLower(clean)
-
 	switch p.host {
 	case "localhost.run":
-		matches := localhostRunRegex.FindStringSubmatch(cleanLower)
-		if len(matches) > 0 {
-			return matches[0]
-		}
-		if strings.Contains(cleanLower, ".lhr.life") {
-			if idx := strings.Index(cleanLower, "https://"); idx != -1 {
-				rest := clean[idx:]
-				if endIdx := strings.IndexAny(rest, " \t\n\r,"); endIdx != -1 {
-					return rest[:endIdx]
-				}
-				return rest
-			}
-		}
+		return providers.ExtractURL(line, func(host string) bool {
+			return providers.IsSubdomainOf(host, "lhr.life")
+		})
 	case "serveo.net":
-		matches := serveoRegex.FindStringSubmatch(cleanLower)
-		if len(matches) > 0 {
-			return matches[0]
-		}
-		if strings.Contains(cleanLower, "serveo") || strings.Contains(cleanLower, "serveousercontent") {
-			if idx := strings.Index(cleanLower, "https://"); idx != -1 {
-				rest := clean[idx:]
-				if endIdx := strings.IndexAny(rest, " \t\n\r"); endIdx != -1 {
-					return rest[:endIdx]
-				}
-				return rest
-			}
-		}
+		return providers.ExtractURL(line, func(host string) bool {
+			return providers.IsSubdomainOf(host, "serveousercontent.com", "serveo.net")
+		})
 	}
 
 	return ""
-}
-
-func (p *SSHProvider) IsReady(line string) bool {
-	clean := stripANSI(line)
-	cleanLower := strings.ToLower(clean)
-
-	if p.host == "localhost.run" {
-		return strings.Contains(cleanLower, ".lhr.life") ||
-			strings.Contains(cleanLower, "tunneled")
-	}
-
-	return strings.Contains(cleanLower, "serveo") ||
-		strings.Contains(cleanLower, "forwarding")
 }

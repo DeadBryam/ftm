@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"strings"
 
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/providers"
@@ -114,18 +113,12 @@ func (p *BoreProvider) Start(ctx context.Context, tunnel config.TunnelConfig, lo
 	return proc, nil
 }
 
-var boreURLRegex = regexp.MustCompile(`bore\.pub:\d+`)
+var boreEndpointRegex = regexp.MustCompile(`bore\.pub:\d+`)
 
 func (p *BoreProvider) ParseURL(line string) string {
-	matches := boreURLRegex.FindString(line)
-	if matches != "" {
-		return matches
+	if endpoint := boreEndpointRegex.FindString(providers.StripANSI(line)); endpoint != "" {
+		return "http://" + endpoint
 	}
-	return ""
-}
 
-func (p *BoreProvider) IsReady(line string) bool {
-	lineLower := strings.ToLower(line)
-	return strings.Contains(lineLower, "bore.pub") &&
-		(strings.Contains(lineLower, "listening") || strings.Contains(lineLower, "port"))
+	return ""
 }
