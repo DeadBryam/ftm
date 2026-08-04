@@ -1,9 +1,11 @@
 <script lang="ts">
   import QRCode from "qrcode";
 
-  let { value, size = 148 }: { value: string; size?: number } = $props();
-
-  let dataUrl = $state("");
+  let {
+    value,
+    size = 148,
+    dataUrl = $bindable(""),
+  }: { value: string; size?: number; dataUrl?: string } = $props();
 
   $effect(() => {
     if (!value) {

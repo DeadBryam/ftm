@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { Copy, MousePointerClick } from "lucide-svelte";
+  import {
+    Copy,
+    MousePointerClick,
+    QrCode as QrCodeIcon,
+  } from "lucide-svelte";
   import { useProviders } from "$lib/stores/providers.svelte";
   import { useToast } from "$lib/stores/toast.svelte";
   import { useClock } from "$lib/stores/clock.svelte";
@@ -36,10 +40,42 @@
     tunnel?.expiresAt && isOnline ? tunnel.expiresAt - clock.now : 0,
   );
 
+  let qrDataUrl = $state("");
+
   async function copy() {
     if (!tunnel?.publicUrl) return;
     await navigator.clipboard.writeText(tunnel.publicUrl);
     toast.success(t("overview_copied"));
+  }
+
+  function downloadQr(blob: Blob) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${tunnel?.name ?? "tunnel"}-qr.png`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success(t("qr_downloaded"));
+  }
+
+  async function copyQr() {
+    if (!qrDataUrl) return;
+
+    const blob = await (await fetch(qrDataUrl)).blob();
+
+    if (typeof ClipboardItem === "undefined" || !navigator.clipboard?.write) {
+      downloadQr(blob);
+      return;
+    }
+
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({ "image/png": blob }),
+      ]);
+      toast.success(t("qr_copied"));
+    } catch {
+      downloadQr(blob);
+    }
   }
 </script>
 
@@ -106,10 +142,19 @@
         </button>
 
         <div class="flex flex-col items-center gap-2">
-          <QrCode value={tunnel.publicUrl} size={148} />
+          <QrCode value={tunnel.publicUrl} size={148} bind:dataUrl={qrDataUrl} />
           <p class="m-0 text-center text-xs leading-relaxed text-text-muted">
             {t("overview_share")}
           </p>
+          <button
+            type="button"
+            onclick={copyQr}
+            disabled={!qrDataUrl}
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-control border border-border bg-input-bg px-3 py-1.5 text-xs text-text transition-colors hover:border-primary/50 hover:bg-hover disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <QrCodeIcon size={13} />
+            {t("qr_copy")}
+          </button>
         </div>
       {/if}
 
