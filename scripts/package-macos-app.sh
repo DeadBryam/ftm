@@ -24,8 +24,32 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/ftm-desktop"
 chmod +x "$APP/Contents/MacOS/ftm-desktop"
 
-# Build AppIcon.icns from desktop/icon.png using sips + iconutil. macOS only.
-if [ -f desktop/icon.png ]; then
+ICON_SOURCE="$PWD/desktop/AppIcon.icon"
+LAYERED_ICON=""
+
+# Needs Xcode 26+; older toolchains cannot read .icon, so keep going without it.
+if [ -d "$ICON_SOURCE" ] && xcrun --find actool >/dev/null 2>&1; then
+  STAGE="$(mktemp -d)"
+  if xcrun actool "$ICON_SOURCE" \
+      --compile "$STAGE" \
+      --app-icon AppIcon \
+      --platform macosx \
+      --minimum-deployment-target 26.0 \
+      --output-partial-info-plist "$STAGE/partial.plist" \
+      --output-format human-readable-text >/dev/null 2>&1 \
+     && [ -f "$STAGE/Assets.car" ]; then
+    cp "$STAGE/Assets.car" "$APP/Contents/Resources/Assets.car"
+    [ -f "$STAGE/AppIcon.icns" ] && cp "$STAGE/AppIcon.icns" "$ICNS_PATH"
+    LAYERED_ICON=1
+  else
+    echo "note: actool could not build $ICON_SOURCE; falling back to .icns" >&2
+  fi
+  rm -rf "$STAGE"
+fi
+
+if [ -n "$LAYERED_ICON" ]; then
+  :
+elif [ -f desktop/icon.png ]; then
   ICONSET="$(mktemp -d)/AppIcon.iconset"
   mkdir -p "$ICONSET"
   trap 'rm -rf "$(dirname "$ICONSET")"' EXIT
@@ -41,7 +65,7 @@ if [ -f desktop/icon.png ]; then
 
   iconutil -c icns "$ICONSET" -o "$ICNS_PATH"
 else
-  echo "warning: desktop/icon.png not found; shipping without icon" >&2
+  echo "warning: no icon source found; shipping without icon" >&2
 fi
 
 cat > "$APP/Contents/Info.plist" <<PLIST
@@ -72,6 +96,11 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 </dict>
 </plist>
 PLIST
+
+# CFBundleIconName is what points macOS 26 at the layered icon inside Assets.car.
+if [ -f "$APP/Contents/Resources/Assets.car" ]; then
+  /usr/libexec/PlistBuddy -c "Add :CFBundleIconName string AppIcon" "$APP/Contents/Info.plist"
+fi
 
 # Codesign + xattr only matter when running locally; CI also runs this on a
 # macOS runner, so apply the same hardening here as the cask does post-install.
