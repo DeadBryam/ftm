@@ -75,7 +75,25 @@ Wails shell around the same embedded UI. Prefer this if you want a window withou
 
 ## Install
 
-**macOS / Linux**
+**Homebrew** (macOS and Linux)
+
+```bash
+# CLI + embedded web dashboard (TUI + web UI in one binary)
+brew install sthbryan/tap/ftm-cli
+
+# Native desktop app — Wails shell around the same UI (macOS only)
+brew install --cask sthbryan/tap/ftm
+```
+
+The cask runs an ad-hoc codesign and strips quarantine on install, so the first launch works without manual `xattr` cleanup. Formula installs the CLI under the canonical `ftm` name regardless of platform.
+
+```bash
+brew update && brew upgrade ftm-cli
+brew update && brew upgrade --cask ftm
+brew uninstall --cask --zap ftm   # removes config + caches too
+```
+
+**macOS / Linux (install script)**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sthbryan/ftm/main/install.sh | bash
@@ -85,6 +103,7 @@ Detects OS and arch, installs the CLI to `~/.local/bin` (override with `INSTALL_
 
 | | |
 |---|---|
+| **Homebrew** | `brew install sthbryan/tap/ftm-cli` (CLI) or `--cask` for desktop |
 | **Install script** | The one-liner above — macOS and Linux |
 | **Download** | [Releases](https://github.com/sthbryan/ftm/releases/latest) — CLI + desktop apps |
 | **From source** | `make install` — needs Go 1.22+ and Bun |
