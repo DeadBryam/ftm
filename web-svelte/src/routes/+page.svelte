@@ -25,7 +25,6 @@
   let formOpen = $state(true);
 
   onMount(async () => {
-    theme.init();
     store.connect();
     providerStore.fetch();
   });

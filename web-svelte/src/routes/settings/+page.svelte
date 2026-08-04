@@ -36,7 +36,6 @@
   ]);
 
   onMount(async () => {
-    theme.init();
     settingsStore.load();
     await i18n.init();
     statusApi

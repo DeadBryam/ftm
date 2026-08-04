@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
+  import { browser } from "$app/environment";
   import Toasts from "$lib/components/Toasts.svelte";
   import { subscribeWsMessages } from "$lib/api/ws";
   import { useI18n } from "$lib/stores/i18n.svelte";
@@ -12,10 +13,11 @@
   const i18n = useI18n();
   const theme = useTheme();
 
+  if (browser) theme.init();
+
   let unsubscribeWs: (() => void) | null = null;
 
   onMount(async () => {
-    theme.init();
     unsubscribeWs = subscribeWsMessages(() => {});
     await i18n.init();
   });
