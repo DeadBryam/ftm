@@ -87,7 +87,7 @@
   const soundActive = $derived(!!settingsStore.settings.notification_sound);
 </script>
 
-<div class="mx-auto flex w-full max-w-3xl min-h-0 flex-1 flex-col">
+<div class="mx-auto flex w-full max-w-app min-h-0 flex-1 flex-col">
   <div class="mb-6 flex items-center gap-2 px-1">
     <a
       href="/"
