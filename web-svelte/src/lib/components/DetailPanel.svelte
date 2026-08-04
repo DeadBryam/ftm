@@ -14,6 +14,7 @@
   import { cn } from "$lib/utils/cn";
   import { formatDuration } from "$lib/utils/duration";
   import { formatLogs } from "$lib/utils/logs";
+  import Button from "./Button.svelte";
   import IconButton from "./IconButton.svelte";
   import QrCode from "./QrCode.svelte";
   import type { LogStream, Tunnel } from "$lib/types";
@@ -153,14 +154,36 @@
   class="ftm-enter flex h-full min-h-0 flex-col overflow-hidden rounded-card border border-border bg-card"
 >
   <div
-    class="flex shrink-0 items-center justify-between border-b border-border-light bg-url-bg px-3 py-2"
+    class="flex shrink-0 items-center justify-between gap-2 border-b border-border-light bg-url-bg px-3 py-2"
   >
-    <h2 class="m-0 text-sm font-semibold text-text-heading">
+    <h2 class="m-0 truncate text-sm font-semibold text-text-heading">
       {t("detail_title")}
     </h2>
+    {#if tunnel}
+      <div class="flex shrink-0 gap-1">
+        <IconButton
+          icon={Pencil}
+          label={t("edit")}
+          size="sm"
+          disabled={isRunning}
+          onclick={() => onAction("edit", tunnel.id)}
+        />
+        <IconButton
+          icon={Trash2}
+          label={t("delete")}
+          variant="danger"
+          size="sm"
+          disabled={isRunning}
+          onclick={() => onAction("delete", tunnel)}
+        />
+      </div>
+    {/if}
   </div>
 
-  <div class="min-h-0 flex-1 overflow-y-auto p-3">
+  <div class="relative min-h-0 flex-1 overflow-hidden">
+    <div class="panel-pattern" aria-hidden="true"></div>
+
+    <div class="relative z-10 h-full min-h-0 overflow-y-auto p-3">
     {#if !tunnel}
       <div
         class="flex h-full flex-col items-center justify-center gap-2 px-3 text-center text-text-muted"
@@ -211,19 +234,21 @@
           <Copy size={13} class="shrink-0 text-text-muted" />
         </button>
 
-        <div class="flex flex-col items-center gap-2">
-          <QrCode value={tunnel.publicUrl} size={148} bind:dataUrl={qrDataUrl} />
+        <div
+          class="flex flex-col items-center gap-2 rounded-control border border-border-light bg-bg/40 p-3"
+        >
+          <QrCode value={tunnel.publicUrl} size={140} bind:dataUrl={qrDataUrl} />
           <p class="m-0 text-center text-xs leading-relaxed text-text-muted">
             {t("overview_share")}
           </p>
-          <IconButton
+          <Button
+            variant="default"
             icon={QrCodeIcon}
-            label={t("qr_copy")}
-            variant="outline"
-            size="sm"
             disabled={!qrDataUrl}
             onclick={copyQr}
-          />
+          >
+            {t("qr_copy")}
+          </Button>
         </div>
       {/if}
 
@@ -252,24 +277,7 @@
         {/if}
       </div>
 
-      <div class="mt-3 flex justify-end gap-2 border-t border-border-light pt-3">
-        <IconButton
-          icon={Pencil}
-          label={t("edit")}
-          variant="outline"
-          size="sm"
-          disabled={isRunning}
-          onclick={() => onAction("edit", tunnel.id)}
-        />
-        <IconButton
-          icon={Trash2}
-          label={t("delete")}
-          variant="danger"
-          size="sm"
-          disabled={isRunning}
-          onclick={() => onAction("delete", tunnel)}
-        />
-      </div>
     {/if}
+    </div>
   </div>
 </section>
