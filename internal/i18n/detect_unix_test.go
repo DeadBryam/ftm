@@ -49,11 +49,11 @@ func TestDetectSystemLangEnvPrecedence(t *testing.T) {
 		{
 			name:  "C locale is skipped in favour of the next variable",
 			lcAll: "C",
+			lang:  "es_ES.UTF-8",
+			want:  LangES,
 		},
 		{
-			name: "empty environment falls back to the default",
-			// On macOS this consults AppleLanguages instead, which depends on
-			// the machine running the test.
+			name:    "empty environment falls back to the default",
 			want:    DefaultLang,
 			skipMac: true,
 		},
