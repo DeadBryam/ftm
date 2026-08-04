@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import { browser } from "$app/environment";
+  import { onNavigate } from "$app/navigation";
   import Toasts from "$lib/components/Toasts.svelte";
   import { subscribeWsMessages } from "$lib/api/ws";
   import { useI18n } from "$lib/stores/i18n.svelte";
@@ -14,6 +15,20 @@
   const theme = useTheme();
 
   if (browser) theme.init();
+
+  onNavigate((navigation) => {
+    if (!document.startViewTransition || prefersReducedMotion()) return;
+    return new Promise((resolve) => {
+      document.startViewTransition(async () => {
+        resolve();
+        await navigation.complete;
+      });
+    });
+  });
+
+  function prefersReducedMotion(): boolean {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
 
   let unsubscribeWs: (() => void) | null = null;
 
