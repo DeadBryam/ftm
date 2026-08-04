@@ -30,7 +30,7 @@
     ...i18n.available.filter((l) => l !== LANGUAGE_AUTO).map((l) => ({
       id: l,
       label: t(`lang_${l}`),
-      native: l === "en" ? "English" : l === "es" ? "Español" : l,
+      native: t(`lang_${l}`),
     })),
   ]);
 

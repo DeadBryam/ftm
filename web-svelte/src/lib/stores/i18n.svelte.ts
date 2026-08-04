@@ -15,7 +15,7 @@ export const LANGUAGE_AUTO = 'auto';
 
 let translations = $state<Translations>({});
 let language = $state('en');
-let available = $state<string[]>(['en', 'es']);
+let available = $state<string[]>(['en', 'es', 'pt']);
 let ready = $state(false);
 
 /**
