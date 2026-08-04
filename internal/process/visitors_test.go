@@ -138,9 +138,12 @@ func TestProxyStopsWithTheTunnel(t *testing.T) {
 
 	deadline := time.Now().Add(3 * time.Second)
 	for time.Now().Before(deadline) {
-		if _, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/", exposed)); err != nil {
+		resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/", exposed))
+		if err != nil {
 			return
 		}
+		resp.Body.Close()
+
 		time.Sleep(20 * time.Millisecond)
 	}
 
