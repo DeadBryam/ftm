@@ -224,6 +224,7 @@ error_generic_desc: "An unexpected error occurred. Try again or go back to the s
 lang_auto: "Automatic (system)"
 lang_en: "English"
 lang_es: "Español"
+lang_pt: "Português"
 
 # Dropdown
 close_notification: "Close notification"

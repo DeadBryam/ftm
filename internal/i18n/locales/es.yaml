@@ -224,6 +224,7 @@ error_generic_desc: "Ocurrió un error inesperado. Probá de nuevo o volvé al i
 lang_auto: "Automático (sistema)"
 lang_en: "English"
 lang_es: "Español"
+lang_pt: "Português"
 
 # Dropdown
 close_notification: "Cerrar notificación"
