@@ -31,10 +31,26 @@ func Update(checkOnly bool) error {
 		return nil
 	}
 
+	if info.Method != updater.MethodSelf {
+		fmt.Println(manualUpdateHint(info.Method))
+		return nil
+	}
+
 	fmt.Println(i18n.TF("update_downloading", info.AssetName))
 	if err := u.Apply(info); err != nil {
 		return fmt.Errorf("%s", i18n.TF("update_apply_failed", err.Error()))
 	}
 	fmt.Println(i18n.TF("update_success", info.LatestVersion))
 	return nil
+}
+
+func manualUpdateHint(method updater.Method) string {
+	switch method {
+	case updater.MethodStore:
+		return i18n.T("update_manual_store")
+	case updater.MethodHomebrew:
+		return i18n.T("update_manual_homebrew")
+	default:
+		return i18n.T("update_manual_download")
+	}
 }
