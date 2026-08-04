@@ -1,4 +1,4 @@
-:root[data-theme="foundry-dark"] {
+[data-theme="foundry-dark"] {
   --color-bg: #14120f;
   --color-card: #232019;
   --color-text: #f6f3ec;

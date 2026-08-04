@@ -1,4 +1,4 @@
-:root[data-theme="solarized"] {
+[data-theme="solarized"] {
   --color-bg: #002b36;
   --color-card: #073642;
   --color-text: #93a1a1;

@@ -1,4 +1,4 @@
-:root[data-theme="dracula"] {
+[data-theme="dracula"] {
   --color-bg: #282a36;
   --color-card: #21222c;
   --color-text: #f8f8f2;

@@ -1,4 +1,4 @@
-:root[data-theme="gruvbox-light"] {
+[data-theme="gruvbox-light"] {
   --color-bg: #fbf1c7;
   --color-card: #f9f5d7;
   --color-text: #3c3836;

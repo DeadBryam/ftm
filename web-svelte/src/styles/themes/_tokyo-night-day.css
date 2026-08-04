@@ -1,4 +1,4 @@
-:root[data-theme="tokyo-night-day"] {
+[data-theme="tokyo-night-day"] {
   --color-bg: #e1e2e7;
   --color-card: #e9ecf1;
   --color-text: #3760bf;

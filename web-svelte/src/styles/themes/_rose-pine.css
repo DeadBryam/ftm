@@ -3,7 +3,7 @@
    Based on rosepinetheme.com
    =========================================== */
 
-:root[data-theme="rose-pine"] {
+[data-theme="rose-pine"] {
   --color-bg: #191724;
   --color-card: #1f1d2e;
   --color-text: #e0def4;

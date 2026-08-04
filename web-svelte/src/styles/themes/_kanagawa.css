@@ -1,4 +1,4 @@
-:root[data-theme="kanagawa"] {
+[data-theme="kanagawa"] {
   --color-bg: #1f1f28;
   --color-card: #16161d;
   --color-text: #dcd7ba;

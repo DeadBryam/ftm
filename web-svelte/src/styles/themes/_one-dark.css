@@ -1,4 +1,4 @@
-:root[data-theme="one-dark"] {
+[data-theme="one-dark"] {
   --color-bg: #282c34;
   --color-card: #21252b;
   --color-text: #abb2bf;

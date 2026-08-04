@@ -1,4 +1,4 @@
-:root[data-theme="one-light"] {
+[data-theme="one-light"] {
   --color-bg: #fafafa;
   --color-card: #ffffff;
   --color-text: #383a42;
