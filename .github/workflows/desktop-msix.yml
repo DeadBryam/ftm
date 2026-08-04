@@ -60,7 +60,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p desktop/build/bin
-          CGO_ENABLED=1 go build -tags production -ldflags "-s -w" \
+          CGO_ENABLED=1 go build -tags production -ldflags "-s -w -H windowsgui" \
             -o desktop/build/bin/ftm-desktop-windows.exe ./desktop
 
       - name: Package MSIX
