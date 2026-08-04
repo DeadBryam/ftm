@@ -142,7 +142,7 @@
       <button
         type="button"
         onclick={onCancel}
-        class="cursor-pointer rounded-control border-none bg-transparent p-1 text-text-muted transition-colors hover:bg-hover hover:text-text"
+        class="cursor-pointer rounded-control border-none bg-transparent p-1 text-text-muted transition-colors hover:bg-hover hover:text-text aspect-square size-6 flex items-center justify-center"
         aria-label={t("cancel")}
       >
         ×
