@@ -181,9 +181,8 @@ choose_bump() {
       echo "__ABORT__"
       ;;
     1|p|patch) echo "patch" ;;
-    1|p|patch) echo "patch" ;;
     2|m|minor) echo "minor" ;;
-    3|major)   echo "major" ;;
+    3|j|major) echo "major" ;;
     4|c|custom)
       local custom
       read -r -p " $(paint '?' "$C_BOLD") version $(paint '(x.y.z)' "$C_DIM"): " custom
