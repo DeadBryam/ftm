@@ -88,7 +88,11 @@ jobs:
           GITHUB_REF_NAME: ${{ github.ref_name }}
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          go build -ldflags "-s -w -X github.com/sthbryan/ftm/internal/version.Version=${VERSION}" \
+          LDFLAGS="-X github.com/sthbryan/ftm/internal/version.Version=${VERSION}"
+          if [ "$GOOS" != "windows" ]; then
+            LDFLAGS="-s -w $LDFLAGS"
+          fi
+          go build -ldflags "$LDFLAGS" \
             -o ftm-${{ matrix.suffix }}${{ matrix.ext }} ./cmd/ftm
 
       - name: Upload artifact
