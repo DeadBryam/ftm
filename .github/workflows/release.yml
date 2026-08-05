@@ -174,7 +174,7 @@ jobs:
               go run github.com/tc-hib/go-winres@v0.3.3 make \
                 --in desktop/winres/winres.json --out desktop/rsrc --arch amd64 \
                 --product-version "$VERSION" --file-version "$VERSION"
-              CGO_ENABLED=1 go build -tags production -ldflags "-s -w" \
+              CGO_ENABLED=1 go build -tags production -ldflags "-H windowsgui" \
                 -o "$OUT/ftm-desktop-windows.exe" ./desktop
               ;;
             darwin)
