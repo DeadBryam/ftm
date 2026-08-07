@@ -36,6 +36,14 @@ body {
 
 * {
   box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 160ms ease;
+}
+
+*:hover,
+*:focus-within {
+  scrollbar-color: color-mix(in srgb, var(--color-muted) 45%, transparent) transparent;
 }
 
 ::view-transition-old(root),

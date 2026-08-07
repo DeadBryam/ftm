@@ -165,7 +165,7 @@
 </script>
 
 <section
-  class="ftm-enter flex h-full min-h-0 flex-col overflow-hidden rounded-card border border-border bg-card"
+  class="ftm-enter flex h-full min-h-0 flex-col overflow-hidden rounded-card border border-border bg-card max-md:h-auto"
 >
   <div
     class="flex shrink-0 items-center justify-between gap-2 border-b border-border-light bg-url-bg px-3 py-2"
@@ -197,7 +197,7 @@
   <div class="relative min-h-0 flex-1 overflow-hidden">
     <div class="panel-pattern" aria-hidden="true"></div>
 
-    <div class="relative z-10 h-full min-h-0 overflow-y-auto p-3">
+    <div class="relative z-10 h-full min-h-0 overflow-y-auto p-3 max-md:h-auto max-md:overflow-visible">
     {#if !tunnel}
       <div
         class="flex h-full flex-col items-center justify-center gap-2 px-3 text-center text-text-muted"

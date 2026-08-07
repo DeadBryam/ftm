@@ -59,7 +59,7 @@
 <section
   class={cn(
     "ftm-enter flex h-full min-h-56 w-full flex-col overflow-hidden rounded-card border border-border bg-card",
-    "max-md:max-h-96",
+    "max-md:h-auto",
   )}
 >
   <div
@@ -103,7 +103,7 @@
   <div class="ftm-enter ftm-enter-delay-2 relative min-h-0 flex-1 overflow-hidden">
     <div class="panel-pattern" aria-hidden="true"></div>
 
-    <div class="relative z-10 h-full min-h-0 overflow-y-auto p-2.5">
+    <div class="relative z-10 h-full min-h-0 overflow-y-auto p-2.5 max-md:h-auto max-md:overflow-visible">
       {#if store.loading}
         <div
           class="flex flex-col items-center justify-center gap-2 py-8 text-text-muted"

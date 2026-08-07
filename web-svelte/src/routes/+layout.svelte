@@ -47,7 +47,7 @@
 </script>
 
 <div
-  class="mx-auto flex h-dvh w-full max-w-app flex-col overflow-hidden px-app-x py-app-y sm:px-5"
+  class="mx-auto flex min-h-dvh w-full max-w-app flex-col px-app-x py-app-y sm:px-5 md:h-dvh md:min-h-0 md:overflow-hidden"
 >
   {#if i18n.ready}
     <Header />

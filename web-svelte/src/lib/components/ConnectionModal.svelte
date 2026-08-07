@@ -17,7 +17,11 @@
     if (!show || !dialogEl) return;
     const previous = document.activeElement as HTMLElement | null;
     dialogEl.focus();
-    return () => previous?.focus?.();
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+      previous?.focus?.();
+    };
   });
 
   function handleKeydown(e: KeyboardEvent) {
