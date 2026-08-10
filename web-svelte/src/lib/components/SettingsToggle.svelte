@@ -1,6 +1,7 @@
 <script lang="ts">
   import { cn } from '$lib/utils/cn';
   import { t } from '$lib/stores/i18n.svelte';
+  import ToggleTrack from './ToggleTrack.svelte';
 
   interface Props {
     checked?: boolean;
@@ -8,7 +9,7 @@
     onchange?: (checked: boolean) => void;
   }
 
-  let { checked, disabled = false, onchange }: Props = $props();
+  let { checked = false, disabled = false, onchange }: Props = $props();
 
   function toggle() {
     if (disabled) return;
@@ -18,20 +19,15 @@
 
 <button
   type="button"
+  role="switch"
   onclick={toggle}
   {disabled}
-  aria-pressed={checked}
+  aria-checked={checked}
   aria-label={checked ? t('disable') : t('enable')}
   class={cn(
-    "relative h-7 w-12 shrink-0 rounded-full border transition-all duration-200",
-    checked ? "border-primary bg-primary" : "border-border bg-secondary",
-    disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+    "inline-flex items-center",
+    disabled ? "cursor-not-allowed" : "cursor-pointer",
   )}
 >
-  <span
-    class={cn(
-      "absolute top-0.5 h-5 w-5 rounded-full shadow transition-all duration-200",
-      checked ? "left-6 bg-btn-text" : "left-0.5 bg-muted",
-    )}
-  ></span>
+  <ToggleTrack {checked} {disabled} />
 </button>

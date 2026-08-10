@@ -5,6 +5,7 @@
   import { t } from "$lib/stores/i18n.svelte";
   import type { ThemeFamily } from "$lib/data/themes";
   import { cn } from "$lib/utils/cn";
+  import { rovingRadioKeydown } from "$lib/utils/roving";
   import { Check, Monitor, Moon, Sun } from "lucide-svelte";
 
   interface Props {
@@ -77,6 +78,7 @@
         <div
           role="radiogroup"
           aria-label={t("theme_manual")}
+          onkeydown={rovingRadioKeydown}
           class="flex rounded-control border border-border bg-input-bg p-0.5"
         >
           {#each modes as mode (mode.id)}
@@ -85,6 +87,7 @@
               type="button"
               role="radio"
               aria-checked={selected}
+              tabindex={selected ? 0 : -1}
               onclick={() => theme.setManual(activeFamily[mode.id].id)}
               class={cn(
                 "inline-flex cursor-pointer items-center gap-1.5 rounded-sm px-2.5 py-1 text-xs transition-colors",
@@ -107,6 +110,7 @@
 <div
   role="radiogroup"
   aria-label={t("appearance_section")}
+  onkeydown={rovingRadioKeydown}
   class="grid grid-cols-2 gap-2 px-5 pb-5 sm:grid-cols-3 lg:grid-cols-4"
 >
   {#each families as family (family.id)}
@@ -116,6 +120,7 @@
       role="radio"
       aria-checked={active}
       aria-label={family.name}
+      tabindex={active ? 0 : -1}
       onclick={() => pickFamily(family)}
       class={cn(
         "flex cursor-pointer flex-col gap-2 rounded-control border p-2 text-left transition-colors",

@@ -46,6 +46,12 @@ body {
   scrollbar-color: color-mix(in srgb, var(--color-muted) 45%, transparent) transparent;
 }
 
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-control);
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 220ms;

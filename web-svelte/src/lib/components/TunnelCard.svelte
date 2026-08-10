@@ -98,17 +98,9 @@
   const installStep = $derived(installProgress?.step ?? t("installing"));
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
 <div
-  role="button"
-  tabindex="0"
-  aria-pressed={selected}
-  onclick={() => onAction("select", tunnel.id)}
-  onkeydown={(e) =>
-    (e.key === "Enter" || e.key === " ") &&
-    (e.preventDefault(), onAction("select", tunnel.id))}
   class={cn(
-    "cursor-pointer rounded-card border bg-card transition-colors duration-150",
+    "rounded-card border bg-card transition-colors duration-150",
     selected
       ? "border-primary bg-primary/5"
       : "border-border hover:border-primary/40",
@@ -118,16 +110,21 @@
     <div
       class="flex flex-row items-start justify-between gap-2 p-2.5 sm:items-stretch"
     >
-      <div class="min-w-0 flex-1">
-        <div
-          class="mb-0.5 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold"
+      <button
+        type="button"
+        aria-pressed={selected}
+        onclick={() => onAction("select", tunnel.id)}
+        class="min-w-0 flex-1 cursor-pointer text-left"
+      >
+        <span
+          class="mb-0.5 block overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold"
         >
           {tunnel.name}
-        </div>
-        <div class="mb-1.5 text-xs text-text-muted">
+        </span>
+        <span class="mb-1.5 block text-xs text-text-muted">
           {providerLabel} · <span class="font-mono">localhost:{tunnel.port}</span>
-        </div>
-        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+        </span>
+        <span class="flex flex-wrap items-center gap-x-2 gap-y-1">
           <StatusBadge
             state={tunnelState}
             percent={tunnelState === "installing" && installProgress
@@ -149,21 +146,8 @@
               {expiryLabel}
             </span>
           {/if}
-        </div>
-        {#if tunnelState === "installing" && installProgress}
-          <div class="mt-2 h-1 w-full overflow-hidden rounded bg-border">
-            <div
-              class="h-full rounded bg-status-installing"
-              style="width: {installPercent}%"
-            ></div>
-          </div>
-          <div
-            class="mt-1 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-muted sm:text-[10px]"
-          >
-            {installStep}
-          </div>
-        {/if}
-      </div>
+        </span>
+      </button>
       <div class="flex shrink-0 gap-2">
         {#if isRunning}
           <Button
@@ -185,6 +169,22 @@
         {/if}
       </div>
     </div>
+
+    {#if tunnelState === "installing" && installProgress}
+      <div class="px-2.5 pb-2.5">
+        <div class="h-1 w-full overflow-hidden rounded bg-border">
+          <div
+            class="h-full rounded bg-status-installing"
+            style="width: {installPercent}%"
+          ></div>
+        </div>
+        <div
+          class="mt-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-text-muted"
+        >
+          {installStep}
+        </div>
+      </div>
+    {/if}
 
     {#if tunnel.publicUrl}
       <button

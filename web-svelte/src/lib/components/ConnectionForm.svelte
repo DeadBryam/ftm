@@ -170,7 +170,7 @@
           placeholder={isEdit ? t("name_placeholder") : t("tunnel_name_hint")}
           required
           autocomplete="off"
-          class="h-8 w-full rounded-control border border-border bg-input-bg px-2.5 py-1.5 text-sm text-text transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+          class="h-8 w-full rounded-control border border-border bg-input-bg px-2.5 py-1.5 text-sm text-text transition-all duration-150"
         />
       </div>
 
@@ -186,7 +186,7 @@
             min="1"
             max="65535"
             required
-            class="h-8 w-full rounded-control border border-border bg-input-bg px-2.5 py-1.5 text-sm text-text transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+            class="h-8 w-full rounded-control border border-border bg-input-bg px-2.5 py-1.5 text-sm text-text transition-all duration-150"
           />
         </div>
         <div class="mb-2.5">
