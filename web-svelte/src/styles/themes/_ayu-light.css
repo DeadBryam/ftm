@@ -3,11 +3,11 @@
   --color-card: #ffffff;
   --color-text: #5c6166;
   --color-heading: #14191f;
-  --color-muted: #a4a6a9;
+  --color-muted: #6e7074;
   --color-border: #e0e0e0;
   --color-border-light: #ececec;
   --color-primary: #fa8d3e;
-  --color-btn-text: #ffffff;
+  --color-btn-text: #14191f;
   --color-primary-hover: #e07a2b;
   --color-hover: #ececec;
   --color-btn-primary: #fa8d3e;
@@ -26,10 +26,10 @@
   --color-logs-bg: #ececec;
   --color-logs-text: #5c6166;
   --color-url-bg: #f5f5f5;
-  --color-url-text: #fa8d3e;
+  --color-url-text: #b95005;
   --color-input-bg: #ffffff;
   --color-input-text: #5c6166;
-  --color-input-placeholder: #a4a6a9;
+  --color-input-placeholder: #73767a;
   --color-input-disabled: #ececec;
   --color-badge-text: #ffffff;
   --color-secondary-btn: #ececec;

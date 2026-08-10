@@ -3,11 +3,11 @@
   --color-card: #21252b;
   --color-text: #abb2bf;
   --color-heading: #ffffff;
-  --color-muted: #5c6370;
+  --color-muted: #9299a5;
   --color-border: #3e4451;
   --color-border-light: #2c313a;
   --color-primary: #61afef;
-  --color-btn-text: #282c34;
+  --color-btn-text: #1e2127;
   --color-primary-hover: #4f9fd4;
   --color-hover: #2c313a;
   --color-btn-primary: #61afef;
@@ -15,9 +15,9 @@
   --color-btn-start: #98c379;
   --color-btn-start-hover: #84ad6a;
   --color-btn-stop: #e06c75;
-  --color-btn-stop-hover: #cd6069;
+  --color-btn-stop-hover: #d06971;
   --color-btn-danger: #e06c75;
-  --color-btn-danger-hover: #cd6069;
+  --color-btn-danger-hover: #d06971;
   --color-status-running: #98c379;
   --color-status-starting: #e5c07b;
   --color-status-installing: #61afef;
@@ -29,7 +29,7 @@
   --color-url-text: #61afef;
   --color-input-bg: #21252b;
   --color-input-text: #abb2bf;
-  --color-input-placeholder: #5c6370;
+  --color-input-placeholder: #858c9a;
   --color-input-disabled: #282c34;
   --color-badge-text: #282c34;
   --color-secondary-btn: #3e4451;
