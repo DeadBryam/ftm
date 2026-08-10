@@ -138,6 +138,9 @@ export function useTheme() {
     get isAuto() {
       return preference.kind === 'auto';
     },
+    get isLight() {
+      return Object.values(FAMILY_THEMES).some((f) => f.light === currentTheme);
+    },
     get themes() {
       return [...THEME_IDS];
     },
