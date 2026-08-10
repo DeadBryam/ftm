@@ -8,6 +8,7 @@
     Trash2,
   } from "lucide-svelte";
   import { useProviders } from "$lib/stores/providers.svelte";
+  import { useTunnels } from "$lib/stores/tunnels.svelte";
   import { useToast } from "$lib/stores/toast.svelte";
   import { useClock } from "$lib/stores/clock.svelte";
   import { logsApi } from "$lib/api";
@@ -44,8 +45,11 @@
 
   const isOnline = $derived(tunnel?.state === "online");
 
+  const tunnelStore = useTunnels();
+  const stale = $derived(isOnline && !tunnelStore.connected);
+
   const uptime = $derived(
-    tunnel?.startedAt && isOnline
+    tunnel?.startedAt && isOnline && !stale
       ? formatDuration(clock.now - tunnel.startedAt)
       : "",
   );
@@ -220,8 +224,14 @@
       <dl class="m-0 mb-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
         <dt class="text-text-muted">{t("status_label")}</dt>
         <dd class="m-0">
-          <StatusBadge state={tunnel.state} />
+          <StatusBadge state={tunnel.state} {stale} />
         </dd>
+        {#if stale}
+          <dt class="text-text-muted">{t("connection_label")}</dt>
+          <dd class="m-0 font-medium text-status-error">
+            {t("connection_lost")}
+          </dd>
+        {/if}
         {#if uptime}
           <dt class="text-text-muted">{t("detail_uptime")}</dt>
           <dd class="m-0 font-mono text-text">{uptime}</dd>

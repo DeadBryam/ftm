@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Activity, Hourglass, Radio, Timer } from "lucide-svelte";
+  import { Activity, Hourglass, PlugZap, Radio, Timer } from "lucide-svelte";
   import { useTunnels } from "$lib/stores/tunnels.svelte";
   import { useClock } from "$lib/stores/clock.svelte";
   import { t } from "$lib/stores/i18n.svelte";
@@ -37,6 +37,14 @@
   );
 
   const third = $derived.by(() => {
+    if (!store.connected && store.tunnels.length > 0) {
+      return {
+        icon: PlugZap,
+        value: "—",
+        label: t("overview_reconnecting"),
+        urgent: true,
+      };
+    }
     if (nextExpiry) {
       return {
         icon: Hourglass,

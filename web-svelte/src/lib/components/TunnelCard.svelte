@@ -1,6 +1,7 @@
 <script lang="ts">
   import { useToast } from "$lib/stores/toast.svelte";
   import { useProviders } from "$lib/stores/providers.svelte";
+  import { useTunnels } from "$lib/stores/tunnels.svelte";
   import { AlertCircle, Copy, Pause, Play } from "lucide-svelte";
   import { t } from "$lib/stores/i18n.svelte";
   import { useClock } from "$lib/stores/clock.svelte";
@@ -61,8 +62,11 @@
       tunnel.provider,
   );
 
+  const store = useTunnels();
+  const stale = $derived(isRunning && !store.connected);
+
   const uptime = $derived(
-    tunnel.startedAt && isRunning
+    tunnel.startedAt && isRunning && !stale
       ? formatDuration(clock.now - tunnel.startedAt)
       : "",
   );
@@ -127,10 +131,14 @@
         <span class="flex flex-wrap items-center gap-x-2 gap-y-1">
           <StatusBadge
             state={tunnelState}
+            {stale}
             percent={tunnelState === "installing" && installProgress
               ? installPercent
               : null}
           />
+          {#if stale}
+            <span class="text-xs text-text-muted">{t("connection_lost")}</span>
+          {/if}
           {#if uptime}
             <span class="text-xs text-text-muted">
               {t("card_uptime", { 0: uptime })}
