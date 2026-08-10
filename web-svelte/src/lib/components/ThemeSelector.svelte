@@ -78,6 +78,7 @@
         <div
           role="radiogroup"
           aria-label={t("theme_manual")}
+          tabindex={-1}
           onkeydown={rovingRadioKeydown}
           class="flex rounded-control border border-border bg-input-bg p-0.5"
         >
@@ -110,6 +111,7 @@
 <div
   role="radiogroup"
   aria-label={t("appearance_section")}
+  tabindex={-1}
   onkeydown={rovingRadioKeydown}
   class="grid grid-cols-2 gap-2 px-5 pb-5 sm:grid-cols-3 lg:grid-cols-4"
 >

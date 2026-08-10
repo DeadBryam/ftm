@@ -201,6 +201,7 @@
             <div
               role="radiogroup"
               aria-label={t("language_section")}
+              tabindex={-1}
               onkeydown={rovingRadioKeydown}
               class="flex flex-wrap gap-1.5 px-5 pb-4"
             >
