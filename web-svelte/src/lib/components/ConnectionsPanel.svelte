@@ -44,14 +44,31 @@
 
   const searchable = $derived(store.tunnels.length >= SEARCH_THRESHOLD);
 
+  const STATE_ORDER: Record<string, number> = {
+    error: 0,
+    timeout: 0,
+    online: 1,
+    starting: 2,
+    connecting: 2,
+    stopping: 2,
+    installing: 3,
+    downloading: 3,
+  };
+
   const visible = $derived.by(() => {
     const term = query.trim().toLowerCase();
-    if (!term || !searchable) return store.tunnels;
-    return store.tunnels.filter(
-      (tunnel) =>
-        tunnel.name.toLowerCase().includes(term) ||
-        tunnel.provider.toLowerCase().includes(term) ||
-        String(tunnel.port).includes(term),
+    const matches =
+      !term || !searchable
+        ? store.tunnels
+        : store.tunnels.filter(
+            (tunnel) =>
+              tunnel.name.toLowerCase().includes(term) ||
+              tunnel.provider.toLowerCase().includes(term) ||
+              String(tunnel.port).includes(term),
+          );
+
+    return [...matches].sort(
+      (a, b) => (STATE_ORDER[a.state] ?? 9) - (STATE_ORDER[b.state] ?? 9),
     );
   });
 </script>

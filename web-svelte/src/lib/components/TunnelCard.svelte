@@ -2,7 +2,7 @@
   import { useToast } from "$lib/stores/toast.svelte";
   import { useProviders } from "$lib/stores/providers.svelte";
   import { useTunnels } from "$lib/stores/tunnels.svelte";
-  import { AlertCircle, Copy, Pause, Play } from "lucide-svelte";
+  import { AlertCircle, Check, Copy, Pause, Play } from "lucide-svelte";
   import { t } from "$lib/stores/i18n.svelte";
   import { useClock } from "$lib/stores/clock.svelte";
   import { cn } from "$lib/utils/cn";
@@ -92,9 +92,18 @@
         : t("stop"),
   );
 
+  let copied = $state(false);
+  let copiedTimer: ReturnType<typeof setTimeout> | null = null;
+
   function copyUrl(url: string) {
     navigator.clipboard.writeText(url);
     toast.info(t("copied"));
+
+    copied = true;
+    if (copiedTimer) clearTimeout(copiedTimer);
+    copiedTimer = setTimeout(() => {
+      copied = false;
+    }, 3000);
   }
 
   const installPercent = $derived(
@@ -120,8 +129,15 @@
         type="button"
         aria-pressed={selected}
         onclick={() => onAction("select", tunnel.id)}
-        class="min-w-0 flex-1 cursor-pointer text-left"
+        class="flex min-w-0 flex-1 cursor-pointer gap-2.5 text-left"
       >
+        <span
+          aria-hidden="true"
+          class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-control bg-secondary font-mono text-xs font-semibold text-text-muted uppercase"
+        >
+          {providerLabel.slice(0, 2)}
+        </span>
+        <span class="min-w-0 flex-1">
         <span
           class="mb-0.5 block overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold"
         >
@@ -156,6 +172,7 @@
               {expiryLabel}
             </span>
           {/if}
+        </span>
         </span>
       </button>
       <div class="flex shrink-0 gap-2">
@@ -206,12 +223,16 @@
         )}
         onclick={() => tunnel.publicUrl && copyUrl(tunnel.publicUrl)}
       >
-        <span class="flex h-4 w-4 shrink-0 text-muted"><Copy size={14} /></span>
+        <span class="flex h-4 w-4 shrink-0 text-text-muted">
+          {#if copied}<Check size={14} />{:else}<Copy size={14} />{/if}
+        </span>
         <span
           class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-start font-mono text-xs text-primary"
           >{tunnel.publicUrl}</span
         >
-        <span class="shrink-0 text-[10px] text-muted">{t("click_to_copy")}</span>
+        <span class="shrink-0 text-xs text-text-muted">
+          {copied ? t("copied") : t("click_to_copy")}
+        </span>
       </button>
     {/if}
 
