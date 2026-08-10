@@ -116,6 +116,7 @@ export function connectSharedWebSocket(): Promise<void> {
 
         ws.onclose = () => {
           socket = null;
+          notifyListeners({ type: '__ws_close' });
           if (!settled) {
             settled = true;
             reject(new Error('WebSocket closed'));
