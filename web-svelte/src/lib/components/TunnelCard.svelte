@@ -8,11 +8,9 @@
   import { formatDuration } from "$lib/utils/duration";
   import { onMount } from "svelte";
   import Button from "./Button.svelte";
+  import StatusBadge from "./StatusBadge.svelte";
   import type { Tunnel, TunnelState } from "$lib/types";
 
-  type StatusKey = "running" | "starting" | "installing" | "error" | "stopped";
-  type StatusColors = { bg: string; text: string; dot: string };
-  type StatusInfo = { key: StatusKey; textKey: string };
   type InstallProgress = { percent: number; step: string };
 
   interface TunnelCardProps {
@@ -43,51 +41,7 @@
 
   onMount(() => clock.subscribe());
 
-  const statusConfig: Record<StatusKey, StatusColors> = {
-    running: {
-      bg: "bg-status-running/40",
-      text: "text-status-running",
-      dot: "bg-status-running/95",
-    },
-    starting: {
-      bg: "bg-status-starting/40",
-      text: "text-status-starting",
-      dot: "bg-status-starting/95",
-    },
-    installing: {
-      bg: "bg-status-installing/40",
-      text: "text-status-installing",
-      dot: "bg-status-installing/95",
-    },
-    error: {
-      bg: "bg-status-error/40",
-      text: "text-status-error",
-      dot: "bg-status-error/95",
-    },
-    stopped: {
-      bg: "bg-status-stopped/40",
-      text: "text-status-stopped",
-      dot: "bg-status-stopped/95",
-    },
-  };
-
-  const statusMap: Record<TunnelState, StatusInfo> = {
-    online: { key: "running", textKey: "online" },
-    starting: { key: "starting", textKey: "starting" },
-    connecting: { key: "starting", textKey: "connecting" },
-    installing: { key: "installing", textKey: "installing" },
-    downloading: { key: "installing", textKey: "downloading" },
-    need_installing: { key: "stopped", textKey: "need_installing" },
-    stopping: { key: "starting", textKey: "stopping" },
-    stopped: { key: "stopped", textKey: "stopped" },
-    offline: { key: "stopped", textKey: "offline" },
-    timeout: { key: "error", textKey: "timeout" },
-    error: { key: "error", textKey: "error" },
-  };
-
   const tunnelState = $derived(tunnel.state as TunnelState);
-  const statusInfo = $derived(statusMap[tunnelState] ?? statusMap.error);
-  const statusColors = $derived(statusConfig[statusInfo.key]);
 
   const isRunning = $derived(
     tunnelState === "online" ||
@@ -174,20 +128,12 @@
           {providerLabel} · <span class="font-mono">localhost:{tunnel.port}</span>
         </div>
         <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <div
-            class={cn(
-              "inline-flex items-center gap-1.5 rounded-control px-2 py-0.5 text-xs font-medium",
-              statusColors.bg,
-              statusColors.text,
-            )}
-          >
-            <span class={cn("h-1.5 w-1.5 rounded-full", statusColors.dot)}
-            ></span>
-            <span>{t(statusInfo.textKey)}</span>
-            {#if tunnelState === "installing" && installProgress}
-              <span class="ml-1 font-semibold">{installPercent}%</span>
-            {/if}
-          </div>
+          <StatusBadge
+            state={tunnelState}
+            percent={tunnelState === "installing" && installProgress
+              ? installPercent
+              : null}
+          />
           {#if uptime}
             <span class="text-xs text-text-muted">
               {t("card_uptime", { 0: uptime })}

@@ -18,6 +18,7 @@
   import Button from "./Button.svelte";
   import IconButton from "./IconButton.svelte";
   import QrCode from "./QrCode.svelte";
+  import StatusBadge from "./StatusBadge.svelte";
   import type { LogStream, Tunnel } from "$lib/types";
   import { onDestroy, onMount } from "svelte";
 
@@ -218,13 +219,8 @@
 
       <dl class="m-0 mb-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
         <dt class="text-text-muted">{t("status_label")}</dt>
-        <dd
-          class={cn(
-            "m-0 font-medium",
-            isOnline ? "text-status-running" : "text-text",
-          )}
-        >
-          {t(tunnel.state)}
+        <dd class="m-0">
+          <StatusBadge state={tunnel.state} />
         </dd>
         {#if uptime}
           <dt class="text-text-muted">{t("detail_uptime")}</dt>
