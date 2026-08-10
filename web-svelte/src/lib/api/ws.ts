@@ -171,6 +171,11 @@ function closeSharedWebSocket() {
 
 export function subscribeWsMessages(handler: WsHandler): () => void {
   listeners.add(handler);
+
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    handler({ type: '__ws_open' });
+  }
+
   void connectSharedWebSocket();
 
   return () => {
