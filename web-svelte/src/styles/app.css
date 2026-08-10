@@ -52,6 +52,20 @@ body {
   border-radius: var(--radius-control);
 }
 
+@media (pointer: coarse) {
+  button,
+  a[href],
+  [role="switch"],
+  [role="radio"] {
+    min-height: 44px;
+  }
+
+  button[aria-label]:not(:has(span)),
+  a[href][aria-label]:not(:has(h1)) {
+    min-width: 44px;
+  }
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 220ms;

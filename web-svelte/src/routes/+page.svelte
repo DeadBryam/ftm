@@ -29,6 +29,27 @@
       null,
   );
 
+  let announcement = $state("");
+  let lastStates: Record<string, string> = {};
+
+  $effect(() => {
+    const changed = store.tunnels.filter(
+      (tunnel) =>
+        lastStates[tunnel.id] !== undefined &&
+        lastStates[tunnel.id] !== tunnel.state,
+    );
+
+    lastStates = Object.fromEntries(
+      store.tunnels.map((tunnel) => [tunnel.id, tunnel.state]),
+    );
+
+    if (changed.length) {
+      announcement = changed
+        .map((tunnel) => `${tunnel.name}: ${t(tunnel.state)}`)
+        .join(". ");
+    }
+  });
+
   onMount(async () => {
     store.connect();
     providerStore.fetch();
@@ -100,6 +121,8 @@
 <svelte:window onkeydown={handleKeydown} />
 
 <div class="flex min-h-0 flex-1 flex-col">
+  <div role="status" aria-live="polite" class="sr-only">{announcement}</div>
+
   <UpdateBanner />
   <OverviewBar />
 
