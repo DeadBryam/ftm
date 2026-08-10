@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    Check,
     ChevronDown,
     Copy,
     MousePointerClick,
@@ -61,8 +62,12 @@
   );
 
   const LOGS_OPEN_KEY = "ftm-detail-logs-open";
+  const QR_OPEN_KEY = "ftm-detail-qr-open";
 
   let qrDataUrl = $state("");
+  let qrOpen = $state(false);
+  let copied = $state(false);
+  let copiedTimer: ReturnType<typeof setTimeout> | null = null;
   let logsOpen = $state(true);
   let logs = $state("");
   let logPre: HTMLPreElement | undefined = $state();
@@ -75,11 +80,17 @@
 
   onMount(() => {
     logsOpen = localStorage.getItem(LOGS_OPEN_KEY) !== "false";
+    qrOpen = localStorage.getItem(QR_OPEN_KEY) === "true";
   });
 
   function toggleLogs() {
     logsOpen = !logsOpen;
     localStorage.setItem(LOGS_OPEN_KEY, String(logsOpen));
+  }
+
+  function toggleQr() {
+    qrOpen = !qrOpen;
+    localStorage.setItem(QR_OPEN_KEY, String(qrOpen));
   }
 
   function closeStream() {
@@ -138,6 +149,12 @@
     if (!tunnel?.publicUrl) return;
     await navigator.clipboard.writeText(tunnel.publicUrl);
     toast.success(t("overview_copied"));
+
+    copied = true;
+    if (copiedTimer) clearTimeout(copiedTimer);
+    copiedTimer = setTimeout(() => {
+      copied = false;
+    }, 3000);
   }
 
   function downloadQr(blob: Blob) {
@@ -251,32 +268,53 @@
       </dl>
 
       {#if tunnel.publicUrl}
-        <button
-          type="button"
-          onclick={copy}
-          class="mb-3 flex w-full cursor-pointer items-center gap-2 rounded-control bg-url-bg px-2.5 py-2 text-left transition-colors hover:bg-hover"
-        >
-          <span class="min-w-0 flex-1 truncate font-mono text-xs text-url-text"
-            >{tunnel.publicUrl}</span
-          >
-          <Copy size={13} class="shrink-0 text-text-muted" />
-        </button>
-
-        <div
-          class="flex flex-col items-center gap-2 rounded-control border border-border-light bg-bg/40 p-3"
-        >
-          <QrCode value={tunnel.publicUrl} size={140} bind:dataUrl={qrDataUrl} />
-          <p class="m-0 text-center text-xs leading-relaxed text-text-muted">
-            {t("overview_share")}
-          </p>
+        <div class="mb-3">
           <Button
-            variant="default"
-            icon={QrCodeIcon}
-            disabled={!qrDataUrl}
-            onclick={copyQr}
+            variant="primary"
+            size="lg"
+            class="w-full"
+            icon={copied ? Check : Copy}
+            onclick={copy}
           >
-            {t("qr_copy")}
+            {copied ? t("link_copied") : t("copy_link_for_players")}
           </Button>
+          <p
+            class="m-0 mt-1.5 rounded-control bg-url-bg px-2.5 py-2 font-mono text-xs break-all text-url-text"
+          >
+            {tunnel.publicUrl}
+          </p>
+        </div>
+
+        <div class="mb-3 border-t border-border-light pt-3">
+          <button
+            type="button"
+            onclick={toggleQr}
+            aria-expanded={qrOpen}
+            class="flex w-full cursor-pointer items-center justify-between gap-2 text-xs font-medium text-text-muted transition-colors hover:text-text"
+          >
+            <span>{t("qr_for_phones")}</span>
+            <ChevronDown
+              size={14}
+              class={cn("transition-transform", !qrOpen && "-rotate-90")}
+            />
+          </button>
+          {#if qrOpen}
+            <div class="mt-2 flex flex-col items-center gap-2">
+              <QrCode
+                value={tunnel.publicUrl}
+                size={140}
+                bind:dataUrl={qrDataUrl}
+              />
+              <Button
+                variant="default"
+                icon={QrCodeIcon}
+                disabled={!qrDataUrl}
+                onclick={copyQr}
+              >
+                {t("qr_copy")}
+              </Button>
+            </div>
+          {/if}
         </div>
       {/if}
 
