@@ -7,6 +7,7 @@
   import { useClock } from "$lib/stores/clock.svelte";
   import { cn } from "$lib/utils/cn";
   import { formatDuration } from "$lib/utils/duration";
+  import { providerErrorHint } from "$lib/utils/providerError";
   import { onMount } from "svelte";
   import Button from "./Button.svelte";
   import StatusBadge from "./StatusBadge.svelte";
@@ -100,6 +101,7 @@
     Math.trunc((installProgress?.percent ?? 0) * 100) / 100,
   );
   const installStep = $derived(installProgress?.step ?? t("installing"));
+  const errorHint = $derived(providerErrorHint(tunnel.errorMessage));
 </script>
 
 <div
@@ -215,10 +217,17 @@
 
     {#if tunnel.errorMessage}
       <div
-        class="flex items-center gap-2 rounded-b-card border-t border-t-status-error/70 bg-status-error/15 px-2.5 py-2 text-status-error"
+        class="flex items-start gap-2 rounded-b-card border-t border-t-status-error/70 bg-status-error/15 px-2.5 py-2 text-status-error"
       >
-        <span class="h-4 w-4 shrink-0"><AlertCircle size={16} /></span>
-        <span class="font-mono text-xs break-words">{tunnel.errorMessage}</span>
+        <span class="mt-0.5 h-4 w-4 shrink-0"><AlertCircle size={16} /></span>
+        <span class="min-w-0 flex-1">
+          {#if errorHint}
+            <span class="block text-xs font-medium">{t(errorHint)}</span>
+          {/if}
+          <span class="block font-mono text-xs break-words opacity-80">
+            {tunnel.errorMessage}
+          </span>
+        </span>
       </div>
     {/if}
 

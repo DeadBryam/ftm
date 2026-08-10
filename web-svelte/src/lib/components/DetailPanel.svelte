@@ -16,6 +16,7 @@
   import { cn } from "$lib/utils/cn";
   import { formatDuration } from "$lib/utils/duration";
   import { formatLogs } from "$lib/utils/logs";
+  import { providerErrorHint } from "$lib/utils/providerError";
   import Button from "./Button.svelte";
   import IconButton from "./IconButton.svelte";
   import QrCode from "./QrCode.svelte";
@@ -44,6 +45,7 @@
   );
 
   const isOnline = $derived(tunnel?.state === "online");
+  const errorHint = $derived(providerErrorHint(tunnel?.errorMessage));
 
   const tunnelStore = useTunnels();
   const stale = $derived(isOnline && !tunnelStore.connected);
@@ -279,11 +281,16 @@
       {/if}
 
       {#if tunnel.errorMessage}
-        <p
-          class="m-0 mb-3 rounded-control border border-status-error/40 bg-status-error/10 px-2.5 py-1.5 font-mono text-xs break-words text-status-error"
+        <div
+          class="m-0 mb-3 rounded-control border border-status-error/40 bg-status-error/10 px-2.5 py-1.5 text-status-error"
         >
-          {tunnel.errorMessage}
-        </p>
+          {#if errorHint}
+            <p class="m-0 mb-1 text-xs font-medium">{t(errorHint)}</p>
+          {/if}
+          <p class="m-0 font-mono text-xs break-words opacity-80">
+            {tunnel.errorMessage}
+          </p>
+        </div>
       {/if}
 
       <div class="mt-3 border-t border-border-light pt-3">
