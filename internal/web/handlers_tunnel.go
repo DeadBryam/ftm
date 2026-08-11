@@ -2,11 +2,9 @@ package web
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/sthbryan/ftm/internal/config"
 )
@@ -49,7 +47,7 @@ func (h *Handlers) createTunnel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tunnel := config.TunnelConfig{
-		ID:        fmt.Sprintf("tunnel-%d", time.Now().Unix()),
+		ID:        h.config.NewTunnelID(name),
 		Name:      name,
 		Provider:  config.Provider(providerStr),
 		LocalPort: port,
