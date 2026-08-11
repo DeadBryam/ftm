@@ -130,7 +130,7 @@
       >
         <span
           aria-hidden="true"
-          class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-control bg-secondary-btn font-mono text-xs font-semibold text-secondary-btn-text uppercase"
+          class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-control bg-secondary-btn font-mono text-2xs font-semibold text-secondary-btn-text uppercase"
         >
           {providerLabel.slice(0, 2)}
         </span>

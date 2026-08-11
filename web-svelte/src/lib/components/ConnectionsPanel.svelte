@@ -87,7 +87,7 @@
     >
       {t("connections")}
       <span
-        class="rounded-control bg-primary px-2 py-0.5 text-xs font-semibold text-btn-text"
+        class="rounded-control bg-primary px-2 py-0.5 text-2xs font-semibold text-btn-text"
       >
         {store.tunnels.length}
       </span>
@@ -199,7 +199,7 @@
 
   {#if store.tunnels.length > 0}
     <p
-      class="shrink-0 border-t border-border-light px-3 py-1.5 text-center text-[11px] text-text-muted max-md:hidden"
+      class="shrink-0 border-t border-border-light px-3 py-1.5 text-center text-2xs text-text-muted max-md:hidden"
     >
       {t("list_hint_new")}
     </p>
