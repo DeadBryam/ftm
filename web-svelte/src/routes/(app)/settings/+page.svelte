@@ -88,7 +88,7 @@
 
 <div class="mx-auto flex w-full max-w-app min-h-0 flex-1 flex-col">
   <div class="mb-4 flex items-center justify-between gap-3 px-1">
-    <h1 class="font-serif text-xl font-bold tracking-tight text-text-heading">
+    <h1 class="font-serif text-xl font-bold tracking-tight text-text-heading sm:text-2xl">
       {t("web_settings_title")}
     </h1>
     {#if saving}
