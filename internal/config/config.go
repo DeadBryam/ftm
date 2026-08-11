@@ -169,6 +169,12 @@ func (c *Config) AddTunnel(t TunnelConfig) {
 	c.Onboarded = true
 }
 
+func (c *Config) ClearTunnels() int {
+	removed := len(c.Tunnels)
+	c.Tunnels = []TunnelConfig{}
+	return removed
+}
+
 func (c *Config) RemoveTunnel(id string) bool {
 	for i, t := range c.Tunnels {
 		if t.ID == id {

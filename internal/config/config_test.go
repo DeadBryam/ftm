@@ -282,6 +282,44 @@ func TestAddTunnelMarksTheConfigOnboarded(t *testing.T) {
 	}
 }
 
+func TestClearTunnelsRemovesEveryConnection(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AddTunnel(TunnelConfig{ID: "a", Name: "First", LocalPort: 30000})
+	cfg.AddTunnel(TunnelConfig{ID: "b", Name: "Second", LocalPort: 30001})
+
+	if got := cfg.ClearTunnels(); got != 2 {
+		t.Errorf("ClearTunnels() = %d, want 2", got)
+	}
+	if len(cfg.Tunnels) != 0 {
+		t.Fatalf("Tunnels = %+v, want empty", cfg.Tunnels)
+	}
+	if cfg.Tunnels == nil {
+		t.Error("Tunnels = nil, want an empty slice so it marshals as [] and not null")
+	}
+	if got := cfg.ClearTunnels(); got != 0 {
+		t.Errorf("ClearTunnels() on an empty config = %d, want 0", got)
+	}
+}
+
+func TestClearTunnelsKeepsPreferences(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.Language = "es"
+	cfg.NotificationsStatus = NotificationGranted
+	cfg.AddTunnel(TunnelConfig{ID: "a", Name: "First", LocalPort: 30000})
+
+	cfg.ClearTunnels()
+
+	if !cfg.Onboarded {
+		t.Error("Onboarded = false after clearing, want true so the empty home shows and not the welcome")
+	}
+	if cfg.Language != "es" {
+		t.Errorf("Language = %q, want it untouched", cfg.Language)
+	}
+	if cfg.NotificationsStatus != NotificationGranted {
+		t.Errorf("NotificationsStatus = %q, want it untouched", cfg.NotificationsStatus)
+	}
+}
+
 func TestGetTunnelReturnsLivePointer(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.AddTunnel(TunnelConfig{ID: "a", Name: "First", LocalPort: 30000})
