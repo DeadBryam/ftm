@@ -162,10 +162,8 @@ logs_action: "Logs"
 click_to_copy: "Clic para copiar"
 no_logs: "No hay logs disponibles"
 
-# Empty state
+# Welcome screen
 welcome_title: "¡Bienvenido, Dungeon Master!"
-no_tunnels_yet: "Aún no has creado ningún túnel."
-tunnels_desc: "Los túneles permiten a tus jugadores conectarse a tu mundo de Foundry."
 welcome_lead: "ftm le da a tu mundo de Foundry una dirección pública, para que tus jugadores entren sin abrir puertos."
 welcome_step_provider_title: "Elige un proveedor"
 welcome_step_provider_body: "Cloudflare, Pinggy, Bore. ftm los instala por ti."

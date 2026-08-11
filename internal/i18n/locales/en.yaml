@@ -164,8 +164,6 @@ no_logs: "No logs available"
 
 # Welcome screen
 welcome_title: "Welcome, Dungeon Master!"
-no_tunnels_yet: "You haven't created any tunnels yet."
-tunnels_desc: "Tunnels let your players connect to your Foundry world."
 welcome_lead: "ftm gives your Foundry world a public address, so your players can join without port forwarding."
 welcome_step_provider_title: "Pick a provider"
 welcome_step_provider_body: "Cloudflare, Pinggy, Bore. ftm installs them for you."
