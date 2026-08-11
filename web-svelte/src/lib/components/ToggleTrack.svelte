@@ -13,15 +13,15 @@
 <span
   aria-hidden="true"
   class={cn(
-    "relative block h-7 w-12 shrink-0 rounded-full border transition-all duration-200",
+    "relative block h-5 w-9 shrink-0 rounded-full border transition-colors duration-200",
     checked ? "border-primary bg-primary" : "border-border bg-secondary",
     disabled && "opacity-50",
   )}
 >
   <span
     class={cn(
-      "absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full shadow transition-all duration-200",
-      checked ? "left-[calc(100%-1.375rem)] bg-btn-text" : "left-0.5 bg-muted",
+      "absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full shadow-sm transition-all duration-200",
+      checked ? "left-[calc(100%-1rem)] bg-btn-text" : "left-0.5 bg-muted",
     )}
   ></span>
 </span>
