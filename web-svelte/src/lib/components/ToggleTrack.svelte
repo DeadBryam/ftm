@@ -20,8 +20,8 @@
 >
   <span
     class={cn(
-      "absolute top-0.5 h-5 w-5 rounded-full shadow transition-all duration-200",
-      checked ? "left-6 bg-btn-text" : "left-0.5 bg-muted",
+      "absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full shadow transition-all duration-200",
+      checked ? "left-[calc(100%-1.375rem)] bg-btn-text" : "left-0.5 bg-muted",
     )}
   ></span>
 </span>
