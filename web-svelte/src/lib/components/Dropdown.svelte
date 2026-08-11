@@ -86,14 +86,14 @@
     aria-expanded={isOpen}
     aria-haspopup="true"
     class={cn(
-      "dropdown-trigger flex h-8 min-h-8 flex-1 cursor-pointer items-center gap-1.5 rounded-control border px-2.5 py-1.5 text-xs",
-      "border-border bg-card text-text hover:bg-hover",
+      "dropdown-trigger flex h-8 min-h-8 flex-1 cursor-pointer items-center gap-1.5 rounded-control border px-2.5 py-1.5 text-sm",
+      "border-border bg-input-bg text-text hover:bg-hover",
     )}
   >
     {#if children}
       {@render children()}
     {:else}
-      <span class="flex-1 text-left text-sm">{label}</span>
+      <span class="flex-1 truncate text-left text-sm">{label}</span>
       <ChevronDown
         size={14}
         class={cn("transition-transform duration-150", isOpen && "rotate-180")}
@@ -129,7 +129,7 @@
             onSelect?.(option);
           }}
           class={cn(
-            "flex w-full cursor-pointer items-center gap-2 rounded-control border-none bg-transparent px-2.5 py-1.5 text-left text-xs text-text",
+            "flex w-full cursor-pointer items-center gap-2 rounded-control border-none bg-transparent px-2.5 py-1.5 text-left text-sm text-text",
             "hover:bg-hover disabled:cursor-not-allowed disabled:opacity-50",
             option.danger && "text-red-500 hover:bg-red-500/10",
           )}
@@ -140,9 +140,13 @@
             }>}
             <IconComponent size={16} />
           {/if}
-          <span class="flex-1">{option.label}</span>
+          <span>{option.label}</span>
           {#if option.hint}
-            <span class="shrink-0 text-xs text-text-muted">{option.hint}</span>
+            <span
+              class="shrink-0 rounded-control bg-secondary-btn px-1.5 py-0.5 text-[11px] font-medium text-secondary-btn-text"
+            >
+              {option.hint}
+            </span>
           {/if}
         </button>
       {/if}
