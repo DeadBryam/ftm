@@ -55,7 +55,7 @@ func (h *Handlers) createTunnel(w http.ResponseWriter, r *http.Request) {
 		LocalPort: port,
 	}
 
-	h.config.Tunnels = append(h.config.Tunnels, tunnel)
+	h.config.AddTunnel(tunnel)
 	h.server.updateConfig()
 
 	h.server.BroadcastTunnelUpdate(tunnel)
