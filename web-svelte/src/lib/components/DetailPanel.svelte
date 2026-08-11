@@ -313,7 +313,7 @@
             icon={copied ? Check : Copy}
             onclick={copy}
           >
-            {copied ? t("link_copied") : t("copy_link_for_players")}
+            {copied ? t("link_copied") : t("copy_link")}
           </Button>
           <p
             class="m-0 mt-1.5 rounded-control bg-url-bg px-2.5 py-2 font-mono text-xs break-all text-url-text"
