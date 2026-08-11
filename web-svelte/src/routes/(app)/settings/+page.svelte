@@ -12,7 +12,8 @@
     VolumeX,
     Languages,
   } from "lucide-svelte";
-  import SettingsToggle from "$lib/components/SettingsToggle.svelte";
+  import ToggleTrack from "$lib/components/ToggleTrack.svelte";
+  import { rovingRadioKeydown } from "$lib/utils/roving";
   import ThemeSelector from "$lib/components/ThemeSelector.svelte";
   import { themeFamilies } from "$lib/data/themes";
   import { cn } from "$lib/utils/cn";
@@ -119,96 +120,71 @@
           <span class="text-xs text-text-muted">{t("preferences_hint")}</span>
         </header>
 
-        <div
-          class="relative z-10 border-t border-border-light cursor-pointer transition-colors hover:bg-hover"
-          role="button"
-          tabindex="0"
+        <button
+          type="button"
+          role="switch"
+          aria-checked={notifActive}
+          disabled={saving}
           onclick={toggleNotifications}
-          onkeydown={(e) =>
-            (e.key === "Enter" || e.key === " ") && (e.preventDefault(), toggleNotifications())}
+          class="relative z-10 grid w-full cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-4 border-t border-border-light px-5 py-3.5 text-left transition-colors hover:bg-hover disabled:cursor-not-allowed"
         >
-          <div
-            class="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3.5"
+          <span
+            class={cn(
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-control transition-colors",
+              notifActive ? "bg-primary/15 text-primary" : "bg-secondary text-text-muted",
+            )}
           >
-            <div
-              class={cn(
-                "flex h-9 w-9 shrink-0 items-center justify-center rounded-control transition-colors",
-                notifActive ? "bg-primary/15 text-primary" : "bg-secondary text-text-muted",
-              )}
-            >
-              {#if notifActive}
-                <Bell size={17} />
-              {:else}
-                <BellOff size={17} />
-              {/if}
-            </div>
-            <div class="min-w-0">
-              <p class="m-0 text-sm font-medium text-text-heading">
-                {t("enable_notifications_web")}
-              </p>
-              <p class="m-0 truncate text-xs text-text-muted">
-                {t("settings_notifications_desc")}
-              </p>
-            </div>
-            <div
-              role="presentation"
-              onclick={(e) => e.stopPropagation()}
-            >
-              <SettingsToggle
-                disabled={saving}
-                checked={notifActive}
-                onchange={toggleNotifications}
-              />
-            </div>
-          </div>
-        </div>
+            {#if notifActive}
+              <Bell size={17} />
+            {:else}
+              <BellOff size={17} />
+            {/if}
+          </span>
+          <span class="min-w-0">
+            <span class="block text-sm font-medium text-text-heading">
+              {t("enable_notifications_web")}
+            </span>
+            <span class="block truncate text-xs text-text-muted">
+              {t("settings_notifications_desc")}
+            </span>
+          </span>
+          <ToggleTrack checked={notifActive} disabled={saving} />
+        </button>
+
+        <button
+          type="button"
+          role="switch"
+          aria-checked={soundActive}
+          disabled={saving}
+          onclick={toggleSound}
+          class="relative z-10 grid w-full cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-4 border-t border-border-light px-5 py-3.5 text-left transition-colors hover:bg-hover disabled:cursor-not-allowed"
+        >
+          <span
+            class={cn(
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-control transition-colors",
+              soundActive ? "bg-primary/15 text-primary" : "bg-secondary text-text-muted",
+            )}
+          >
+            {#if soundActive}
+              <Volume2 size={17} />
+            {:else}
+              <VolumeX size={17} />
+            {/if}
+          </span>
+          <span class="min-w-0">
+            <span class="block text-sm font-medium text-text-heading">
+              {t("sound_effects")}
+            </span>
+            <span class="block truncate text-xs text-text-muted">
+              {t("settings_sound_desc")}
+            </span>
+          </span>
+          <ToggleTrack checked={soundActive} disabled={saving} />
+        </button>
 
         <div
-          class="relative z-10 border-t border-border-light cursor-pointer transition-colors hover:bg-hover"
-          role="button"
-          tabindex="0"
-          onclick={toggleSound}
-          onkeydown={(e) =>
-            (e.key === "Enter" || e.key === " ") && (e.preventDefault(), toggleSound())}
+          class="relative z-10 grid grid-cols-[auto_1fr_auto] items-center gap-4 border-t border-border-light px-5 py-3.5"
         >
-          <div
-            class="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3.5"
-          >
-            <div
-              class={cn(
-                "flex h-9 w-9 shrink-0 items-center justify-center rounded-control transition-colors",
-                soundActive ? "bg-primary/15 text-primary" : "bg-secondary text-text-muted",
-              )}
-            >
-              {#if soundActive}
-                <Volume2 size={17} />
-              {:else}
-                <VolumeX size={17} />
-              {/if}
-            </div>
-            <div class="min-w-0">
-              <p class="m-0 text-sm font-medium text-text-heading">
-                {t("sound_effects")}
-              </p>
-              <p class="m-0 truncate text-xs text-text-muted">
-                {t("settings_sound_desc")}
-              </p>
-            </div>
-            <div
-              role="presentation"
-              onclick={(e) => e.stopPropagation()}
-            >
-              <SettingsToggle
-                disabled={saving}
-                checked={soundActive}
-                onchange={toggleSound}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="relative z-10 border-t border-border-light">
-            <div class="grid grid-cols-[auto_1fr] items-center gap-4 px-5 pt-3.5 pb-2">
               <div
                 class="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-secondary text-text-muted"
               >
@@ -222,11 +198,12 @@
                   {t("settings_language_desc")}
                 </p>
               </div>
-            </div>
             <div
               role="radiogroup"
               aria-label={t("language_section")}
-              class="flex flex-wrap gap-1.5 px-5 pb-4"
+              tabindex={-1}
+              onkeydown={rovingRadioKeydown}
+              class="flex rounded-control border border-border bg-input-bg p-0.5 max-sm:col-span-2 max-sm:col-start-2"
             >
               {#each languageOptions as opt (opt.id)}
                 {@const selected = settingsStore.settings.language === opt.id}
@@ -234,13 +211,14 @@
                   type="button"
                   role="radio"
                   aria-checked={selected}
+                  tabindex={selected ? 0 : -1}
                   disabled={saving}
                   onclick={() => changeLanguage(opt.id)}
                   class={cn(
-                    "cursor-pointer rounded-control border px-3 py-1.5 text-sm transition-all",
+                    "cursor-pointer rounded-sm px-2.5 py-1 text-xs transition-colors",
                     selected
-                      ? "border-primary bg-primary text-btn-text shadow-sm"
-                      : "border-border bg-input-bg text-text hover:border-primary/50 hover:bg-hover",
+                      ? "bg-primary font-medium text-btn-text"
+                      : "text-text-muted hover:text-text",
                     saving && "cursor-not-allowed opacity-60",
                   )}
                 >
@@ -248,7 +226,7 @@
                 </button>
               {/each}
             </div>
-          </div>
+        </div>
       </section>
 
       <section

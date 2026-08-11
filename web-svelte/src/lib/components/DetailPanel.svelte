@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    Check,
     ChevronDown,
     Copy,
     MousePointerClick,
@@ -9,6 +10,7 @@
     Trash2,
   } from "lucide-svelte";
   import { useProviders } from "$lib/stores/providers.svelte";
+  import { useTunnels } from "$lib/stores/tunnels.svelte";
   import { useToast } from "$lib/stores/toast.svelte";
   import { useClock } from "$lib/stores/clock.svelte";
   import { logsApi, pipApi, statusApi } from "$lib/api";
@@ -17,9 +19,14 @@
   import { cn } from "$lib/utils/cn";
   import { formatDuration } from "$lib/utils/duration";
   import { formatLogs } from "$lib/utils/logs";
+  import { providerErrorHint } from "$lib/utils/providerError";
+  import { revealDuration } from "$lib/utils/motion";
+  import { copyText } from "$lib/utils/clipboard";
+  import { slide } from "svelte/transition";
   import Button from "./Button.svelte";
   import IconButton from "./IconButton.svelte";
   import QrCode from "./QrCode.svelte";
+  import StatusBadge from "./StatusBadge.svelte";
   import type { LogStream, Tunnel } from "$lib/types";
   import { onDestroy, onMount } from "svelte";
 
@@ -44,9 +51,13 @@
   );
 
   const isOnline = $derived(tunnel?.state === "online");
+  const errorHint = $derived(providerErrorHint(tunnel?.errorMessage));
+
+  const tunnelStore = useTunnels();
+  const stale = $derived(isOnline && !tunnelStore.connected);
 
   const uptime = $derived(
-    tunnel?.startedAt && isOnline
+    tunnel?.startedAt && isOnline && !stale
       ? formatDuration(clock.now - tunnel.startedAt)
       : "",
   );
@@ -56,6 +67,7 @@
   );
 
   const LOGS_OPEN_KEY = "ftm-detail-logs-open";
+  const QR_OPEN_KEY = "ftm-detail-qr-open";
 
   let nativePip = $state(false);
   let documentPip = $state(false);
@@ -85,6 +97,9 @@
   }
 
   let qrDataUrl = $state("");
+  let qrOpen = $state(false);
+  let copied = $state(false);
+  let copiedTimer: ReturnType<typeof setTimeout> | null = null;
   let logsOpen = $state(true);
   let logs = $state("");
   let logPre: HTMLPreElement | undefined = $state();
@@ -97,11 +112,17 @@
 
   onMount(() => {
     logsOpen = localStorage.getItem(LOGS_OPEN_KEY) !== "false";
+    qrOpen = localStorage.getItem(QR_OPEN_KEY) === "true";
   });
 
   function toggleLogs() {
     logsOpen = !logsOpen;
     localStorage.setItem(LOGS_OPEN_KEY, String(logsOpen));
+  }
+
+  function toggleQr() {
+    qrOpen = !qrOpen;
+    localStorage.setItem(QR_OPEN_KEY, String(qrOpen));
   }
 
   function closeStream() {
@@ -158,8 +179,19 @@
 
   async function copy() {
     if (!tunnel?.publicUrl) return;
-    await navigator.clipboard.writeText(tunnel.publicUrl);
+
+    if (!(await copyText(tunnel.publicUrl))) {
+      toast.error(t("copy_failed"));
+      return;
+    }
+
     toast.success(t("overview_copied"));
+
+    copied = true;
+    if (copiedTimer) clearTimeout(copiedTimer);
+    copiedTimer = setTimeout(() => {
+      copied = false;
+    }, 3000);
   }
 
   function downloadQr(blob: Blob) {
@@ -255,14 +287,15 @@
 
       <dl class="m-0 mb-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
         <dt class="text-text-muted">{t("status_label")}</dt>
-        <dd
-          class={cn(
-            "m-0 font-medium",
-            isOnline ? "text-status-running" : "text-text",
-          )}
-        >
-          {t(tunnel.state)}
+        <dd class="m-0">
+          <StatusBadge state={tunnel.state} {stale} />
         </dd>
+        {#if stale}
+          <dt class="text-text-muted">{t("connection_label")}</dt>
+          <dd class="m-0 font-medium text-status-error">
+            {t("connection_lost")}
+          </dd>
+        {/if}
         {#if uptime}
           <dt class="text-text-muted">{t("detail_uptime")}</dt>
           <dd class="m-0 font-mono text-text">{uptime}</dd>
@@ -280,41 +313,82 @@
       </dl>
 
       {#if tunnel.publicUrl}
-        <button
-          type="button"
-          onclick={copy}
-          class="mb-3 flex w-full cursor-pointer items-center gap-2 rounded-control bg-url-bg px-2.5 py-2 text-left transition-colors hover:bg-hover"
-        >
-          <span class="min-w-0 flex-1 truncate font-mono text-xs text-url-text"
-            >{tunnel.publicUrl}</span
-          >
-          <Copy size={13} class="shrink-0 text-text-muted" />
-        </button>
-
         <div
-          class="flex flex-col items-center gap-2 rounded-control border border-border-light bg-bg/40 p-3"
+          class="mb-3 flex items-center gap-1 rounded-control border border-border bg-url-bg py-1 pr-1 pl-2.5"
         >
-          <QrCode value={tunnel.publicUrl} size={140} bind:dataUrl={qrDataUrl} />
-          <p class="m-0 text-center text-xs leading-relaxed text-text-muted">
-            {t("overview_share")}
-          </p>
-          <Button
-            variant="default"
-            icon={QrCodeIcon}
-            disabled={!qrDataUrl}
-            onclick={copyQr}
+          <span
+            class="min-w-0 flex-1 truncate font-mono text-xs text-url-text"
+            title={tunnel.publicUrl}
           >
-            {t("qr_copy")}
-          </Button>
+            {tunnel.publicUrl}
+          </span>
+          <button
+            type="button"
+            onclick={copy}
+            aria-label={copied ? t("link_copied") : t("copy_link")}
+            title={copied ? t("link_copied") : t("copy_link")}
+            class={cn(
+              "inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-control transition-colors",
+              copied ? "text-status-running" : "text-url-text hover:bg-hover",
+            )}
+          >
+            {#if copied}
+              <Check size={14} />
+            {:else}
+              <Copy size={14} />
+            {/if}
+          </button>
+        </div>
+
+        <div class="mb-3 border-t border-border-light pt-3">
+          <button
+            type="button"
+            onclick={toggleQr}
+            aria-expanded={qrOpen}
+            class="flex w-full cursor-pointer items-center justify-between gap-2 text-xs font-medium text-text-muted transition-colors hover:text-text"
+          >
+            <span>{t("qr_for_phones")}</span>
+            <ChevronDown
+              size={14}
+              class={cn("transition-transform", !qrOpen && "-rotate-90")}
+            />
+          </button>
+          {#if qrOpen}
+            <div
+              class="mt-2 flex flex-col items-center gap-2"
+              transition:slide={{ duration: revealDuration() }}
+            >
+              <div class="flex h-[148px] w-[148px] items-center justify-center">
+                <QrCode
+                  value={tunnel.publicUrl}
+                  size={140}
+                  bind:dataUrl={qrDataUrl}
+                />
+              </div>
+              <Button
+                variant="default"
+                icon={QrCodeIcon}
+                disabled={!qrDataUrl}
+                onclick={copyQr}
+              >
+                {t("qr_copy")}
+              </Button>
+            </div>
+          {/if}
         </div>
       {/if}
 
       {#if tunnel.errorMessage}
-        <p
-          class="m-0 mb-3 rounded-control border border-status-error/40 bg-status-error/10 px-2.5 py-1.5 font-mono text-xs break-words text-status-error"
+        <div
+          class="m-0 mb-3 rounded-control border border-status-error/40 bg-status-error/10 px-2.5 py-1.5 text-status-error"
         >
-          {tunnel.errorMessage}
-        </p>
+          {#if errorHint}
+            <p class="m-0 mb-1 text-xs font-medium">{t(errorHint)}</p>
+          {/if}
+          <p class="m-0 font-mono text-xs break-words opacity-80">
+            {tunnel.errorMessage}
+          </p>
+        </div>
       {/if}
 
       <div class="mt-3 border-t border-border-light pt-3">
@@ -335,16 +409,20 @@
             />
           </span>
         </button>
-        {#if logsOpen && !isRunning}
-          <p class="m-0 text-xs text-text-muted italic">
-            {t("detail_logs_idle")}
-          </p>
-        {:else if logsOpen}
-          <pre
-            bind:this={logPre}
-            onscroll={onLogScroll}
-            class="m-0 max-h-48 overflow-x-hidden overflow-y-auto rounded-control bg-logs-bg p-2 font-mono text-[11px] leading-relaxed break-all whitespace-pre-wrap text-logs-text">{logs ||
-              t("no_logs")}</pre>
+        {#if logsOpen}
+          <div transition:slide={{ duration: revealDuration() }}>
+            {#if !isRunning}
+              <p class="m-0 text-xs text-text-muted italic">
+                {t("detail_logs_idle")}
+              </p>
+            {:else}
+              <pre
+                bind:this={logPre}
+                onscroll={onLogScroll}
+                class="m-0 max-h-48 overflow-x-hidden overflow-y-auto rounded-control bg-logs-bg p-2 font-mono text-[11px] leading-relaxed break-all whitespace-pre-wrap text-logs-text">{logs ||
+                  t("no_logs")}</pre>
+            {/if}
+          </div>
         {/if}
       </div>
 

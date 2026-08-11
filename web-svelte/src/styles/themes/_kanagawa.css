@@ -3,15 +3,15 @@
   --color-card: #16161d;
   --color-text: #dcd7ba;
   --color-heading: #ebdbb2;
-  --color-muted: #625e5a;
+  --color-muted: #96928d;
   --color-border: #393f4f;
   --color-border-light: #2a2a37;
   --color-primary: #957fb8;
-  --color-btn-text: #1f1f28;
+  --color-btn-text: #16161d;
   --color-primary-hover: #7e6da0;
   --color-hover: #2a2a37;
   --color-btn-primary: #957fb8;
-  --color-btn-primary-hover: #7e6da0;
+  --color-btn-primary-hover: #8879a8;
   --color-btn-start: #98bb6c;
   --color-btn-start-hover: #87a85e;
   --color-btn-stop: #e46876;
@@ -29,7 +29,7 @@
   --color-url-text: #7fb4ca;
   --color-input-bg: #1f1f28;
   --color-input-text: #dcd7ba;
-  --color-input-placeholder: #625e5a;
+  --color-input-placeholder: #8c8782;
   --color-input-disabled: #16161d;
   --color-badge-text: #1f1f28;
   --color-secondary-btn: #2a2a37;

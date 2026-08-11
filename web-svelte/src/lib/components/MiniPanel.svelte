@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import {
+    Check,
     Copy,
     Pause,
     Play,
@@ -14,14 +15,12 @@
   import { t } from "$lib/stores/i18n.svelte";
   import { cn } from "$lib/utils/cn";
   import { formatDuration } from "$lib/utils/duration";
-  import {
-    isInstallingState,
-    isRunningState,
-    statusColors as statusColorsFor,
-    statusInfo as statusInfoFor,
-  } from "$lib/utils/status";
+  import { isInstallingState, isRunningState } from "$lib/utils/status";
+  import { providerErrorHint } from "$lib/utils/providerError";
+  import { copyText } from "$lib/utils/clipboard";
   import Button from "./Button.svelte";
   import QrCode from "./QrCode.svelte";
+  import StatusBadge from "./StatusBadge.svelte";
   import type { TunnelState } from "$lib/types";
 
   let { tunnelId }: { tunnelId: string } = $props();
@@ -39,10 +38,10 @@
 
   const tunnel = $derived(store.getById(tunnelId));
   const tunnelState = $derived((tunnel?.state ?? "stopped") as TunnelState);
-  const statusInfo = $derived(statusInfoFor(tunnelState));
-  const statusColors = $derived(statusColorsFor(tunnelState));
   const isRunning = $derived(!!tunnel && isRunningState(tunnelState));
   const isInstalling = $derived(!!tunnel && isInstallingState(tunnelState));
+  const stale = $derived(isRunning && !store.connected);
+  const errorHint = $derived(providerErrorHint(tunnel?.errorMessage));
 
   const providerLabel = $derived(
     providerStore.providers.find((p) => p.id === tunnel?.provider)?.name ??
@@ -51,7 +50,7 @@
   );
 
   const uptime = $derived(
-    tunnel?.startedAt && isRunning
+    tunnel?.startedAt && isRunning && !stale
       ? formatDuration(clock.now - tunnel.startedAt)
       : "",
   );
@@ -68,10 +67,24 @@
         : t("stop"),
   );
 
+  let copied = $state(false);
+  let copiedTimer: ReturnType<typeof setTimeout> | null = null;
+
   async function copyUrl() {
     if (!tunnel?.publicUrl) return;
-    await navigator.clipboard.writeText(tunnel.publicUrl);
+
+    if (!(await copyText(tunnel.publicUrl))) {
+      toast.error(t("copy_failed"));
+      return;
+    }
+
     toast.success(t("overview_copied"));
+
+    copied = true;
+    if (copiedTimer) clearTimeout(copiedTimer);
+    copiedTimer = setTimeout(() => {
+      copied = false;
+    }, 3000);
   }
 
   async function toggle() {
@@ -109,15 +122,8 @@
           {providerLabel} · <span class="font-mono">localhost:{tunnel.port}</span>
         </p>
       </div>
-      <span
-        class={cn(
-          "inline-flex shrink-0 items-center gap-1.5 rounded-control px-2 py-0.5 text-[11px] font-medium",
-          statusColors.bg,
-          statusColors.text,
-        )}
-      >
-        <span class={cn("h-1.5 w-1.5 rounded-full", statusColors.dot)}></span>
-        {t(statusInfo.textKey)}
+      <span class="shrink-0">
+        <StatusBadge state={tunnelState} {stale} />
       </span>
     </div>
 
@@ -163,15 +169,20 @@
         <span class="min-w-0 flex-1 truncate font-mono text-[11px] text-url-text"
           >{tunnel.publicUrl}</span
         >
-        <Copy size={12} class="shrink-0 text-text-muted" />
+        {#if copied}
+          <Check size={12} class="shrink-0 text-status-running" />
+        {:else}
+          <Copy size={12} class="shrink-0 text-text-muted" />
+        {/if}
       </button>
     {/if}
 
     {#if tunnel.errorMessage}
       <p
-        class="m-0 line-clamp-2 shrink-0 rounded-control border border-status-error/40 bg-status-error/10 px-2 py-1 font-mono text-[11px] break-words text-status-error"
+        class="m-0 line-clamp-2 shrink-0 rounded-control border border-status-error/40 bg-status-error/10 px-2 py-1 text-[11px] break-words text-status-error"
+        title={tunnel.errorMessage}
       >
-        {tunnel.errorMessage}
+        {errorHint ? t(errorHint) : tunnel.errorMessage}
       </p>
     {/if}
 

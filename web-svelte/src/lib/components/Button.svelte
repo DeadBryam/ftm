@@ -12,6 +12,7 @@
     disabled?: boolean;
     type?: "button" | "submit" | "reset";
     class?: string;
+    ariaLabel?: string;
     onclick?: (e: MouseEvent) => void;
     children?: Snippet;
     icon?: ComponentType<SvelteComponentTyped<IconProps>>;
@@ -53,6 +54,7 @@
     disabled = false,
     type = "button",
     class: className = "",
+    ariaLabel,
     onclick,
     children,
     icon: Icon,
@@ -73,6 +75,7 @@
   {type}
   {disabled}
   {onclick}
+  aria-label={ariaLabel}
   class={cn(
     "inline-flex items-center justify-center border font-medium cursor-pointer",
     "transition-all duration-150 rounded-control",

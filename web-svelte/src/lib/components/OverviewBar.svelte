@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Activity, Hourglass, Radio, Timer } from "lucide-svelte";
+  import { Activity, Hourglass, PlugZap, Radio, Timer, Users } from "lucide-svelte";
   import { useTunnels } from "$lib/stores/tunnels.svelte";
   import { useClock } from "$lib/stores/clock.svelte";
   import { t } from "$lib/stores/i18n.svelte";
@@ -24,6 +24,12 @@
     ).length,
   );
 
+  const players = $derived(
+    active.length > 0
+      ? active.reduce((sum, tunnel) => sum + (tunnel.activeSessions ?? 0), 0)
+      : null,
+  );
+
   const nextExpiry = $derived(
     active
       .filter((tunnel) => (tunnel.expiresAt ?? 0) > clock.now)
@@ -37,6 +43,14 @@
   );
 
   const third = $derived.by(() => {
+    if (!store.connected && store.tunnels.length > 0) {
+      return {
+        icon: PlugZap,
+        value: "—",
+        label: t("overview_reconnecting"),
+        urgent: true,
+      };
+    }
     if (nextExpiry) {
       return {
         icon: Hourglass,
@@ -49,7 +63,7 @@
       return {
         icon: Timer,
         value: formatDuration(clock.now - (oldestStart.startedAt ?? 0)),
-        label: t("overview_session"),
+        label: t("overview_uptime"),
         urgent: false,
       };
     }
@@ -93,24 +107,24 @@
 <section
   class="ftm-enter mb-app flex shrink-0 flex-wrap items-stretch gap-app text-sm"
 >
-  {@render tile(
-    Radio,
-    String(active.length),
-    t("overview_online"),
-    active.length > 0 ? "good" : "muted",
-  )}
+  {#if active.length > 0}
+    {@render tile(Radio, String(active.length), t("overview_online"), "good")}
+  {:else}
+    {@render tile(Radio, "—", t("overview_idle"), "muted")}
+  {/if}
 
-  {@render tile(
-    Activity,
-    String(failing > 0 ? failing : store.tunnels.length),
-    failing > 0 ? t("overview_failing") : t("overview_total"),
-    failing > 0 ? "bad" : "muted",
-  )}
+  {#if failing > 0}
+    {@render tile(Activity, String(failing), t("overview_failing"), "bad")}
+  {:else if players !== null}
+    {@render tile(Users, String(players), t("overview_players"), "good")}
+  {/if}
 
-  {@render tile(
-    third.icon,
-    third.value,
-    third.label,
-    third.urgent ? "bad" : "muted",
-  )}
+  {#if active.length > 0 || !store.connected}
+    {@render tile(
+      third.icon,
+      third.value,
+      third.label,
+      third.urgent ? "bad" : "muted",
+    )}
+  {/if}
 </section>

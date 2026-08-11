@@ -40,6 +40,7 @@ interface InstallProgress {
 let tunnelsById: TunnelMap = $state({});
 let loading = $state(true);
 let error: string | null = $state(null);
+let connected = $state(false);
 let unsubscribeWs: (() => void) | null = $state(null);
 let installProgress: InstallProgress = $state({});
 
@@ -144,26 +145,11 @@ async function syncTunnels() {
   }
 }
 
-function connect() {
-  if (unsubscribeWs) return;
-
+function loadTunnels() {
   loading = true;
+  error = null;
 
-  unsubscribeWs = subscribeWsMessages((message) => {
-    if (typeof message !== 'object' || message === null) {
-      return;
-    }
-    const msg = message as TunnelMessage;
-    if (msg.type === '__ws_open') {
-      void syncTunnels();
-      return;
-    }
-    processStateMessage(msg);
-  });
-
-  void notifications.syncWithSettings();
-
-  tunnelsApi.getAll()
+  return tunnelsApi.getAll()
     .then((data: Tunnel[]) => {
       const map: TunnelMap = {};
       data.forEach(t => { map[t.id] = t; });
@@ -181,11 +167,42 @@ function connect() {
     });
 }
 
+function retry() {
+  void loadTunnels();
+  connect();
+}
+
+function connect() {
+  if (unsubscribeWs) return;
+
+  unsubscribeWs = subscribeWsMessages((message) => {
+    if (typeof message !== 'object' || message === null) {
+      return;
+    }
+    const msg = message as TunnelMessage;
+    if (msg.type === '__ws_open') {
+      connected = true;
+      error = null;
+      void syncTunnels();
+      return;
+    }
+    if (msg.type === '__ws_close') {
+      connected = false;
+      return;
+    }
+    processStateMessage(msg);
+  });
+
+  void notifications.syncWithSettings();
+  void loadTunnels();
+}
+
 function disconnect() {
   if (unsubscribeWs) {
     unsubscribeWs();
     unsubscribeWs = null;
   }
+  connected = false;
   expirationMonitor.stopAll();
 }
 
@@ -299,8 +316,10 @@ export function useTunnels() {
     get tunnels() { return tunnels; },
     get loading() { return loading; },
     get error() { return error; },
+    get connected() { return connected; },
     get installProgress() { return installProgress; },
     connect,
+    retry,
     disconnect,
     start,
     stop,

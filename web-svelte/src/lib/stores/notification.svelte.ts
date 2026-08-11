@@ -1,5 +1,6 @@
 import { settingsApi, type Settings } from '$lib/api';
 import { useToast, type ToastType } from './toast.svelte';
+import { t } from './i18n.svelte';
 
 type NotificationStatus = 'pending' | 'granted' | 'rejected';
 type NotificationChannel = 'toast' | 'os';
@@ -207,21 +208,24 @@ const notificationStore = {
   },
 
   notifyOnline(name: string, url: string) {
-    this.notify('Tunnel Active', `${name} - ${url}`, 'success');
+    this.notify(t('connection_success'), `${t('notification_tunnel_online', { name })} — ${url}`, 'success');
   },
 
   notifyError(name: string, err: string) {
-    this.notify('Tunnel Error', `${name}: ${err}`, 'error');
+    this.notify(t('error'), `${t('notification_tunnel_error', { name })}: ${err}`, 'error');
   },
 
   notifyExpiring(name: string, mins: number) {
-    const title = mins <= 1 ? 'Last Minute!' : 'Tunnel Expiring';
-    const type = mins <= 1 ? 'alert' : 'warning';
-    this.notify(title, `${name}: ${mins} min remaining`, type as ToastType);
+    const lastMinute = mins <= 1;
+    this.notify(
+      t('tunnel_expiring'),
+      t('notification_tunnel_expiring', { name, minutes: mins }),
+      (lastMinute ? 'alert' : 'warning') as ToastType,
+    );
   },
 
   notifyExpired(name: string) {
-    this.notify('Tunnel Expired', `${name} session ended`, 'error');
+    this.notify(t('tunnel_expired'), t('notification_tunnel_expired', { name }), 'error');
   }
 };
 

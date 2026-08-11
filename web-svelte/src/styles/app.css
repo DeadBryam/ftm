@@ -46,6 +46,37 @@ body {
   scrollbar-color: color-mix(in srgb, var(--color-muted) 45%, transparent) transparent;
 }
 
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-control);
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+@media (pointer: coarse) {
+  button,
+  a[href],
+  [role="switch"],
+  [role="radio"] {
+    min-height: 44px;
+  }
+
+  button[aria-label]:not(:has(span)),
+  a[href][aria-label]:not(:has(h1)) {
+    min-width: 44px;
+  }
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 220ms;

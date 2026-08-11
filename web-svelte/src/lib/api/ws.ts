@@ -116,6 +116,7 @@ export function connectSharedWebSocket(): Promise<void> {
 
         ws.onclose = () => {
           socket = null;
+          notifyListeners({ type: '__ws_close' });
           if (!settled) {
             settled = true;
             reject(new Error('WebSocket closed'));
@@ -170,6 +171,11 @@ function closeSharedWebSocket() {
 
 export function subscribeWsMessages(handler: WsHandler): () => void {
   listeners.add(handler);
+
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    handler({ type: '__ws_open' });
+  }
+
   void connectSharedWebSocket();
 
   return () => {

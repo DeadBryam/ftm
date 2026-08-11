@@ -2,43 +2,17 @@ import type { TunnelState } from '$lib/types';
 
 export type StatusKey = 'running' | 'starting' | 'installing' | 'error' | 'stopped';
 
-export interface StatusColors {
-  bg: string;
-  text: string;
-  dot: string;
-}
-
 export interface StatusInfo {
   key: StatusKey;
   textKey: string;
 }
 
-export const STATUS_COLORS: Record<StatusKey, StatusColors> = {
-  running: {
-    bg: 'bg-status-running/40',
-    text: 'text-status-running',
-    dot: 'bg-status-running/95'
-  },
-  starting: {
-    bg: 'bg-status-starting/40',
-    text: 'text-status-starting',
-    dot: 'bg-status-starting/95'
-  },
-  installing: {
-    bg: 'bg-status-installing/40',
-    text: 'text-status-installing',
-    dot: 'bg-status-installing/95'
-  },
-  error: {
-    bg: 'bg-status-error/40',
-    text: 'text-status-error',
-    dot: 'bg-status-error/95'
-  },
-  stopped: {
-    bg: 'bg-status-stopped/40',
-    text: 'text-status-stopped',
-    dot: 'bg-status-stopped/95'
-  }
+export const STATUS_FILL: Record<StatusKey, string> = {
+  running: 'bg-status-running',
+  starting: 'bg-status-starting',
+  installing: 'bg-status-installing',
+  error: 'bg-status-error',
+  stopped: ''
 };
 
 const STATUS_MAP: Record<TunnelState, StatusInfo> = {
@@ -64,18 +38,14 @@ const RUNNING_STATES: TunnelState[] = [
   'stopping'
 ];
 
-export function statusInfo(state: TunnelState): StatusInfo {
-  return STATUS_MAP[state] ?? STATUS_MAP.error;
+export function statusInfo(state: TunnelState | string): StatusInfo {
+  return STATUS_MAP[state as TunnelState] ?? STATUS_MAP.error;
 }
 
-export function statusColors(state: TunnelState): StatusColors {
-  return STATUS_COLORS[statusInfo(state).key];
+export function isRunningState(state: TunnelState | string): boolean {
+  return RUNNING_STATES.includes(state as TunnelState);
 }
 
-export function isRunningState(state: TunnelState): boolean {
-  return RUNNING_STATES.includes(state);
-}
-
-export function isInstallingState(state: TunnelState): boolean {
+export function isInstallingState(state: TunnelState | string): boolean {
   return state === 'installing' || state === 'downloading';
 }

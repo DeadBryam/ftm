@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plus, Radio, Search } from "lucide-svelte";
+  import { Plus, PlugZap, Radio, RefreshCw, Search } from "lucide-svelte";
   import { useTunnels } from "$lib/stores/tunnels.svelte";
   import { useToast } from "$lib/stores/toast.svelte";
   import { t } from "$lib/stores/i18n.svelte";
@@ -44,14 +44,31 @@
 
   const searchable = $derived(store.tunnels.length >= SEARCH_THRESHOLD);
 
+  const STATE_ORDER: Record<string, number> = {
+    error: 0,
+    timeout: 0,
+    online: 1,
+    starting: 2,
+    connecting: 2,
+    stopping: 2,
+    installing: 3,
+    downloading: 3,
+  };
+
   const visible = $derived.by(() => {
     const term = query.trim().toLowerCase();
-    if (!term || !searchable) return store.tunnels;
-    return store.tunnels.filter(
-      (tunnel) =>
-        tunnel.name.toLowerCase().includes(term) ||
-        tunnel.provider.toLowerCase().includes(term) ||
-        String(tunnel.port).includes(term),
+    const matches =
+      !term || !searchable
+        ? store.tunnels
+        : store.tunnels.filter(
+            (tunnel) =>
+              tunnel.name.toLowerCase().includes(term) ||
+              tunnel.provider.toLowerCase().includes(term) ||
+              String(tunnel.port).includes(term),
+          );
+
+    return [...matches].sort(
+      (a, b) => (STATE_ORDER[a.state] ?? 9) - (STATE_ORDER[b.state] ?? 9),
     );
   });
 </script>
@@ -76,8 +93,15 @@
       </span>
     </h2>
     {#if onCreate}
-      <Button variant="primary" size="sm" icon={Plus} onclick={onCreate}>
-        {t("new_connection_action")}
+      <Button
+        variant="primary"
+        size="sm"
+        icon={Plus}
+        onclick={onCreate}
+        class="max-sm:aspect-square max-sm:px-0"
+        ariaLabel={t("new_connection_action")}
+      >
+        <span class="max-sm:hidden">{t("new_connection_action")}</span>
       </Button>
     {/if}
   </div>
@@ -94,7 +118,7 @@
           bind:value={query}
           placeholder={t("search_placeholder")}
           aria-label={t("search_placeholder")}
-          class="h-8 w-full rounded-control border border-border bg-input-bg py-1.5 pr-2.5 pl-8 text-sm text-text focus:ring-2 focus:ring-primary focus:outline-none"
+          class="h-8 w-full rounded-control border border-border bg-input-bg py-1.5 pr-2.5 pl-8 text-sm text-text transition-colors duration-150 hover:border-primary/50"
         />
       </div>
     </div>
@@ -112,6 +136,24 @@
             class="h-7 w-7 animate-spin rounded-full border-2 border-border border-t-primary"
           ></div>
           <span>{t("loading")}</span>
+        </div>
+      {:else if store.error}
+        <div
+          class="flex h-full min-h-40 flex-col items-center justify-center px-3 py-6 text-center text-text-muted"
+        >
+          <PlugZap class="mx-auto mb-2 h-8 w-8 text-status-error" size={32} />
+          <h3 class="mt-0 mb-1 text-sm text-text-heading">
+            {t("panel_unreachable")}
+          </h3>
+          <p class="m-0 mb-3 max-w-xs text-xs leading-relaxed">
+            {t("panel_unreachable_desc")}
+          </p>
+          <p class="m-0 mb-3 max-w-xs font-mono text-xs break-words">
+            {store.error}
+          </p>
+          <Button variant="primary" icon={RefreshCw} onclick={() => store.retry()}>
+            {t("retry")}
+          </Button>
         </div>
       {:else if store.tunnels.length === 0}
         <div
