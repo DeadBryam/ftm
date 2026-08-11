@@ -1,7 +1,5 @@
 <script lang="ts">
   let { class: className = "" }: { class?: string } = $props();
-
-  const gradientId = $props.id();
 </script>
 
 <svg
@@ -10,22 +8,20 @@
   aria-hidden="true"
   xmlns="http://www.w3.org/2000/svg"
 >
-  <defs>
-    <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#b5862a" />
-      <stop offset="1" stop-color="#8a6d1f" />
-    </linearGradient>
-  </defs>
-  <rect width="40" height="40" rx="9" fill="url(#{gradientId})" />
-  <g
-    transform="translate(8 8)"
-    fill="none"
-    stroke="#fff8e1"
-    stroke-width="1.6"
-    stroke-linejoin="round"
-    stroke-linecap="round"
-  >
-    <path d="M12 2 20 6.9v10.2L12 22l-8-4.9V6.9z" />
-    <path d="M12 7.2 17.6 16.6H6.4z" />
+  <rect width="40" height="40" rx="9" fill="#ac4f06" />
+  <g transform="translate(8 8)">
+    <path d="M3.34 7 L12 2 L20.66 7 L20.66 17 L12 22 L3.34 17 Z" fill="#e3c05c" />
+    <g
+      fill="none"
+      stroke="#ac4f06"
+      stroke-width="1.15"
+      stroke-linejoin="round"
+      stroke-linecap="round"
+    >
+      <path d="M12 5.82 L17.352 15.09 L6.648 15.09 Z" />
+      <path
+        d="M12 2 L12 5.82 M3.34 7 L12 5.82 M20.66 7 L12 5.82 M3.34 7 L6.648 15.09 M20.66 7 L17.352 15.09 M3.34 17 L6.648 15.09 M20.66 17 L17.352 15.09 M12 22 L6.648 15.09 M12 22 L17.352 15.09"
+      />
+    </g>
   </g>
 </svg>
