@@ -11,8 +11,6 @@
     "test": "svelte-kit sync && vitest run"
   },
   "devDependencies": {
-    "@fontsource/crimson-pro": "^5.3.0",
-    "@fontsource/inter": "^5.3.0",
     "@sveltejs/adapter-static": "^3.0.10",
     "@sveltejs/kit": "^2.70.2",
     "@sveltejs/vite-plugin-svelte": "^7.2.0",
