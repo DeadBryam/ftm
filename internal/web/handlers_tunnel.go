@@ -15,9 +15,32 @@ func (h *Handlers) handleTunnels(w http.ResponseWriter, r *http.Request) {
 		h.listTunnels(w)
 	case http.MethodPost:
 		h.createTunnel(w, r)
+	case http.MethodDelete:
+		h.clearTunnels(w)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
+}
+
+func (h *Handlers) clearTunnels(w http.ResponseWriter) {
+	ids := make([]string, 0, len(h.config.Tunnels))
+	for _, t := range h.config.Tunnels {
+		ids = append(ids, t.ID)
+	}
+
+	for _, id := range ids {
+		h.manager.Stop(id)
+	}
+
+	deleted := h.config.ClearTunnels()
+	h.server.updateConfig()
+
+	for _, id := range ids {
+		h.server.BroadcastTunnelDeleted(id)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{"deleted": deleted})
 }
 
 func (h *Handlers) listTunnels(w http.ResponseWriter) {
@@ -266,12 +289,7 @@ func (h *Handlers) deleteTunnel(w http.ResponseWriter, id string) {
 		}
 	}
 	h.server.updateConfig()
-
-	data, _ := MarshalJSON(map[string]interface{}{
-		"type": "tunnel_deleted",
-		"id":   id,
-	})
-	h.server.broadcast(string(data))
+	h.server.BroadcastTunnelDeleted(id)
 
 	w.WriteHeader(http.StatusOK)
 }

@@ -28,6 +28,13 @@ const (
 	viewSettings
 )
 
+type confirmKind int
+
+const (
+	confirmDeleteTunnel confirmKind = iota
+	confirmClearTunnels
+)
+
 type Settings struct {
 	NotificationsEnabled bool
 	NotificationSound    bool
@@ -62,6 +69,7 @@ type Model struct {
 	listFirst           int
 	pendingDeleteID     string
 	pendingDeleteName   string
+	pendingConfirm      confirmKind
 	messageUntil        time.Time
 	statusUpdates       chan config.TunnelStatus
 }

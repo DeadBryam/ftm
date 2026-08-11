@@ -1,6 +1,7 @@
 package views
 
 import (
+	"fmt"
 	"strings"
 
 	"charm.land/lipgloss/v2"
@@ -12,8 +13,11 @@ type SettingsView struct {
 	NotificationsEnabled bool
 	NotificationSound    bool
 	Language             string
+	TunnelCount          int
 	Focused              int
 }
+
+const SettingsRows = 4
 
 func NewSettingsView() *SettingsView {
 	return &SettingsView{
@@ -33,6 +37,8 @@ func (s *SettingsView) Render() string {
 		s.toggle(inner, i18n.T("notification_sound"), s.NotificationSound, s.Focused == 1),
 		"",
 		s.languages(inner),
+		"",
+		s.clearAll(inner),
 		"",
 		lipgloss.NewStyle().
 			Foreground(t.TextDim).
@@ -78,6 +84,27 @@ func (s *SettingsView) toggle(width int, label string, enabled, focused bool) st
 	gap := ui.Clamp(width-lipgloss.Width(marker)-lipgloss.Width(label)-lipgloss.Width(state), 1)
 
 	return marker + labelStyle.Render(label) + ui.Repeat(" ", gap) + state
+}
+
+func (s *SettingsView) clearAll(width int) string {
+	t := ui.ThemeDefault
+	focused := s.Focused == 3
+
+	labelStyle := lipgloss.NewStyle().Foreground(t.TextDim)
+	if s.TunnelCount > 0 {
+		labelStyle = lipgloss.NewStyle().Foreground(t.Danger)
+		if focused {
+			labelStyle = labelStyle.Bold(true)
+		}
+	}
+
+	label := i18n.T("reset_connections")
+	count := lipgloss.NewStyle().Foreground(t.TextDim).Render(fmt.Sprintf("%d", s.TunnelCount))
+
+	marker := s.marker(focused)
+	gap := ui.Clamp(width-lipgloss.Width(marker)-lipgloss.Width(label)-lipgloss.Width(count), 1)
+
+	return marker + labelStyle.Render(label) + ui.Repeat(" ", gap) + count
 }
 
 func (s *SettingsView) languages(width int) string {

@@ -27,7 +27,7 @@ func (m *Model) View() tea.View {
 		case viewSettings:
 			content = ui.Overlay(m.viewList(), m.viewSettings(), m.Width, m.Height)
 		case viewConfirm:
-			content = ui.Overlay(m.viewList(), m.viewConfirm(), m.Width, m.Height)
+			content = ui.Overlay(m.confirmBackdrop(), m.viewConfirm(), m.Width, m.Height)
 		default:
 			content = m.viewList()
 		}
@@ -197,10 +197,32 @@ func (m *Model) viewDownloading() string {
 func (m *Model) viewConfirm() string {
 	view := views.NewConfirmView()
 	view.Danger = true
+
+	if m.pendingConfirm == confirmClearTunnels {
+		view.Title = i18n.T("confirm_reset_title")
+		view.Message = m.clearTunnelsMessage()
+		return view.Render()
+	}
+
 	view.Title = i18n.T("confirm_delete_title")
 	view.Message = i18n.TF("confirm_delete_body", m.pendingDeleteName)
 
 	return view.Render()
+}
+
+func (m *Model) confirmBackdrop() string {
+	if m.pendingConfirm == confirmClearTunnels {
+		return ui.Overlay(m.viewList(), m.viewSettings(), m.Width, m.Height)
+	}
+	return m.viewList()
+}
+
+func (m *Model) clearTunnelsMessage() string {
+	count := len(m.App.Config.Tunnels)
+	if count == 1 {
+		return i18n.T("confirm_reset_body_one")
+	}
+	return i18n.TF("confirm_reset_body_other", count)
 }
 
 func (m *Model) viewSettings() string {
@@ -210,5 +232,6 @@ func (m *Model) viewSettings() string {
 		view.NotificationSound = m.SettingsView.NotificationSound
 		view.Focused = m.SettingsView.Focused
 	}
+	view.TunnelCount = len(m.App.Config.Tunnels)
 	return view.Render()
 }

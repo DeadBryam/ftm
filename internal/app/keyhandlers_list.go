@@ -159,6 +159,15 @@ func (m *Model) cancelDelete() {
 	m.State = viewList
 }
 
+func (m *Model) cancelConfirm() {
+	if m.pendingConfirm == confirmClearTunnels {
+		m.pendingConfirm = confirmDeleteTunnel
+		m.State = viewSettings
+		return
+	}
+	m.cancelDelete()
+}
+
 func (m *Model) copyTunnelURL(item TunnelItem) {
 	if item.Status.PublicURL != "" {
 		clipboard.Write(item.Status.PublicURL)

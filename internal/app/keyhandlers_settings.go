@@ -24,7 +24,7 @@ func (m *Model) handleSettingsKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 		}
 
 	case key.Matches(msg, m.Keys.Down):
-		if sv.Focused < 2 {
+		if sv.Focused < views.SettingsRows-1 {
 			sv.Focused++
 		}
 
@@ -68,7 +68,45 @@ func (m *Model) handleSettingsSelect() {
 
 		sv.Language = cycleLanguage(sv.Language, 1)
 		i18n.SetLanguage(sv.Language)
+	case 3:
+		if len(m.App.Config.Tunnels) == 0 {
+			return
+		}
+		m.pendingConfirm = confirmClearTunnels
+		m.State = viewConfirm
 	}
+}
+
+func (m *Model) confirmClearTunnels() (tea.Model, tea.Cmd) {
+	m.pendingConfirm = confirmDeleteTunnel
+	m.saveSettings()
+	m.SettingsView = nil
+
+	ids := make([]string, 0, len(m.App.Config.Tunnels))
+	for _, t := range m.App.Config.Tunnels {
+		ids = append(ids, t.ID)
+	}
+
+	for _, id := range ids {
+		m.App.Manager.Stop(id)
+	}
+
+	m.App.Config.ClearTunnels()
+	m.App.SaveConfig()
+	m.refreshItems()
+
+	if m.App.WebServer != nil {
+		for _, id := range ids {
+			m.App.WebServer.BroadcastTunnelDeleted(id)
+		}
+	}
+
+	m.Cursor = 0
+	m.SelectedTunnel = ""
+	m.State = viewList
+	m.showMessage(i18n.T("connections_cleared"))
+
+	return m, nil
 }
 
 func cycleLanguage(current string, dir int) string {
@@ -92,6 +130,7 @@ func (m *Model) openSettings() {
 	m.SettingsView.NotificationsEnabled = m.App.Config.NotificationsStatus == config.NotificationGranted
 	m.SettingsView.NotificationSound = m.App.Config.NotificationSound
 	m.SettingsView.Language = i18n.GetCurrentLang()
+	m.SettingsView.TunnelCount = len(m.App.Config.Tunnels)
 	m.State = viewSettings
 }
 
