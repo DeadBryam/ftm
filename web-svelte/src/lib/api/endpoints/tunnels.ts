@@ -24,6 +24,9 @@ export const tunnelsApi = {
     await api.delete(`tunnels/${id}`);
   },
 
+  deleteAll: (): Promise<{ deleted: number }> =>
+    api.delete('tunnels').json<{ deleted: number }>(),
+
   reorder: async (ids: string[]): Promise<void> => {
     await api.post('tunnels/reorder', { json: ids });
   },

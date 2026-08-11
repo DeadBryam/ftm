@@ -293,6 +293,25 @@ async function remove(id: string) {
   }
 }
 
+async function clearAll() {
+  const previous = tunnelsById;
+
+  expirationMonitor.stopAll();
+  tunnelsById = {};
+
+  try {
+    return await tunnelsApi.deleteAll();
+  } catch (e) {
+    tunnelsById = previous;
+    Object.values(previous).forEach(tunnel => {
+      if (tunnel.state === 'online' && tunnel.expiresAt) {
+        expirationMonitor.start(tunnel);
+      }
+    });
+    throw e;
+  }
+}
+
 async function add(data: { name: string; provider: string; localPort: number }) {
   const newTunnel = await tunnelsApi.create(data);
   tunnelsById = {
@@ -331,9 +350,11 @@ export function useTunnels() {
     connect,
     retry,
     disconnect,
+    sync: syncTunnels,
     start,
     stop,
     delete: remove,
+    clearAll,
     create: add,
     update,
     getById: (id: string) => tunnelsById[id]
