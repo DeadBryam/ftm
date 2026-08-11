@@ -87,7 +87,7 @@
     >
       {t("connections")}
       <span
-        class="rounded-control bg-primary px-2 py-0.5 text-2xs font-semibold text-btn-text"
+        class="rounded-control bg-primary px-2 py-0.5 font-sans text-2xs font-semibold text-btn-text"
       >
         {store.tunnels.length}
       </span>
