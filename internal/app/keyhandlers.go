@@ -60,7 +60,7 @@ func (m *Model) handleQuit() (tea.Model, tea.Cmd) {
 
 func (m *Model) handleBack() (tea.Model, tea.Cmd) {
 	if m.State == viewConfirm {
-		m.cancelDelete()
+		m.cancelConfirm()
 		return m, nil
 	}
 
@@ -76,15 +76,18 @@ func (m *Model) handleBack() (tea.Model, tea.Cmd) {
 
 func (m *Model) handleConfirmKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	if key.Matches(msg, m.Keys.Back) {
-		m.cancelDelete()
+		m.cancelConfirm()
 		return m, nil
 	}
 
 	switch msg.String() {
 	case "y", "Y", "enter":
+		if m.pendingConfirm == confirmClearTunnels {
+			return m.confirmClearTunnels()
+		}
 		return m.confirmDelete()
 	case "n", "N", "q":
-		m.cancelDelete()
+		m.cancelConfirm()
 	}
 
 	return m, nil
