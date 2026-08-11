@@ -231,7 +231,9 @@
   <div
     class="flex shrink-0 items-center justify-between gap-2 border-b border-border-light bg-url-bg px-3 py-2"
   >
-    <h2 class="m-0 truncate text-sm font-semibold text-text-heading">
+    <h2
+      class="m-0 truncate font-serif text-base font-semibold tracking-tight text-text-heading"
+    >
       {t("detail_title")}
     </h2>
     {#if tunnel}
