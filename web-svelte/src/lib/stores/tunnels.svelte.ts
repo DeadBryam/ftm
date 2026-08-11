@@ -1,4 +1,5 @@
-import { tunnelsApi } from '$lib/api';
+import { settingsApi, tunnelsApi } from '$lib/api';
+import type { Settings } from '$lib/api';
 import { subscribeWsMessages } from '$lib/api/ws';
 import { useNotifications } from './notification.svelte';
 import { useExpirationMonitor } from './expiration.svelte';
@@ -39,6 +40,7 @@ interface InstallProgress {
 
 let tunnelsById: TunnelMap = $state({});
 let loading = $state(true);
+let onboarded = $state(true);
 let error: string | null = $state(null);
 let connected = $state(false);
 let unsubscribeWs: (() => void) | null = $state(null);
@@ -149,8 +151,11 @@ function loadTunnels() {
   loading = true;
   error = null;
 
-  return tunnelsApi.getAll()
-    .then((data: Tunnel[]) => {
+  return Promise.all([
+    tunnelsApi.getAll(),
+    settingsApi.get().catch(() => null),
+  ])
+    .then(([data, settings]: [Tunnel[], Settings | null]) => {
       const map: TunnelMap = {};
       data.forEach(t => { map[t.id] = t; });
       tunnelsById = map;
@@ -159,6 +164,7 @@ function loadTunnels() {
           expirationMonitor.start(t);
         }
       });
+      onboarded = settings?.onboarded ?? true;
       loading = false;
     })
     .catch((e: Error) => {
@@ -291,6 +297,7 @@ async function add(data: { name: string; provider: string; localPort: number }) 
     ...tunnelsById,
     [newTunnel.id]: newTunnel
   };
+  onboarded = true;
   return newTunnel;
 }
 
@@ -315,6 +322,7 @@ export function useTunnels() {
   return {
     get tunnels() { return tunnels; },
     get loading() { return loading; },
+    get onboarded() { return onboarded; },
     get error() { return error; },
     get connected() { return connected; },
     get installProgress() { return installProgress; },
