@@ -224,7 +224,7 @@
           {#if copied}<Check size={14} />{:else}<Copy size={14} />{/if}
         </span>
         <span
-          class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-start font-mono text-xs text-primary"
+          class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-start font-mono text-xs text-url-text"
           >{tunnel.publicUrl}</span
         >
         <span class="shrink-0 text-xs text-text-muted">
