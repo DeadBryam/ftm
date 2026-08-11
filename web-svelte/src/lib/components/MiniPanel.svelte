@@ -1,6 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Copy, Pause, Play, Unplug } from "lucide-svelte";
+  import {
+    Copy,
+    Pause,
+    Play,
+    QrCode as QrCodeIcon,
+    Unplug,
+  } from "lucide-svelte";
   import { useTunnels } from "$lib/stores/tunnels.svelte";
   import { useProviders } from "$lib/stores/providers.svelte";
   import { useToast } from "$lib/stores/toast.svelte";
@@ -15,6 +21,7 @@
     statusInfo as statusInfoFor,
   } from "$lib/utils/status";
   import Button from "./Button.svelte";
+  import QrCode from "./QrCode.svelte";
   import type { TunnelState } from "$lib/types";
 
   let { tunnelId }: { tunnelId: string } = $props();
@@ -81,7 +88,7 @@
   }
 </script>
 
-<div class="flex h-dvh min-h-0 flex-col gap-2 bg-bg p-2.5 text-text">
+<div class="panel flex h-dvh min-h-0 flex-col gap-2.5 bg-bg p-3 text-text">
   {#if !tunnel}
     <div
       class="flex h-full flex-col items-center justify-center gap-2 text-center text-text-muted"
@@ -90,22 +97,21 @@
       <p class="m-0 text-xs leading-relaxed">{t("pip_gone")}</p>
     </div>
   {:else}
-    <div class="min-w-0">
-      <h1
-        class="m-0 truncate text-sm font-semibold text-text-heading"
-        title={tunnel.name}
-      >
-        {tunnel.name}
-      </h1>
-      <p class="m-0 truncate text-[11px] text-text-muted">
-        {providerLabel} · <span class="font-mono">localhost:{tunnel.port}</span>
-      </p>
-    </div>
-
-    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+    <div class="flex shrink-0 items-start justify-between gap-2">
+      <div class="min-w-0">
+        <h1
+          class="m-0 truncate text-sm font-semibold text-text-heading"
+          title={tunnel.name}
+        >
+          {tunnel.name}
+        </h1>
+        <p class="m-0 truncate text-[11px] text-text-muted">
+          {providerLabel} · <span class="font-mono">localhost:{tunnel.port}</span>
+        </p>
+      </div>
       <span
         class={cn(
-          "inline-flex items-center gap-1.5 rounded-control px-2 py-0.5 text-[11px] font-medium",
+          "inline-flex shrink-0 items-center gap-1.5 rounded-control px-2 py-0.5 text-[11px] font-medium",
           statusColors.bg,
           statusColors.text,
         )}
@@ -113,34 +119,46 @@
         <span class={cn("h-1.5 w-1.5 rounded-full", statusColors.dot)}></span>
         {t(statusInfo.textKey)}
       </span>
-      {#if uptime}
-        <span class="font-mono text-[11px] text-text-muted">{uptime}</span>
-      {/if}
-      {#if remaining > 0}
-        <span class="font-mono text-[11px] text-text-muted">
-          {t("card_expires", { 0: formatDuration(remaining) })}
-        </span>
-      {/if}
     </div>
 
-    {#if tunnelState === "online"}
-      <div class="flex gap-2 text-[11px] text-text-muted">
-        <span>
-          {t("detail_sessions")}
-          <span class="font-mono text-text">{tunnel.activeSessions ?? 0}</span>
-        </span>
-        <span>
-          {t("detail_visitors")}
-          <span class="font-mono text-text">{tunnel.visitors ?? 0}</span>
-        </span>
+    <dl
+      class="m-0 grid shrink-0 grid-cols-3 divide-x divide-border-light rounded-control border border-border-light bg-card"
+    >
+      <div class="min-w-0 px-2 py-1.5">
+        <dt class="m-0 truncate text-[10px] text-text-muted">
+          {t("detail_uptime")}
+        </dt>
+        <dd class="m-0 truncate font-mono text-xs text-text-heading">
+          {uptime || "—"}
+        </dd>
       </div>
-    {/if}
+      <div class="min-w-0 px-2 py-1.5">
+        <dt class="m-0 truncate text-[10px] text-text-muted">
+          {t("detail_sessions")}
+        </dt>
+        <dd class="m-0 font-mono text-xs text-text-heading">
+          {tunnelState === "online" ? (tunnel.activeSessions ?? 0) : "—"}
+        </dd>
+      </div>
+      <div class="min-w-0 px-2 py-1.5">
+        <dt class="m-0 truncate text-[10px] text-text-muted">
+          {remaining > 0 ? t("detail_expires") : t("detail_visitors")}
+        </dt>
+        <dd class="m-0 truncate font-mono text-xs text-text-heading">
+          {#if remaining > 0}
+            {formatDuration(remaining)}
+          {:else}
+            {tunnelState === "online" ? (tunnel.visitors ?? 0) : "—"}
+          {/if}
+        </dd>
+      </div>
+    </dl>
 
     {#if tunnel.publicUrl}
       <button
         type="button"
         onclick={copyUrl}
-        class="flex w-full cursor-pointer items-center gap-2 rounded-control bg-url-bg px-2 py-1.5 text-left transition-colors hover:bg-hover"
+        class="flex w-full shrink-0 cursor-pointer items-center gap-2 rounded-control bg-url-bg px-2.5 py-2 text-left transition-colors hover:bg-hover"
       >
         <span class="min-w-0 flex-1 truncate font-mono text-[11px] text-url-text"
           >{tunnel.publicUrl}</span
@@ -151,22 +169,55 @@
 
     {#if tunnel.errorMessage}
       <p
-        class="m-0 line-clamp-2 rounded-control border border-status-error/40 bg-status-error/10 px-2 py-1 font-mono text-[11px] break-words text-status-error"
+        class="m-0 line-clamp-2 shrink-0 rounded-control border border-status-error/40 bg-status-error/10 px-2 py-1 font-mono text-[11px] break-words text-status-error"
       >
         {tunnel.errorMessage}
       </p>
     {/if}
 
-    <div class="mt-auto">
-      <Button
-        variant={isRunning ? "error" : "success"}
-        icon={isRunning ? Pause : Play}
-        class="w-full"
-        disabled={isInstalling || tunnelState === "stopping"}
-        onclick={toggle}
-      >
-        {isRunning ? actionLabel : t("start")}
-      </Button>
+    <div class="fill flex min-h-0 flex-1 flex-col items-center justify-center gap-1.5">
+      {#if tunnel.publicUrl}
+        <QrCode
+          value={tunnel.publicUrl}
+          size={176}
+          class="h-full min-h-0 w-auto max-w-full object-contain"
+        />
+        <p class="m-0 shrink-0 text-center text-[11px] text-text-muted">
+          {t("overview_share")}
+        </p>
+      {:else}
+        <div
+          class="flex aspect-square h-full min-h-0 items-center justify-center rounded-control border border-dashed border-border text-text-muted/50"
+        >
+          <QrCodeIcon size={32} strokeWidth={1.5} />
+        </div>
+        <p class="m-0 max-w-[24ch] shrink-0 text-center text-[11px] leading-relaxed text-text-muted">
+          {t("pip_idle")}
+        </p>
+      {/if}
     </div>
+
+    <Button
+      variant={isRunning ? "error" : "success"}
+      icon={isRunning ? Pause : Play}
+      size="md"
+      class="w-full shrink-0"
+      disabled={isInstalling || tunnelState === "stopping"}
+      onclick={toggle}
+    >
+      {isRunning ? actionLabel : t("start")}
+    </Button>
   {/if}
 </div>
+
+<style>
+  .panel {
+    container: panel / size;
+  }
+
+  @container panel (height < 300px) {
+    .fill > :global(*) {
+      display: none;
+    }
+  }
+</style>
