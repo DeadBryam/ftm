@@ -4,6 +4,7 @@
   import { cn } from "$lib/utils/cn";
   import { revealDuration } from "$lib/utils/motion";
   import { t } from "$lib/stores/i18n.svelte";
+  import Button from "./Button.svelte";
 
   const notifications = useNotifications();
 
@@ -34,26 +35,12 @@
         {t("notifications_prompt")}
       </p>
       <div class="mt-1 flex gap-2">
-        <button
-          type="button"
-          onclick={request}
-          class={cn(
-            "inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border-none px-3 py-2 text-sm font-medium",
-            "bg-primary text-heading transition-all duration-150 hover:-translate-y-px",
-          )}
-        >
+        <Button variant="primary" size="md" onclick={request} class="flex-1">
           {t("enable_notifications")}
-        </button>
-        <button
-          type="button"
-          onclick={later}
-          class={cn(
-            "inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium",
-            "bg-secondary-btn text-secondary-btn-text transition-all duration-150 hover:-translate-y-px",
-          )}
-        >
+        </Button>
+        <Button variant="default" size="md" onclick={later} class="flex-1">
           {t("not_now")}
-        </button>
+        </Button>
       </div>
     </div>
   </div>
