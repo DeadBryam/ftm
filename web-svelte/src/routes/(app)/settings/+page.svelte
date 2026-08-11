@@ -111,13 +111,12 @@
         class="relative overflow-hidden rounded-card border border-border bg-card"
       >
         <div class="panel-pattern" aria-hidden="true"></div>
-        <header class="relative z-10 flex items-baseline justify-between gap-3 px-5 pt-5 pb-3">
+        <header class="relative z-10 px-5 pt-5 pb-3">
           <h2
             class="font-serif text-base font-semibold tracking-tight text-text-heading"
           >
             {t("preferences_section")}
           </h2>
-          <span class="text-xs text-text-muted">{t("preferences_hint")}</span>
         </header>
 
         <button
@@ -233,13 +232,12 @@
         class="relative mt-4 overflow-hidden rounded-card border border-border bg-card"
       >
         <div class="panel-pattern" aria-hidden="true"></div>
-        <header class="relative z-10 flex items-baseline justify-between gap-3 px-5 pt-5 pb-3">
+        <header class="relative z-10 px-5 pt-5 pb-3">
           <h2
             class="font-serif text-base font-semibold tracking-tight text-text-heading"
           >
             {t("appearance_section")}
           </h2>
-          <span class="text-xs text-text-muted">{t("themes_hint")}</span>
         </header>
 
         <div class="relative z-10">
