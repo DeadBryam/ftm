@@ -87,7 +87,7 @@
     aria-haspopup="true"
     class={cn(
       "dropdown-trigger flex h-8 min-h-8 flex-1 cursor-pointer items-center gap-1.5 rounded-control border px-2.5 py-1.5 text-sm",
-      "border-border bg-input-bg text-text hover:bg-hover",
+      "border-border bg-input-bg text-text transition-colors duration-150 hover:border-primary/50",
     )}
   >
     {#if children}

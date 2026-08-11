@@ -118,7 +118,7 @@
           bind:value={query}
           placeholder={t("search_placeholder")}
           aria-label={t("search_placeholder")}
-          class="h-8 w-full rounded-control border border-border bg-input-bg py-1.5 pr-2.5 pl-8 text-sm text-text"
+          class="h-8 w-full rounded-control border border-border bg-input-bg py-1.5 pr-2.5 pl-8 text-sm text-text transition-colors duration-150 hover:border-primary/50"
         />
       </div>
     </div>
