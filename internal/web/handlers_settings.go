@@ -41,6 +41,7 @@ func (h *Handlers) handleGetSettings(w http.ResponseWriter) {
 		"notification_sound":    h.config.NotificationSound,
 		"language":              h.config.Language,
 		"language_resolved":     i18n.CurrentLanguage(),
+		"onboarded":             h.config.Onboarded,
 	})
 }
 

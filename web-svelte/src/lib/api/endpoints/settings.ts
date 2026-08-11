@@ -4,6 +4,7 @@ export interface Settings {
   notifications_enabled: "granted" | "pending" | "rejected";
   notification_sound: boolean;
   language: string;
+  onboarded: boolean;
 }
 
 export const settingsApi = {
