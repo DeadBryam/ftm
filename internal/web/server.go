@@ -297,6 +297,14 @@ func (s *Server) BroadcastTunnelUpdate(t config.TunnelConfig) {
 	s.broadcast(string(data))
 }
 
+func (s *Server) BroadcastTunnelDeleted(id string) {
+	data, _ := MarshalJSON(map[string]interface{}{
+		"type": "tunnel_deleted",
+		"id":   id,
+	})
+	s.broadcast(string(data))
+}
+
 func (s *Server) getTunnel(id string) *config.TunnelConfig {
 	for i := range s.config.Tunnels {
 		if s.config.Tunnels[i].ID == id {

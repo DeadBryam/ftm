@@ -36,11 +36,7 @@ func (h *Handlers) clearTunnels(w http.ResponseWriter) {
 	h.server.updateConfig()
 
 	for _, id := range ids {
-		data, _ := MarshalJSON(map[string]interface{}{
-			"type": "tunnel_deleted",
-			"id":   id,
-		})
-		h.server.broadcast(string(data))
+		h.server.BroadcastTunnelDeleted(id)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -293,12 +289,7 @@ func (h *Handlers) deleteTunnel(w http.ResponseWriter, id string) {
 		}
 	}
 	h.server.updateConfig()
-
-	data, _ := MarshalJSON(map[string]interface{}{
-		"type": "tunnel_deleted",
-		"id":   id,
-	})
-	h.server.broadcast(string(data))
+	h.server.BroadcastTunnelDeleted(id)
 
 	w.WriteHeader(http.StatusOK)
 }
