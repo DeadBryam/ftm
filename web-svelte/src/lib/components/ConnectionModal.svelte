@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { fade, scale } from "svelte/transition";
   import ConnectionForm from "./ConnectionForm.svelte";
+  import { revealDuration } from "$lib/utils/motion";
 
   let {
     show,
@@ -33,9 +35,11 @@
 
 {#if show}
   <div
-    class="ftm-enter fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
     role="presentation"
     onclick={onClose}
+    in:fade={{ duration: revealDuration(160) }}
+    out:fade={{ duration: revealDuration(110) }}
   >
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_interactive_supports_focus -->
@@ -44,8 +48,10 @@
       role="dialog"
       aria-modal="true"
       tabindex="-1"
-      class="ftm-enter ftm-enter-delay-1 w-full max-w-md outline-none"
+      class="w-full max-w-md outline-none"
       onclick={(e) => e.stopPropagation()}
+      in:scale={{ duration: revealDuration(200), start: 0.96, opacity: 0 }}
+      out:scale={{ duration: revealDuration(130), start: 0.98, opacity: 0 }}
     >
       {#if tunnelId}
         <ConnectionForm
