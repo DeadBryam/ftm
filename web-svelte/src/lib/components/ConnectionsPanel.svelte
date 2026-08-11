@@ -93,8 +93,15 @@
       </span>
     </h2>
     {#if onCreate}
-      <Button variant="primary" size="sm" icon={Plus} onclick={onCreate}>
-        {t("new_connection_action")}
+      <Button
+        variant="primary"
+        size="sm"
+        icon={Plus}
+        onclick={onCreate}
+        class="max-sm:aspect-square max-sm:px-0"
+        ariaLabel={t("new_connection_action")}
+      >
+        <span class="max-sm:hidden">{t("new_connection_action")}</span>
       </Button>
     {/if}
   </div>
