@@ -41,40 +41,6 @@ build:
 .PHONY: build-full
 build-full: web build
 
-# Build for all platforms
-.PHONY: build-all
-build-all: build-darwin-amd64 build-darwin-arm64 build-linux-amd64 build-linux-arm64 build-windows-amd64
-
-.PHONY: build-darwin-amd64
-build-darwin-amd64:
-	@echo "Building $(BINARY_NAME) for darwin/amd64..."
-	@mkdir -p $(BUILD_DIR)
-	GOOS=darwin GOARCH=amd64 CGO_ENABLED=$(CGO_ENABLED) go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-darwin-amd64 $(PKG)
-
-.PHONY: build-darwin-arm64
-build-darwin-arm64:
-	@echo "Building $(BINARY_NAME) for darwin/arm64..."
-	@mkdir -p $(BUILD_DIR)
-	GOOS=darwin GOARCH=arm64 CGO_ENABLED=$(CGO_ENABLED) go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-darwin-arm64 $(PKG)
-
-.PHONY: build-linux-amd64
-build-linux-amd64:
-	@echo "Building $(BINARY_NAME) for linux/amd64..."
-	@mkdir -p $(BUILD_DIR)
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=$(CGO_ENABLED) go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-linux-amd64 $(PKG)
-
-.PHONY: build-linux-arm64
-build-linux-arm64:
-	@echo "Building $(BINARY_NAME) for linux/arm64..."
-	@mkdir -p $(BUILD_DIR)
-	GOOS=linux GOARCH=arm64 CGO_ENABLED=$(CGO_ENABLED) go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-linux-arm64 $(PKG)
-
-.PHONY: build-windows-amd64
-build-windows-amd64:
-	@echo "Building $(BINARY_NAME) for windows/amd64..."
-	@mkdir -p $(BUILD_DIR)
-	GOOS=windows GOARCH=amd64 CGO_ENABLED=$(CGO_ENABLED) go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-windows-amd64.exe $(PKG)
-
 # Desktop (Wails v3) — needs CGO + platform webview libs. Builds for the host OS.
 DESKTOP_OUT := $(DESKTOP_DIR)/build/bin
 DESKTOP_BIN := ftm-desktop
@@ -112,12 +78,6 @@ desktop-winres:
 		--arch amd64,arm64 \
 		--product-version $(VERSION) \
 		--file-version $(WINRES_VERSION)
-
-.PHONY: desktop-package
-desktop-package: desktop
-	@echo "Desktop binary: $(DESKTOP_OUT)/$(DESKTOP_BIN)"
-	@echo "MSIX: built in CI (workflow Desktop MSIX / release job on windows-latest)."
-	@echo "Local Windows: pwsh ./scripts/package-msix.ps1 -ExePath $(DESKTOP_OUT)/$(DESKTOP_BIN) -Version 0.10.0"
 
 # Run without installing
 .PHONY: run
@@ -197,10 +157,8 @@ help:
 	@echo "  build                     - Build CLI for current platform → $(BUILD_DIR)/$(BINARY_NAME)"
 	@echo "  web                       - Build Svelte UI into internal/web/static (+ desktop dist)"
 	@echo "  build-full                - Build web UI then the Go binary"
-	@echo "  build-all                 - Build CLI for all platforms (darwin/amd64, darwin/arm64, linux/amd64, linux/arm64, windows/amd64)"
 	@echo "  desktop                   - Build desktop app (Wails v3, production, host OS)"
 	@echo "  desktop-dev               - Build desktop without production tags"
-	@echo "  desktop-package           - Alias of desktop (binary in desktop/build/bin)"
 	@echo "  run / dev                 - go run the CLI"
 	@echo "  test                      - Run go tests"
 	@echo "  test-race                 - Run tests with -race detector"
