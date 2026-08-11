@@ -8,6 +8,7 @@
   import { cn } from "$lib/utils/cn";
   import { formatDuration } from "$lib/utils/duration";
   import { providerErrorHint } from "$lib/utils/providerError";
+  import { copyText } from "$lib/utils/clipboard";
   import { isInstallingState, isRunningState } from "$lib/utils/status";
   import { onMount } from "svelte";
   import Button from "./Button.svelte";
@@ -87,8 +88,12 @@
   let copied = $state(false);
   let copiedTimer: ReturnType<typeof setTimeout> | null = null;
 
-  function copyUrl(url: string) {
-    navigator.clipboard.writeText(url);
+  async function copyUrl(url: string) {
+    if (!(await copyText(url))) {
+      toast.error(t("copy_failed"));
+      return;
+    }
+
     toast.info(t("copied"));
 
     copied = true;

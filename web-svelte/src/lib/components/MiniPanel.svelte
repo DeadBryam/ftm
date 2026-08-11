@@ -17,6 +17,7 @@
   import { formatDuration } from "$lib/utils/duration";
   import { isInstallingState, isRunningState } from "$lib/utils/status";
   import { providerErrorHint } from "$lib/utils/providerError";
+  import { copyText } from "$lib/utils/clipboard";
   import Button from "./Button.svelte";
   import QrCode from "./QrCode.svelte";
   import StatusBadge from "./StatusBadge.svelte";
@@ -71,7 +72,12 @@
 
   async function copyUrl() {
     if (!tunnel?.publicUrl) return;
-    await navigator.clipboard.writeText(tunnel.publicUrl);
+
+    if (!(await copyText(tunnel.publicUrl))) {
+      toast.error(t("copy_failed"));
+      return;
+    }
+
     toast.success(t("overview_copied"));
 
     copied = true;
