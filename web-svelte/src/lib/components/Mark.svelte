@@ -8,12 +8,15 @@
   aria-hidden="true"
   xmlns="http://www.w3.org/2000/svg"
 >
-  <rect width="40" height="40" rx="9" fill="#ac4f06" />
+  <rect width="40" height="40" rx="9" class="fill-primary" />
   <g transform="translate(8 8)">
-    <path d="M3.34 7 L12 2 L20.66 7 L20.66 17 L12 22 L3.34 17 Z" fill="#e3c05c" />
+    <path
+      d="M3.34 7 L12 2 L20.66 7 L20.66 17 L12 22 L3.34 17 Z"
+      class="fill-btn-text"
+    />
     <g
       fill="none"
-      stroke="#ac4f06"
+      class="stroke-primary"
       stroke-width="1.15"
       stroke-linejoin="round"
       stroke-linecap="round"
