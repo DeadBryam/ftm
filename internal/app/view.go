@@ -41,7 +41,7 @@ func (m *Model) View() tea.View {
 }
 
 func (m *Model) viewList() string {
-	if len(m.Items) == 0 {
+	if len(m.Items) == 0 && !m.App.Config.Onboarded {
 		return m.viewEmptyState()
 	}
 
