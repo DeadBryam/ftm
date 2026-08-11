@@ -40,6 +40,7 @@ interface InstallProgress {
 
 let tunnelsById: TunnelMap = $state({});
 let loading = $state(true);
+let resolvedOnce = false;
 let onboarded = $state(true);
 let error: string | null = $state(null);
 let connected = $state(false);
@@ -148,7 +149,7 @@ async function syncTunnels() {
 }
 
 function loadTunnels() {
-  loading = true;
+  loading = !resolvedOnce;
   error = null;
 
   return Promise.all([
@@ -165,6 +166,7 @@ function loadTunnels() {
         }
       });
       onboarded = settings?.onboarded ?? true;
+      resolvedOnce = true;
       loading = false;
     })
     .catch((e: Error) => {
