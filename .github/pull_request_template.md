@@ -1,18 +1,22 @@
+<!-- Whole body: 1000 chars max. Delete these comments before opening. -->
+
 ## Summary
 
-Brief description of the changes.
+<!-- 300 chars. 2-4 bullets, what changed. No prose. -->
 
 ## Why
 
-Reason / problem this fixes.
+<!-- 350 chars. The bug or the need. Not how you got there, no plan or phase
+     narrative, no before/after tables, no repeating the commit subjects. -->
 
 ## How to test
 
-Steps to verify the changes.
+<!-- 250 chars. Numbered steps the reviewer can run. Anything left unverified
+     goes here as a step, not in a section of its own. -->
 
 ## Screenshot
 
-<!-- Optional. Add a screenshot if UI changes. -->
+<!-- Optional. UI changes only. -->
 
 ## Checklist
 
