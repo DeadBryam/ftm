@@ -182,8 +182,9 @@
           <ToggleTrack checked={soundActive} disabled={saving} />
         </button>
 
-        <div class="relative z-10 border-t border-border-light">
-            <div class="grid grid-cols-[auto_1fr] items-center gap-4 px-5 pt-3.5 pb-2">
+        <div
+          class="relative z-10 grid grid-cols-[auto_1fr_auto] items-center gap-4 border-t border-border-light px-5 py-3.5"
+        >
               <div
                 class="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-secondary text-text-muted"
               >
@@ -197,13 +198,12 @@
                   {t("settings_language_desc")}
                 </p>
               </div>
-            </div>
             <div
               role="radiogroup"
               aria-label={t("language_section")}
               tabindex={-1}
               onkeydown={rovingRadioKeydown}
-              class="flex flex-wrap gap-1.5 px-5 pb-4"
+              class="flex rounded-control border border-border bg-input-bg p-0.5 max-sm:col-span-2 max-sm:col-start-2"
             >
               {#each languageOptions as opt (opt.id)}
                 {@const selected = settingsStore.settings.language === opt.id}
@@ -215,10 +215,10 @@
                   disabled={saving}
                   onclick={() => changeLanguage(opt.id)}
                   class={cn(
-                    "cursor-pointer rounded-control border px-3 py-1.5 text-sm transition-all",
+                    "cursor-pointer rounded-sm px-2.5 py-1 text-xs transition-colors",
                     selected
-                      ? "border-primary bg-primary text-btn-text shadow-sm"
-                      : "border-border bg-input-bg text-text hover:border-primary/50 hover:bg-hover",
+                      ? "bg-primary font-medium text-btn-text"
+                      : "text-text-muted hover:text-text",
                     saving && "cursor-not-allowed opacity-60",
                   )}
                 >
@@ -226,7 +226,7 @@
                 </button>
               {/each}
             </div>
-          </div>
+        </div>
       </section>
 
       <section
