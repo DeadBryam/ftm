@@ -8,7 +8,7 @@
   import { rovingRadioKeydown } from "$lib/utils/roving";
   import { revealDuration } from "$lib/utils/motion";
   import { slide } from "svelte/transition";
-  import { Check, ChevronDown, Monitor, Moon, Sun } from "lucide-svelte";
+  import { Check, ChevronDown, Monitor, Moon, Palette, Sun } from "lucide-svelte";
 
   interface Props {
     families: ThemeFamily[];
@@ -86,10 +86,17 @@
 <div
   class="grid grid-cols-[auto_1fr_auto] items-center gap-4 border-t border-border-light px-5 py-3"
 >
-  <span class="h-9 w-9 shrink-0" aria-hidden="true"></span>
-  <span class="min-w-0 truncate text-sm font-medium text-text-heading">
-    {activeFamily?.name ?? families[0]?.name}
-  </span>
+  <div
+    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-secondary text-text-muted"
+  >
+    <Palette size={17} />
+  </div>
+  <div class="min-w-0">
+    <p class="m-0 text-sm font-medium text-text-heading">{t("theme")}</p>
+    <p class="m-0 truncate text-xs text-text-muted">
+      {activeFamily?.name ?? families[0]?.name}
+    </p>
+  </div>
   <div class="flex shrink-0 items-center gap-3">
     {#if !theme.isAuto && activeFamily}
       <div
