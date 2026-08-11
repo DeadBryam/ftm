@@ -286,7 +286,7 @@ web: "Web"
 config: "Configuración"
 
 # CLI
-uninstall_not_found: "FTM no está instalado o no está en PATH"
+uninstall_not_found: "ftm no está instalado o no está en PATH"
 uninstall_removing: "Removiendo {0}..."
 uninstall_error: "Error al remover binario: {0}"
 uninstall_success: "✓ FTM ha sido desinstalado"
