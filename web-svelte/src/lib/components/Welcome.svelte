@@ -22,11 +22,11 @@
     <div class="relative flex flex-col items-center gap-3">
       <Mark class="h-12 w-12" />
 
-      <h1
+      <h2
         class="m-0 font-serif text-2xl font-semibold tracking-tight text-text-heading"
       >
         {t("welcome_title")}
-      </h1>
+      </h2>
 
       <p class="m-0 max-w-[34ch] text-sm leading-relaxed text-text-muted">
         {t("welcome_lead")}
