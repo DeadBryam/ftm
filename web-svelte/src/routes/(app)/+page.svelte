@@ -31,7 +31,7 @@
   );
 
   const isEmpty = $derived(!store.loading && store.tunnels.length === 0);
-  const showWelcome = $derived(isEmpty && !store.onboarded);
+  const showWelcome = $derived(isEmpty && !store.onboarded && !store.error);
 
   let announcement = $state("");
   let lastStates: Record<string, string> = {};
