@@ -314,10 +314,10 @@
 
       {#if tunnel.publicUrl}
         <div
-          class="mb-3 flex items-center gap-2 rounded-control border border-border bg-url-bg py-1.5 pr-1.5 pl-2.5"
+          class="mb-3 flex items-center gap-1 rounded-control border border-border bg-url-bg py-1 pr-1 pl-2.5"
         >
           <span
-            class="min-w-0 flex-1 font-mono text-xs break-all text-url-text"
+            class="min-w-0 flex-1 truncate font-mono text-xs text-url-text"
             title={tunnel.publicUrl}
           >
             {tunnel.publicUrl}
@@ -325,19 +325,18 @@
           <button
             type="button"
             onclick={copy}
+            aria-label={copied ? t("link_copied") : t("copy_link")}
+            title={copied ? t("link_copied") : t("copy_link")}
             class={cn(
-              "inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-control px-2 py-1.5 text-xs font-semibold transition-colors",
-              copied
-                ? "text-status-running"
-                : "text-primary hover:bg-hover",
+              "inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-control transition-colors",
+              copied ? "text-status-running" : "text-url-text hover:bg-hover",
             )}
           >
             {#if copied}
-              <Check size={13} />
+              <Check size={14} />
             {:else}
-              <Copy size={13} />
+              <Copy size={14} />
             {/if}
-            {copied ? t("link_copied") : t("copy_link")}
           </button>
         </div>
 
