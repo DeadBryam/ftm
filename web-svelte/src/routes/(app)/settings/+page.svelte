@@ -281,7 +281,7 @@
         <div class="panel-pattern" aria-hidden="true"></div>
         <header class="relative z-10 px-5 pt-5 pb-3">
           <h2
-            class="font-serif text-base font-semibold tracking-tight text-status-error"
+            class="font-serif text-base font-semibold tracking-tight text-text-heading"
           >
             {t("danger_section")}
           </h2>
