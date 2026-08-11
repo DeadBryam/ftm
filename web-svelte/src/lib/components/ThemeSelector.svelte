@@ -1,5 +1,5 @@
 <script lang="ts">
-  import SettingsToggle from "./SettingsToggle.svelte";
+  import ToggleTrack from "./ToggleTrack.svelte";
   import ThemePreview from "./ThemePreview.svelte";
   import { useTheme } from "$lib/stores/theme.svelte";
   import { t } from "$lib/stores/i18n.svelte";
@@ -53,59 +53,67 @@
   ] as const;
 </script>
 
-<div class="border-t border-border-light">
-  <div class="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3.5">
+<button
+  type="button"
+  role="switch"
+  aria-checked={theme.isAuto}
+  onclick={() => handleToggleAuto(!theme.isAuto)}
+  class="grid w-full cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-4 border-t border-border-light px-5 py-3.5 text-left transition-colors hover:bg-hover"
+>
+  <span
+    class={cn(
+      "flex h-9 w-9 shrink-0 items-center justify-center rounded-control transition-colors",
+      theme.isAuto ? "bg-primary/15 text-primary" : "bg-secondary text-text-muted",
+    )}
+  >
+    <Monitor size={17} />
+  </span>
+  <span class="min-w-0">
+    <span class="block text-sm font-medium text-text-heading">
+      {t("theme_match_system")}
+    </span>
+    <span class="block truncate text-xs text-text-muted">
+      {theme.isAuto ? t("theme_auto") : t("theme_manual")}
+    </span>
+  </span>
+  <ToggleTrack checked={theme.isAuto} />
+</button>
+
+<div
+  class="flex items-center justify-between gap-3 border-t border-border-light px-5 py-3"
+>
+  <span class="min-w-0 truncate text-sm font-medium text-text-heading">
+    {activeFamily?.name ?? families[0]?.name}
+  </span>
+  {#if !theme.isAuto && activeFamily}
     <div
-      class={cn(
-        "flex h-9 w-9 shrink-0 items-center justify-center rounded-control transition-colors",
-        theme.isAuto
-          ? "bg-primary/15 text-primary"
-          : "bg-secondary text-text-muted",
-      )}
+      role="radiogroup"
+      aria-label={t("theme_manual")}
+      tabindex={-1}
+      onkeydown={rovingRadioKeydown}
+      class="flex shrink-0 rounded-control border border-border bg-input-bg p-0.5"
     >
-      <Monitor size={17} />
-    </div>
-    <div class="min-w-0">
-      <p class="m-0 text-sm font-medium text-text-heading">
-        {t("theme_match_system")}
-      </p>
-      <p class="m-0 truncate text-xs text-text-muted">
-        {theme.isAuto ? t("theme_auto") : t("theme_manual")}
-      </p>
-    </div>
-    <div class="flex items-center gap-3">
-      {#if !theme.isAuto && activeFamily}
-        <div
-          role="radiogroup"
-          aria-label={t("theme_manual")}
-          tabindex={-1}
-          onkeydown={rovingRadioKeydown}
-          class="flex rounded-control border border-border bg-input-bg p-0.5"
+      {#each modes as mode (mode.id)}
+        {@const selected = activeMode === mode.id}
+        <button
+          type="button"
+          role="radio"
+          aria-checked={selected}
+          tabindex={selected ? 0 : -1}
+          onclick={() => theme.setManual(activeFamily[mode.id].id)}
+          class={cn(
+            "inline-flex cursor-pointer items-center gap-1.5 rounded-sm px-2.5 py-1 text-xs transition-colors",
+            selected
+              ? "bg-primary font-medium text-btn-text"
+              : "text-text-muted hover:text-text",
+          )}
         >
-          {#each modes as mode (mode.id)}
-            {@const selected = activeMode === mode.id}
-            <button
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              tabindex={selected ? 0 : -1}
-              onclick={() => theme.setManual(activeFamily[mode.id].id)}
-              class={cn(
-                "inline-flex cursor-pointer items-center gap-1.5 rounded-sm px-2.5 py-1 text-xs transition-colors",
-                selected
-                  ? "bg-primary font-medium text-btn-text"
-                  : "text-text-muted hover:text-text",
-              )}
-            >
-              <mode.icon size={13} />
-              {t(mode.labelKey)}
-            </button>
-          {/each}
-        </div>
-      {/if}
-      <SettingsToggle checked={theme.isAuto} onchange={handleToggleAuto} />
+          <mode.icon size={13} />
+          {t(mode.labelKey)}
+        </button>
+      {/each}
     </div>
-  </div>
+  {/if}
 </div>
 
 <div
