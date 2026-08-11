@@ -156,16 +156,23 @@ submit_edit: "Save Changes"
 editor_nav_hint: "↑↓/tab: move  •  ENTER: submit  •  ESC: cancel"
 
 # Empty states
-no_tunnels: "No tunnels configured"
-add_tunnel_prompt: "Press 'a' to add a new tunnel"
+no_tunnels: "No connections yet"
+add_tunnel_prompt: "Press 'a' to add one"
 logs_action: "Logs"
 click_to_copy: "Click to copy"
 no_logs: "No logs available"
 
-# Empty state
+# Welcome screen
 welcome_title: "Welcome, Dungeon Master!"
 no_tunnels_yet: "You haven't created any tunnels yet."
 tunnels_desc: "Tunnels let your players connect to your Foundry world."
+welcome_lead: "ftm gives your Foundry world a public address, so your players can join without port forwarding."
+welcome_step_provider_title: "Pick a provider"
+welcome_step_provider_body: "Cloudflare, Pinggy, Bore. ftm installs them for you."
+welcome_step_port_title: "Point it at Foundry"
+welcome_step_port_body: "The port Foundry is running on, usually 30000."
+welcome_step_share_title: "Share the link"
+welcome_step_share_body: "Start it, copy the URL, send it to your table."
 create_first: "Create your first connection"
 press_a_hint: "Or press 'a' to start"
 tip_dashboard: "Tip: Web dashboard at"
