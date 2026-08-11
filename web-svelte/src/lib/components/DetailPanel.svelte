@@ -20,6 +20,9 @@
   import { formatDuration } from "$lib/utils/duration";
   import { formatLogs } from "$lib/utils/logs";
   import { providerErrorHint } from "$lib/utils/providerError";
+  import { revealDuration } from "$lib/utils/motion";
+  import { copyText } from "$lib/utils/clipboard";
+  import { slide } from "svelte/transition";
   import Button from "./Button.svelte";
   import IconButton from "./IconButton.svelte";
   import QrCode from "./QrCode.svelte";
@@ -176,7 +179,12 @@
 
   async function copy() {
     if (!tunnel?.publicUrl) return;
-    await navigator.clipboard.writeText(tunnel.publicUrl);
+
+    if (!(await copyText(tunnel.publicUrl))) {
+      toast.error(t("copy_failed"));
+      return;
+    }
+
     toast.success(t("overview_copied"));
 
     copied = true;
@@ -305,21 +313,32 @@
       </dl>
 
       {#if tunnel.publicUrl}
-        <div class="mb-3">
-          <Button
-            variant="primary"
-            size="lg"
-            class="w-full"
-            icon={copied ? Check : Copy}
-            onclick={copy}
-          >
-            {copied ? t("link_copied") : t("copy_link")}
-          </Button>
-          <p
-            class="m-0 mt-1.5 rounded-control bg-url-bg px-2.5 py-2 font-mono text-xs break-all text-url-text"
+        <div
+          class="mb-3 flex items-center gap-2 rounded-control border border-border bg-url-bg py-1.5 pr-1.5 pl-2.5"
+        >
+          <span
+            class="min-w-0 flex-1 font-mono text-xs break-all text-url-text"
+            title={tunnel.publicUrl}
           >
             {tunnel.publicUrl}
-          </p>
+          </span>
+          <button
+            type="button"
+            onclick={copy}
+            class={cn(
+              "inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-control px-2 py-1.5 text-xs font-semibold transition-colors",
+              copied
+                ? "text-status-running"
+                : "text-primary hover:bg-hover",
+            )}
+          >
+            {#if copied}
+              <Check size={13} />
+            {:else}
+              <Copy size={13} />
+            {/if}
+            {copied ? t("link_copied") : t("copy_link")}
+          </button>
         </div>
 
         <div class="mb-3 border-t border-border-light pt-3">
@@ -336,12 +355,17 @@
             />
           </button>
           {#if qrOpen}
-            <div class="mt-2 flex flex-col items-center gap-2">
-              <QrCode
-                value={tunnel.publicUrl}
-                size={140}
-                bind:dataUrl={qrDataUrl}
-              />
+            <div
+              class="mt-2 flex flex-col items-center gap-2"
+              transition:slide={{ duration: revealDuration() }}
+            >
+              <div class="flex h-[148px] w-[148px] items-center justify-center">
+                <QrCode
+                  value={tunnel.publicUrl}
+                  size={140}
+                  bind:dataUrl={qrDataUrl}
+                />
+              </div>
               <Button
                 variant="default"
                 icon={QrCodeIcon}
@@ -386,16 +410,20 @@
             />
           </span>
         </button>
-        {#if logsOpen && !isRunning}
-          <p class="m-0 text-xs text-text-muted italic">
-            {t("detail_logs_idle")}
-          </p>
-        {:else if logsOpen}
-          <pre
-            bind:this={logPre}
-            onscroll={onLogScroll}
-            class="m-0 max-h-48 overflow-x-hidden overflow-y-auto rounded-control bg-logs-bg p-2 font-mono text-[11px] leading-relaxed break-all whitespace-pre-wrap text-logs-text">{logs ||
-              t("no_logs")}</pre>
+        {#if logsOpen}
+          <div transition:slide={{ duration: revealDuration() }}>
+            {#if !isRunning}
+              <p class="m-0 text-xs text-text-muted italic">
+                {t("detail_logs_idle")}
+              </p>
+            {:else}
+              <pre
+                bind:this={logPre}
+                onscroll={onLogScroll}
+                class="m-0 max-h-48 overflow-x-hidden overflow-y-auto rounded-control bg-logs-bg p-2 font-mono text-[11px] leading-relaxed break-all whitespace-pre-wrap text-logs-text">{logs ||
+                  t("no_logs")}</pre>
+            {/if}
+          </div>
         {/if}
       </div>
 
