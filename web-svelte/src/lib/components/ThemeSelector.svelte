@@ -84,8 +84,9 @@
 </button>
 
 <div
-  class="flex items-center justify-between gap-3 border-t border-border-light px-5 py-3"
+  class="grid grid-cols-[auto_1fr_auto] items-center gap-4 border-t border-border-light px-5 py-3"
 >
+  <span class="h-9 w-9 shrink-0" aria-hidden="true"></span>
   <span class="min-w-0 truncate text-sm font-medium text-text-heading">
     {activeFamily?.name ?? families[0]?.name}
   </span>
