@@ -10,11 +10,15 @@
   let {
     show,
     name,
+    title,
+    body,
     onConfirm,
     onCancel,
   }: {
     show: boolean;
-    name: string;
+    name?: string;
+    title?: string;
+    body?: string;
     onConfirm: () => void;
     onCancel: () => void;
   } = $props();
@@ -66,7 +70,7 @@
           class="m-0 flex items-center gap-2 text-lg font-semibold text-text-heading"
         >
           <Trash2 size={20} class="text-status-error" />
-          {t("confirm_delete_title")}
+          {title ?? t("confirm_delete_title")}
         </h2>
         <IconButton
           icon={X}
@@ -76,7 +80,7 @@
         />
       </div>
       <p class="mb-6 text-sm text-text-muted">
-        {t("confirm_delete_body", { 0: name })}
+        {body ?? t("confirm_delete_body", { 0: name ?? "" })}
       </p>
       <div class="flex justify-end gap-3">
         <Button variant="default" onclick={onCancel}>{t("cancel")}</Button>
