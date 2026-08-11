@@ -83,11 +83,11 @@
     class="ftm-enter ftm-enter-delay-1 flex shrink-0 items-center justify-between gap-3 border-b border-border-light bg-url-bg px-3 py-2"
   >
     <h2
-      class="m-0 flex min-w-0 items-center gap-2 text-sm font-semibold text-text-heading"
+      class="m-0 flex min-w-0 items-center gap-2 font-serif text-base font-semibold tracking-tight text-text-heading"
     >
       {t("connections")}
       <span
-        class="rounded-control bg-primary px-2 py-0.5 text-xs font-semibold text-btn-text"
+        class="rounded-control bg-primary px-2 py-0.5 font-sans text-2xs font-semibold text-btn-text"
       >
         {store.tunnels.length}
       </span>
@@ -199,7 +199,7 @@
 
   {#if store.tunnels.length > 0}
     <p
-      class="shrink-0 border-t border-border-light px-3 py-1.5 text-center text-[11px] text-text-muted max-md:hidden"
+      class="shrink-0 border-t border-border-light px-3 py-1.5 text-center text-2xs text-text-muted max-md:hidden"
     >
       {t("list_hint_new")}
     </p>

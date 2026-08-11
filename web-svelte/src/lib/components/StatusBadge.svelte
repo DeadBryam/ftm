@@ -18,11 +18,11 @@
 </script>
 
 {#if idle}
-  <span class="text-xs font-medium text-text-muted">{t(info.textKey)}</span>
+  <span class="text-2xs font-medium text-text-muted">{t(info.textKey)}</span>
 {:else}
   <span
     class={cn(
-      "inline-flex items-center gap-1.5 rounded-control px-2 py-0.5 text-xs font-medium text-btn-text",
+      "inline-flex items-center gap-1.5 rounded-control px-2 py-0.5 text-2xs font-medium text-btn-text",
       STATUS_FILL[info.key],
     )}
   >

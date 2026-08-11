@@ -231,7 +231,9 @@
   <div
     class="flex shrink-0 items-center justify-between gap-2 border-b border-border-light bg-url-bg px-3 py-2"
   >
-    <h2 class="m-0 truncate text-sm font-semibold text-text-heading">
+    <h2
+      class="m-0 truncate font-serif text-base font-semibold tracking-tight text-text-heading"
+    >
       {t("detail_title")}
     </h2>
     {#if tunnel}
@@ -400,7 +402,7 @@
         >
           <span>{t("detail_logs")}</span>
           <span class="flex items-center gap-1">
-            <span class="text-[11px] font-normal">
+            <span class="text-2xs font-normal">
               {logsOpen ? t("detail_logs_hide") : t("detail_logs_show")}
             </span>
             <ChevronDown
@@ -419,7 +421,7 @@
               <pre
                 bind:this={logPre}
                 onscroll={onLogScroll}
-                class="m-0 max-h-48 overflow-x-hidden overflow-y-auto rounded-control bg-logs-bg p-2 font-mono text-[11px] leading-relaxed break-all whitespace-pre-wrap text-logs-text">{logs ||
+                class="m-0 max-h-48 overflow-x-hidden overflow-y-auto rounded-control bg-logs-bg p-2 font-mono text-2xs leading-relaxed break-all whitespace-pre-wrap text-logs-text">{logs ||
                   t("no_logs")}</pre>
             {/if}
           </div>

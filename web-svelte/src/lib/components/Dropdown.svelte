@@ -143,7 +143,7 @@
           <span>{option.label}</span>
           {#if option.hint}
             <span
-              class="shrink-0 rounded-control bg-secondary-btn px-1.5 py-0.5 text-[11px] font-medium text-secondary-btn-text"
+              class="shrink-0 rounded-control bg-secondary-btn px-1.5 py-0.5 text-2xs font-medium text-secondary-btn-text"
             >
               {option.hint}
             </span>
