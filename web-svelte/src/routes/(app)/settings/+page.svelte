@@ -3,6 +3,8 @@
   import { useSettings } from "$lib/stores/settings.svelte";
   import { useNotifications } from "$lib/stores/notification.svelte";
   import { useTheme } from "$lib/stores/theme.svelte";
+  import { useTunnels } from "$lib/stores/tunnels.svelte";
+  import { useToast } from "$lib/stores/toast.svelte";
   import { t, useI18n, LANGUAGE_AUTO } from "$lib/stores/i18n.svelte";
   import { statusApi } from "$lib/api/endpoints/status";
   import {
@@ -11,8 +13,11 @@
     Volume2,
     VolumeX,
     Languages,
+    Trash2,
   } from "lucide-svelte";
   import ToggleTrack from "$lib/components/ToggleTrack.svelte";
+  import Button from "$lib/components/Button.svelte";
+  import DeleteModal from "$lib/components/DeleteModal.svelte";
   import { rovingRadioKeydown } from "$lib/utils/roving";
   import ThemeSelector from "$lib/components/ThemeSelector.svelte";
   import { themeFamilies } from "$lib/data/themes";
@@ -21,10 +26,21 @@
   const settingsStore = useSettings();
   const notifications = useNotifications();
   const theme = useTheme();
+  const tunnels = useTunnels();
+  const toast = useToast();
   const i18n = useI18n();
 
   let saving = $state(false);
   let version = $state("");
+  let confirmingReset = $state(false);
+  let resetting = $state(false);
+
+  const connectionCount = $derived(tunnels.tunnels.length);
+  const resetBody = $derived(
+    connectionCount === 1
+      ? t("confirm_reset_body_one")
+      : t("confirm_reset_body_other", { 0: connectionCount }),
+  );
 
   const languageOptions = $derived([
     { id: LANGUAGE_AUTO, label: t("lang_auto"), native: t("lang_auto_native") },
@@ -37,12 +53,26 @@
 
   onMount(async () => {
     settingsStore.load();
+    tunnels.sync();
     await i18n.init();
     statusApi
       .get()
       .then((s) => (version = s.version))
       .catch(() => {});
   });
+
+  async function confirmReset() {
+    resetting = true;
+    try {
+      await tunnels.clearAll();
+      confirmingReset = false;
+      toast.success(t("connections_cleared"));
+    } catch (err) {
+      toast.error(t("reset_failed", { 0: (err as Error).message }));
+    } finally {
+      resetting = false;
+    }
+  }
 
   async function toggleNotifications() {
     saving = true;
@@ -245,6 +275,45 @@
         </div>
       </section>
 
+      <section
+        class="relative mt-4 overflow-hidden rounded-card border border-status-error/40 bg-card"
+      >
+        <div class="panel-pattern" aria-hidden="true"></div>
+        <header class="relative z-10 px-5 pt-5 pb-3">
+          <h2
+            class="font-serif text-base font-semibold tracking-tight text-status-error"
+          >
+            {t("danger_section")}
+          </h2>
+        </header>
+
+        <div
+          class="relative z-10 grid grid-cols-[auto_1fr_auto] items-center gap-4 border-t border-border-light px-5 py-3.5"
+        >
+          <div
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-status-error/15 text-status-error"
+          >
+            <Trash2 size={17} />
+          </div>
+          <div class="min-w-0">
+            <p class="m-0 text-sm font-medium text-text-heading">
+              {t("reset_connections")}
+            </p>
+            <p class="m-0 text-xs text-text-muted">
+              {t("reset_connections_desc")}
+            </p>
+          </div>
+          <Button
+            variant="error"
+            disabled={connectionCount === 0 || resetting}
+            onclick={() => (confirmingReset = true)}
+            class="max-sm:col-span-2 max-sm:col-start-2 max-sm:justify-self-start"
+          >
+            {t("delete")}
+          </Button>
+        </div>
+      </section>
+
       {#if version}
         <footer class="mt-4 px-1 text-right font-mono text-2xs text-text-muted">
           v{version}
@@ -253,3 +322,11 @@
     {/if}
   </div>
 </div>
+
+<DeleteModal
+  show={confirmingReset}
+  title={t("confirm_reset_title")}
+  body={resetBody}
+  onConfirm={confirmReset}
+  onCancel={() => (confirmingReset = false)}
+/>
