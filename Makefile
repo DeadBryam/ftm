@@ -83,7 +83,7 @@ run:
 	go run $(PKG)
 
 .PHONY: dev
-dev: run
+dev: web run
 
 # Run tests
 .PHONY: test
@@ -157,7 +157,8 @@ help:
 	@echo "  build-full                - Build web UI then the Go binary"
 	@echo "  desktop                   - Build desktop app (Wails v3, production, host OS)"
 	@echo "  desktop-dev               - Build desktop without production tags"
-	@echo "  run / dev                 - go run the CLI"
+	@echo "  run                       - go run the CLI against the embedded assets"
+	@echo "  dev                       - Rebuild the web UI, then go run the CLI"
 	@echo "  test                      - Run go tests"
 	@echo "  test-race                 - Run tests with -race detector"
 	@echo "  vet                       - Run go vet"
