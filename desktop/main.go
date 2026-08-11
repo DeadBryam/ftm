@@ -50,6 +50,13 @@ func main() {
 		},
 	})
 
+	ftmApp.WebServer.SetPiPOpener(func(tunnelID string) error {
+		application.InvokeAsync(func() {
+			openPiPWindow(wailsApp, webURL, tunnelID)
+		})
+		return nil
+	})
+
 	wailsApp.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:            "Foundry Tunnel Manager",
 		Width:            1200,

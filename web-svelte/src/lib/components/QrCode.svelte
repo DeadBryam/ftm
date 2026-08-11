@@ -1,11 +1,18 @@
 <script lang="ts">
   import QRCode from "qrcode";
+  import { cn } from "$lib/utils/cn";
 
   let {
     value,
     size = 148,
     dataUrl = $bindable(""),
-  }: { value: string; size?: number; dataUrl?: string } = $props();
+    class: className = "",
+  }: {
+    value: string;
+    size?: number;
+    dataUrl?: string;
+    class?: string;
+  } = $props();
 
   $effect(() => {
     if (!value) {
@@ -38,6 +45,6 @@
     alt={value}
     width={size}
     height={size}
-    class="rounded-control bg-white p-1"
+    class={cn("rounded-control bg-white p-1", className)}
   />
 {/if}
