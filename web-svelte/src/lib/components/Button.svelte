@@ -43,7 +43,7 @@
   };
 
   const SIZE_CLASSES: Record<ButtonSize, string> = {
-    sm: "h-7.5 px-2.5 text-xs gap-1.5",
+    sm: "h-8 px-3 text-sm gap-1.5",
     md: "h-9 px-3.5 text-sm gap-2",
     lg: "h-11 px-5 text-sm gap-2",
   };
