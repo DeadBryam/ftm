@@ -242,15 +242,15 @@
         </p>
         <ul class="m-0 list-none space-y-1 p-0">
           <li class="flex gap-2">
-            <span class="text-primary">·</span>
+            <span class="text-text-muted">·</span>
             <span>{t("form_tips_port")}</span>
           </li>
           <li class="flex gap-2">
-            <span class="text-primary">·</span>
+            <span class="text-text-muted">·</span>
             <span>{t("form_tips_provider")}</span>
           </li>
           <li class="flex gap-2">
-            <span class="text-primary">·</span>
+            <span class="text-text-muted">·</span>
             <span>{t("form_tips_name")}</span>
           </li>
         </ul>
