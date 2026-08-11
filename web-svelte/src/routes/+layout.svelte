@@ -6,6 +6,7 @@
   import { subscribeWsMessages } from "$lib/api/ws";
   import { useI18n } from "$lib/stores/i18n.svelte";
   import { useTheme } from "$lib/stores/theme.svelte";
+  import { prefersReducedMotion } from "$lib/utils/motion";
 
   import "../styles/app.css";
 
@@ -25,10 +26,6 @@
       });
     });
   });
-
-  function prefersReducedMotion(): boolean {
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }
 
   let unsubscribeWs: (() => void) | null = null;
 
