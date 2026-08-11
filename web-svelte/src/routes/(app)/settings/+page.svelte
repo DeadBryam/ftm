@@ -245,23 +245,11 @@
         </div>
       </section>
 
-      <footer
-        class="mt-4 flex items-center justify-between gap-3 px-1 text-xs text-text-muted"
-      >
-        <div class="flex min-w-0 items-center gap-2">
-          <img
-            src="/favicon.png"
-            alt={t("app_name")}
-            class="h-5 w-5 shrink-0 rounded-control object-cover opacity-80"
-          />
-          <span class="truncate font-medium text-text">{t("app_name")}</span>
-          <span class="hidden sm:inline">·</span>
-          <span class="hidden truncate sm:inline">{t("app_tagline")}</span>
-        </div>
-        {#if version}
-          <span class="shrink-0 font-mono opacity-70">v{version}</span>
-        {/if}
-      </footer>
+      {#if version}
+        <footer class="mt-4 px-1 text-right font-mono text-2xs text-text-muted">
+          v{version}
+        </footer>
+      {/if}
     {/if}
   </div>
 </div>
