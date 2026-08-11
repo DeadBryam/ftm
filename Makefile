@@ -4,8 +4,6 @@
 BINARY_NAME=ftm
 # git describe includes the leading "v" from tags; strip it so callers can print "v$(Version)".
 VERSION=$(shell (git describe --tags --always --dirty 2>/dev/null || echo dev) | sed 's/^v//')
-COMMIT=$(shell git rev-parse --short HEAD 2>/dev/null || echo "none")
-BUILT=$(shell date +%Y-%m-%d)
 LDFLAGS=-ldflags "-X github.com/sthbryan/ftm/internal/version.Version=$(VERSION)"
 CGO_ENABLED=0
 # Windows resources need a strictly numeric version, so drop any git describe suffix.
