@@ -164,9 +164,9 @@ no_logs: "Nenhum log disponível"
 
 # Welcome screen
 welcome_title: "Bem-vindo, Mestre!"
-welcome_lead: "O ftm dá ao seu mundo do Foundry um endereço público, para os seus jogadores entrarem sem abrir portas."
+welcome_lead: "O FTM dá ao seu mundo do Foundry um endereço público, para os seus jogadores entrarem sem abrir portas."
 welcome_step_provider_title: "Escolha um provedor"
-welcome_step_provider_body: "Cloudflare, Pinggy, Bore. O ftm baixa para você."
+welcome_step_provider_body: "Cloudflare, Pinggy, Bore. O FTM baixa para você."
 welcome_step_port_title: "Aponte para o Foundry"
 welcome_step_port_body: "A porta em que o Foundry roda, geralmente 30000."
 welcome_step_share_title: "Compartilhe o link"
