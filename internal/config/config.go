@@ -143,7 +143,10 @@ func Load() (*Config, error) {
 
 	cfg.NormalizeNotificationsStatus()
 
-	if cfg.migrate() {
+	migrated := cfg.migrate()
+	deduped := cfg.dedupeTunnelIDs()
+
+	if migrated || deduped {
 		if err := cfg.Save(); err != nil {
 			return nil, fmt.Errorf("failed to persist migrated config: %w", err)
 		}

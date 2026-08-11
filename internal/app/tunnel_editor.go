@@ -1,8 +1,6 @@
 package app
 
 import (
-	"strings"
-
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/sthbryan/ftm/internal/config"
@@ -143,10 +141,8 @@ func (m *Model) updateTunnel() {
 }
 
 func (m *Model) createTunnel() {
-	id := strings.ToLower(strings.ReplaceAll(m.Draft.Name, " ", "-"))
-
 	tunnel := config.TunnelConfig{
-		ID:        id,
+		ID:        m.App.Config.NewTunnelID(m.Draft.Name),
 		Name:      m.Draft.Name,
 		Provider:  config.Provider(m.Draft.Provider),
 		LocalPort: parsePort(m.Draft.Port),
