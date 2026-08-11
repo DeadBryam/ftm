@@ -222,6 +222,66 @@ func TestTunnelCRUD(t *testing.T) {
 	}
 }
 
+func TestMigrateDerivesOnboardedFromExistingTunnels(t *testing.T) {
+	tests := []struct {
+		name    string
+		version int
+		tunnels []TunnelConfig
+		want    bool
+	}{
+		{"v3 with a tunnel has used the app", 3, []TunnelConfig{{ID: "a"}}, true},
+		{"v3 without tunnels never got started", 3, nil, false},
+		{"v1 with a tunnel has used the app", 1, []TunnelConfig{{ID: "a"}}, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := &Config{Version: tt.version, Tunnels: tt.tunnels}
+			cfg.migrate()
+
+			if cfg.Onboarded != tt.want {
+				t.Errorf("Onboarded = %v, want %v", cfg.Onboarded, tt.want)
+			}
+		})
+	}
+}
+
+func TestMigrateLeavesOnboardedAloneOnCurrentConfigs(t *testing.T) {
+	cfg := &Config{Version: ConfigVersion, Onboarded: false, Tunnels: []TunnelConfig{{ID: "a"}}}
+	cfg.migrate()
+
+	if cfg.Onboarded {
+		t.Error("Onboarded = true, want a v4 config to keep the flag it was saved with")
+	}
+}
+
+func TestFreshConfigIsNotOnboarded(t *testing.T) {
+	isolateHome(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() failed: %v", err)
+	}
+
+	if cfg.Onboarded {
+		t.Error("Onboarded = true on a fresh config, want false so the welcome screen shows")
+	}
+}
+
+func TestAddTunnelMarksTheConfigOnboarded(t *testing.T) {
+	cfg := DefaultConfig()
+
+	cfg.AddTunnel(TunnelConfig{ID: "a", Name: "First", LocalPort: 30000})
+	if !cfg.Onboarded {
+		t.Fatal("Onboarded = false after adding a tunnel, want true")
+	}
+
+	cfg.RemoveTunnel("a")
+	if !cfg.Onboarded {
+		t.Error("Onboarded = false after removing the last tunnel, want it to stay true")
+	}
+}
+
 func TestGetTunnelReturnsLivePointer(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.AddTunnel(TunnelConfig{ID: "a", Name: "First", LocalPort: 30000})

@@ -5,7 +5,8 @@ import { useNotifications } from './notification.svelte';
 let settings = $state<Settings>({
   notifications_enabled: "pending",
   notification_sound: true,
-  language: "en"
+  language: "en",
+  onboarded: true
 });
 
 let loaded = $state(false);

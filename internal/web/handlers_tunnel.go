@@ -23,7 +23,7 @@ func (h *Handlers) handleTunnels(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) listTunnels(w http.ResponseWriter) {
-	var result []map[string]interface{}
+	result := make([]map[string]interface{}, 0, len(h.config.Tunnels))
 	for _, t := range h.config.Tunnels {
 		item := h.tunnelToMap(t)
 		result = append(result, item)
@@ -55,7 +55,7 @@ func (h *Handlers) createTunnel(w http.ResponseWriter, r *http.Request) {
 		LocalPort: port,
 	}
 
-	h.config.Tunnels = append(h.config.Tunnels, tunnel)
+	h.config.AddTunnel(tunnel)
 	h.server.updateConfig()
 
 	h.server.BroadcastTunnelUpdate(tunnel)

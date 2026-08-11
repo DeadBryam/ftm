@@ -36,7 +36,7 @@
       </p>
       <div class="mt-1 flex gap-2">
         <Button variant="primary" onclick={request} class="flex-1">
-          {t("enable_notifications")}
+          {t("enable")}
         </Button>
         <Button variant="default" onclick={later} class="shrink-0">
           {t("not_now")}

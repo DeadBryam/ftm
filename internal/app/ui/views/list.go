@@ -55,10 +55,6 @@ func NewListView() *ListView {
 }
 
 func (l *ListView) Render() string {
-	if len(l.Items) == 0 {
-		return ""
-	}
-
 	header := l.header()
 	footer := l.footer()
 
@@ -71,7 +67,7 @@ func (l *ListView) Render() string {
 	l.VisibleRows = l.rowsAvailable(bodyHeight)
 
 	body := l.singleColumn(bodyHeight)
-	if l.Width >= l.TwoColumnLimit {
+	if len(l.Items) > 0 && l.Width >= l.TwoColumnLimit {
 		body = l.twoColumn(bodyHeight)
 	}
 
@@ -155,11 +151,28 @@ func (l *ListView) twoColumn(bodyHeight int) string {
 }
 
 func (l *ListView) singleColumn(bodyHeight int) string {
-	return ui.Panel(
-		i18n.T("connections"),
-		l.renderTunnelList(ui.PanelInner(l.Width)),
-		l.Width, bodyHeight, ui.ThemeDefault.Gold,
-	)
+	inner := ui.PanelInner(l.Width)
+
+	content := l.renderTunnelList(inner)
+	if len(l.Items) == 0 {
+		content = l.emptyBody(inner, bodyHeight-ui.PanelChrome)
+	}
+
+	return ui.Panel(i18n.T("connections"), content, l.Width, bodyHeight, ui.ThemeDefault.Gold)
+}
+
+func (l *ListView) emptyBody(width, height int) string {
+	t := ui.ThemeDefault
+	centered := lipgloss.NewStyle().Width(width).Align(lipgloss.Center)
+
+	body := centered.Foreground(t.Text).Render(i18n.T("no_tunnels")) + "\n" +
+		centered.Foreground(t.TextDim).Render(i18n.T("add_tunnel_prompt"))
+
+	return lipgloss.NewStyle().
+		Width(width).
+		Height(ui.Clamp(height, lipgloss.Height(body))).
+		AlignVertical(lipgloss.Center).
+		Render(body)
 }
 
 func (l *ListView) visibleWindow() (first, count int) {

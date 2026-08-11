@@ -10,6 +10,7 @@
   import ConnectionModal from "$lib/components/ConnectionModal.svelte";
   import DetailPanel from "$lib/components/DetailPanel.svelte";
   import OverviewBar from "$lib/components/OverviewBar.svelte";
+  import Welcome from "$lib/components/Welcome.svelte";
   import type { Tunnel } from "$lib/types";
   import { cn } from "$lib/utils/cn";
   import { t } from "$lib/stores/i18n.svelte";
@@ -28,6 +29,9 @@
       store.tunnels[0] ??
       null,
   );
+
+  const isEmpty = $derived(!store.loading && store.tunnels.length === 0);
+  const showWelcome = $derived(isEmpty && !store.onboarded && !store.error);
 
   let announcement = $state("");
   let lastStates: Record<string, string> = {};
@@ -124,28 +128,34 @@
   <div role="status" aria-live="polite" class="sr-only">{announcement}</div>
 
   <UpdateBanner />
-  <OverviewBar />
+  {#if !isEmpty}
+    <OverviewBar />
+  {/if}
 
-  <main
-    class={cn(
-      "grid min-h-0 flex-1 gap-app",
-      "max-md:grid-cols-1 max-md:content-start",
-      "md:grid-cols-3",
-    )}
-  >
-    <div class="flex min-h-0 flex-1 max-md:flex-none md:col-span-2 md:h-full md:min-h-0">
-      <ConnectionsPanel
-        onAction={handleAction}
-        onCreateFirst={openCreate}
-        onCreate={openCreate}
-        selectedId={selected?.id ?? null}
-      />
-    </div>
+  {#if showWelcome}
+    <Welcome onCreate={openCreate} />
+  {:else}
+    <main
+      class={cn(
+        "grid min-h-0 flex-1 gap-app",
+        "max-md:grid-cols-1 max-md:content-start",
+        "md:grid-cols-3",
+      )}
+    >
+      <div class="flex min-h-0 flex-1 max-md:flex-none md:col-span-2 md:h-full md:min-h-0">
+        <ConnectionsPanel
+          onAction={handleAction}
+          onCreateFirst={openCreate}
+          onCreate={openCreate}
+          selectedId={selected?.id ?? null}
+        />
+      </div>
 
-    <div class="min-h-0 max-md:min-h-64 md:h-full">
-      <DetailPanel tunnel={selected} onAction={handleAction} />
-    </div>
-  </main>
+      <div class="min-h-0 max-md:min-h-64 md:h-full">
+        <DetailPanel tunnel={selected} onAction={handleAction} />
+      </div>
+    </main>
+  {/if}
 </div>
 
 <ConnectionModal
@@ -161,4 +171,6 @@
   onCancel={handleCancelDelete}
 />
 
-<NotificationPermission />
+{#if !showWelcome}
+  <NotificationPermission />
+{/if}

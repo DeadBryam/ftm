@@ -106,10 +106,6 @@ func New() (*App, error) {
 }
 
 func (a *App) Run() error {
-	if len(a.Config.Tunnels) == 0 {
-		a.createDefaultTunnels()
-	}
-
 	if file := redirectLog(); file != nil {
 		defer file.Close()
 	}
@@ -193,18 +189,6 @@ func startAndReap(cmd *exec.Cmd) error {
 	}()
 
 	return nil
-}
-
-func (a *App) createDefaultTunnels() {
-	a.Config.Tunnels = []config.TunnelConfig{
-		{
-			ID:        "foundry-default",
-			Name:      "Foundry VTT (Default)",
-			Provider:  config.ProviderCloudflared,
-			LocalPort: 30000,
-		},
-	}
-	a.Config.Save()
 }
 
 func (a *App) SaveConfig() error {

@@ -160,15 +160,12 @@
           class="flex h-full min-h-40 flex-col items-center justify-center px-3 py-6 text-center text-text-muted"
         >
           <Radio class="mx-auto mb-2 h-8 w-8" size={32} />
-          <h3 class="mt-0 mb-1 text-sm text-text-heading">
+          <h3 class="mt-0 mb-3 text-sm text-text-heading">
             {t("no_tunnels")}
           </h3>
-          <p class="m-0 mb-3 max-w-xs text-xs leading-relaxed">
-            {t("tunnels_desc")}
-          </p>
           {#if onCreateFirst}
-            <Button variant="primary"  onclick={onCreateFirst}>
-              {t("create_first")}
+            <Button variant="primary" icon={Plus} onclick={onCreateFirst}>
+              {t("new_connection_action")}
             </Button>
           {/if}
         </div>
