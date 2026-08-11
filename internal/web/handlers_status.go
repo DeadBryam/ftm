@@ -14,8 +14,9 @@ import (
 func (h *Handlers) handleStatus(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"port":    h.server.Port(),
-		"version": version.Version,
+		"port":      h.server.Port(),
+		"version":   version.Version,
+		"nativePip": h.server.HasPiP(),
 	})
 }
 

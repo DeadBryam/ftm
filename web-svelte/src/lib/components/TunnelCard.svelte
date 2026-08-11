@@ -8,6 +8,7 @@
   import { cn } from "$lib/utils/cn";
   import { formatDuration } from "$lib/utils/duration";
   import { providerErrorHint } from "$lib/utils/providerError";
+  import { isInstallingState, isRunningState } from "$lib/utils/status";
   import { onMount } from "svelte";
   import Button from "./Button.svelte";
   import StatusBadge from "./StatusBadge.svelte";
@@ -45,18 +46,9 @@
 
   const tunnelState = $derived(tunnel.state as TunnelState);
 
-  const isRunning = $derived(
-    tunnelState === "online" ||
-      tunnelState === "starting" ||
-      tunnelState === "connecting" ||
-      tunnelState === "installing" ||
-      tunnelState === "downloading" ||
-      tunnelState === "stopping",
-  );
+  const isRunning = $derived(isRunningState(tunnelState));
 
-  const isInstalling = $derived(
-    tunnelState === "installing" || tunnelState === "downloading",
-  );
+  const isInstalling = $derived(isInstallingState(tunnelState));
 
   const providerLabel = $derived(
     providerStore.providers.find((p) => p.id === tunnel.provider)?.name ??

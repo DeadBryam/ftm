@@ -1,7 +1,7 @@
 <script lang="ts">
   import { t } from "$lib/stores/i18n.svelte";
   import { cn } from "$lib/utils/cn";
-  import { STATUS_FILL, statusInfoFor } from "$lib/utils/status";
+  import { STATUS_FILL, statusInfo } from "$lib/utils/status";
 
   let {
     state,
@@ -13,7 +13,7 @@
     stale?: boolean;
   } = $props();
 
-  const info = $derived(statusInfoFor(state));
+  const info = $derived(statusInfo(state));
   const idle = $derived(info.key === "stopped" || stale);
 </script>
 

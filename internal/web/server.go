@@ -41,6 +41,8 @@ type Server struct {
 	updateSvc     *updateService
 	updateCtx     context.Context
 	updateCancel  context.CancelFunc
+	pipOpener     func(tunnelID string) error
+	pipMu         sync.RWMutex
 }
 
 func NewServer(manager *process.Manager, cfg *config.Config) *Server {
@@ -150,6 +152,29 @@ func (s *Server) Stop() error {
 
 func (s *Server) Port() int {
 	return s.port
+}
+
+func (s *Server) SetPiPOpener(fn func(tunnelID string) error) {
+	s.pipMu.Lock()
+	defer s.pipMu.Unlock()
+	s.pipOpener = fn
+}
+
+func (s *Server) HasPiP() bool {
+	s.pipMu.RLock()
+	defer s.pipMu.RUnlock()
+	return s.pipOpener != nil
+}
+
+func (s *Server) OpenPiP(tunnelID string) error {
+	s.pipMu.RLock()
+	opener := s.pipOpener
+	s.pipMu.RUnlock()
+
+	if opener == nil {
+		return ErrNoPiP
+	}
+	return opener(tunnelID)
 }
 
 func (s *Server) ClientCount() int {

@@ -5,6 +5,7 @@
     Copy,
     MousePointerClick,
     Pencil,
+    PictureInPicture2,
     QrCode as QrCodeIcon,
     Trash2,
   } from "lucide-svelte";
@@ -12,7 +13,8 @@
   import { useTunnels } from "$lib/stores/tunnels.svelte";
   import { useToast } from "$lib/stores/toast.svelte";
   import { useClock } from "$lib/stores/clock.svelte";
-  import { logsApi } from "$lib/api";
+  import { logsApi, pipApi, statusApi } from "$lib/api";
+  import { openDocumentPip, supportsDocumentPip } from "$lib/utils/pip";
   import { t } from "$lib/stores/i18n.svelte";
   import { cn } from "$lib/utils/cn";
   import { formatDuration } from "$lib/utils/duration";
@@ -63,6 +65,33 @@
 
   const LOGS_OPEN_KEY = "ftm-detail-logs-open";
   const QR_OPEN_KEY = "ftm-detail-qr-open";
+
+  let nativePip = $state(false);
+  let documentPip = $state(false);
+  const pipAvailable = $derived(nativePip || documentPip);
+
+  onMount(async () => {
+    documentPip = supportsDocumentPip();
+    try {
+      nativePip = (await statusApi.get()).nativePip === true;
+    } catch {
+      nativePip = false;
+    }
+  });
+
+  async function openPip() {
+    if (!tunnel) return;
+
+    try {
+      if (nativePip) {
+        await pipApi.open(tunnel.id);
+        return;
+      }
+      await openDocumentPip(tunnel.id);
+    } catch {
+      toast.error(t("pip_failed"));
+    }
+  }
 
   let qrDataUrl = $state("");
   let qrOpen = $state(false);
@@ -199,6 +228,14 @@
     </h2>
     {#if tunnel}
       <div class="flex shrink-0 gap-1">
+        {#if pipAvailable}
+          <IconButton
+            icon={PictureInPicture2}
+            label={t("pip_open")}
+            size="sm"
+            onclick={openPip}
+          />
+        {/if}
         <IconButton
           icon={Pencil}
           label={t("edit")}

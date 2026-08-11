@@ -58,6 +58,8 @@ func (h *Handlers) Route(w http.ResponseWriter, r *http.Request) {
 		h.handleUpdate(w, r)
 	case path == "/api/detect-port":
 		h.handleDetectPort(w)
+	case path == "/api/pip":
+		h.handlePiP(w, r)
 	case strings.HasPrefix(path, "/api/tunnels/"):
 		h.handleTunnelActions(w, r)
 	default:
