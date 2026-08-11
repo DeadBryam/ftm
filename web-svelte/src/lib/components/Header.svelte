@@ -3,6 +3,7 @@
   import { goto } from '$app/navigation';
   import { t } from '$lib/stores/i18n.svelte';
   import { Settings, ChevronLeft } from 'lucide-svelte';
+  import Mark from './Mark.svelte';
 
   const isHome = $derived($page.url.pathname === '/');
   const isSettings = $derived($page.url.pathname === '/settings');
@@ -22,11 +23,7 @@
     class="flex min-w-0 items-center gap-3 rounded-control pr-1 transition-opacity hover:opacity-80"
     aria-label={t('go_home')}
   >
-    <img
-      src="/favicon.png"
-      alt={t('app_name')}
-      class="h-9 w-9 shrink-0 rounded-control object-cover sm:h-10 sm:w-10"
-    />
+    <Mark class="h-9 w-9 shrink-0 sm:h-10 sm:w-10" />
     <div class="min-w-0">
       <h1 class="m-0 font-serif text-2xl font-bold tracking-tight text-text-heading sm:text-3xl">
         {t('app_name')}
