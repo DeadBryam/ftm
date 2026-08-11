@@ -140,7 +140,10 @@
             }>}
             <IconComponent size={16} />
           {/if}
-          <span>{option.label}</span>
+          <span class="flex-1">{option.label}</span>
+          {#if option.hint}
+            <span class="shrink-0 text-xs text-text-muted">{option.hint}</span>
+          {/if}
         </button>
       {/if}
     {/each}

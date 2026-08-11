@@ -33,6 +33,7 @@ export interface TunnelFormData {
 
 export interface DropdownOption {
   label: string;
+  hint?: string;
   action?: string;
   icon?: unknown;
   disabled?: boolean;

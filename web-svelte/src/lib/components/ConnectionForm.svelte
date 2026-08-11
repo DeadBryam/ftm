@@ -43,8 +43,8 @@
 
   const providerOptions: DropdownOption[] = $derived(
     providerStore.providers.map((p) => ({
-      label:
-        p.id === "cloudflared" ? `${p.name} · ${t("provider_recommended")}` : p.name,
+      label: p.name,
+      hint: p.id === "cloudflared" ? t("provider_recommended") : undefined,
       value: p.id,
     })),
   );
