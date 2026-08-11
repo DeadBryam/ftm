@@ -402,7 +402,7 @@
         >
           <span>{t("detail_logs")}</span>
           <span class="flex items-center gap-1">
-            <span class="text-[11px] font-normal">
+            <span class="text-2xs font-normal">
               {logsOpen ? t("detail_logs_hide") : t("detail_logs_show")}
             </span>
             <ChevronDown
@@ -421,7 +421,7 @@
               <pre
                 bind:this={logPre}
                 onscroll={onLogScroll}
-                class="m-0 max-h-48 overflow-x-hidden overflow-y-auto rounded-control bg-logs-bg p-2 font-mono text-[11px] leading-relaxed break-all whitespace-pre-wrap text-logs-text">{logs ||
+                class="m-0 max-h-48 overflow-x-hidden overflow-y-auto rounded-control bg-logs-bg p-2 font-mono text-2xs leading-relaxed break-all whitespace-pre-wrap text-logs-text">{logs ||
                   t("no_logs")}</pre>
             {/if}
           </div>
