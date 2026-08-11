@@ -15,7 +15,7 @@ const (
 	NotificationGranted  = "granted"
 	NotificationRejected = "rejected"
 
-	ConfigVersion = 3
+	ConfigVersion = 4
 
 	LanguageAuto = "auto"
 )
@@ -25,6 +25,8 @@ type Config struct {
 	Tunnels  []TunnelConfig `yaml:"tunnels"`
 	WebPort  int            `yaml:"web_port,omitempty"`
 	Language string         `yaml:"language"`
+
+	Onboarded bool `yaml:"onboarded"`
 
 	NotificationsStatus string `yaml:"notifications_status"`
 	NotificationSound   bool   `yaml:"notification_sound"`
@@ -65,6 +67,11 @@ func (c *Config) migrate() bool {
 
 	if c.Version < 3 {
 		c.CountVisitors = true
+		changed = true
+	}
+
+	if c.Version < 4 {
+		c.Onboarded = len(c.Tunnels) > 0
 		changed = true
 	}
 
@@ -156,6 +163,7 @@ func (c *Config) GetTunnel(id string) *TunnelConfig {
 
 func (c *Config) AddTunnel(t TunnelConfig) {
 	c.Tunnels = append(c.Tunnels, t)
+	c.Onboarded = true
 }
 
 func (c *Config) RemoveTunnel(id string) bool {
