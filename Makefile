@@ -120,7 +120,7 @@ clean:
 	rm -f $(BINARY_NAME) ftm-*
 	rm -rf $(DESKTOP_DIR)/build/bin/*
 	rm -rf $(DESKTOP_DIR)/frontend/dist
-	@go clean -cache -testcache 2>/dev/null || true
+	@go clean -testcache 2>/dev/null || true
 
 # Install binary (builds web UI + binary, then copies it to $(BINDIR)).
 .PHONY: install
