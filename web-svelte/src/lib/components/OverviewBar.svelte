@@ -88,8 +88,8 @@
     <span
       class={cn(
         "flex h-7 w-7 shrink-0 items-center justify-center rounded-control",
-        tone === "good" && "bg-status-running/15 text-status-running",
-        tone === "bad" && "bg-status-error/15 text-status-error",
+        tone === "good" && "bg-status-running text-btn-text",
+        tone === "bad" && "bg-status-error text-btn-text",
         tone === "muted" && "bg-secondary text-text-muted",
       )}
     >
