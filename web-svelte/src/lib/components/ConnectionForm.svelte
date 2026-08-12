@@ -154,7 +154,7 @@
 
   <div class="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto p-3.5">
     {#if providerStore.error}
-      <p class="mb-2 rounded-control border border-status-error/40 bg-status-error/10 px-2.5 py-1.5 text-xs text-status-error">
+      <p class="mb-2 rounded-control border border-status-error/40 bg-status-error/10 px-2.5 py-1.5 text-xs text-text-error">
         {providerStore.error}
       </p>
     {/if}

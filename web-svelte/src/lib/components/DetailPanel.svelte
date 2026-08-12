@@ -382,7 +382,7 @@
 
       {#if tunnel.errorMessage}
         <div
-          class="m-0 mb-3 rounded-control border border-status-error/40 bg-status-error/10 px-2.5 py-1.5 text-status-error"
+          class="m-0 mb-3 rounded-control border border-status-error/40 bg-status-error/10 px-2.5 py-1.5 text-text-error"
         >
           {#if errorHint}
             <p class="m-0 mb-1 text-xs font-medium">{t(errorHint)}</p>
