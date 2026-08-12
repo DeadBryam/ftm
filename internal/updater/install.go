@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/sthbryan/ftm/internal/buildinfo"
 )
 
 type Method string
@@ -42,12 +44,6 @@ func (m Method) HintKey() string {
 	}
 }
 
-var desktopBuild bool
-
-func MarkDesktop() {
-	desktopBuild = true
-}
-
 func DetectMethod() Method {
 	execPath, err := os.Executable()
 	if err != nil {
@@ -57,7 +53,7 @@ func DetectMethod() Method {
 		execPath = resolved
 	}
 
-	return methodFor(execPath, runtime.GOOS, desktopBuild)
+	return methodFor(execPath, runtime.GOOS, buildinfo.IsDesktop())
 }
 
 func methodFor(execPath, goos string, desktop bool) Method {

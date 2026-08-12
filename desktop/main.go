@@ -7,7 +7,8 @@ import (
 	"os"
 
 	"github.com/sthbryan/ftm/internal/app"
-	"github.com/sthbryan/ftm/internal/updater"
+	"github.com/sthbryan/ftm/internal/autostart"
+	"github.com/sthbryan/ftm/internal/buildinfo"
 	"github.com/sthbryan/ftm/internal/version"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
@@ -17,7 +18,11 @@ func main() {
 	flag.IntVar(&port, "port", 0, "Web server port")
 	flag.Parse()
 
-	updater.MarkDesktop()
+	buildinfo.MarkDesktop()
+
+	if err := autostart.New().Repair(); err != nil {
+		log.Printf("Could not refresh the autostart entry: %v", err)
+	}
 
 	ftmApp, err := app.New()
 	if err != nil {

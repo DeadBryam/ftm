@@ -2,8 +2,10 @@ package web
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
+	"github.com/sthbryan/ftm/internal/autostart"
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/i18n"
 	"github.com/sthbryan/ftm/internal/notifications"
@@ -34,15 +36,36 @@ func isSelectableLanguage(lang string) bool {
 	return false
 }
 
-func (h *Handlers) handleGetSettings(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+func (h *Handlers) autostartManager() autostart.Manager {
+	if h.autostart == nil {
+		return autostart.New()
+	}
+	return h.autostart
+}
+
+func (h *Handlers) settingsPayload() map[string]interface{} {
+	manager := h.autostartManager()
+	supported := manager.Supported()
+
+	enabled := false
+	if supported {
+		enabled, _ = manager.Enabled()
+	}
+
+	return map[string]interface{}{
 		"notifications_enabled": h.config.NotificationsStatus,
 		"notification_sound":    h.config.NotificationSound,
 		"language":              h.config.Language,
 		"language_resolved":     i18n.CurrentLanguage(),
 		"onboarded":             h.config.Onboarded,
-	})
+		"autostart_supported":   supported,
+		"autostart_enabled":     enabled,
+	}
+}
+
+func (h *Handlers) handleGetSettings(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(h.settingsPayload())
 }
 
 func (h *Handlers) handlePatchSettings(w http.ResponseWriter, r *http.Request) {
@@ -50,11 +73,26 @@ func (h *Handlers) handlePatchSettings(w http.ResponseWriter, r *http.Request) {
 		NotificationsEnabled *string `json:"notifications_enabled,omitempty"`
 		NotificationSound    *bool   `json:"notification_sound,omitempty"`
 		Language             *string `json:"language,omitempty"`
+		Autostart            *bool   `json:"autostart_enabled,omitempty"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
+	}
+
+	if req.Autostart != nil {
+		if err := h.applyAutostart(*req.Autostart); err != nil {
+			switch {
+			case errors.Is(err, autostart.ErrUnsupported):
+				http.Error(w, err.Error(), http.StatusNotImplemented)
+			case errors.Is(err, autostart.ErrDisabledByUser):
+				http.Error(w, err.Error(), http.StatusConflict)
+			default:
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			return
+		}
 	}
 
 	if req.NotificationsEnabled != nil {
@@ -84,13 +122,21 @@ func (h *Handlers) handlePatchSettings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"notifications_enabled": h.config.NotificationsStatus,
-		"notification_sound":    h.config.NotificationSound,
+	json.NewEncoder(w).Encode(h.settingsPayload())
+}
 
-		"language":          h.config.Language,
-		"language_resolved": i18n.CurrentLanguage(),
-	})
+func (h *Handlers) applyAutostart(enable bool) error {
+	manager := h.autostartManager()
+
+	if !manager.Supported() {
+		return autostart.ErrUnsupported
+	}
+
+	if enable {
+		return manager.Enable()
+	}
+
+	return manager.Disable()
 }
 
 func (h *Handlers) handleI18n(w http.ResponseWriter, r *http.Request) {
