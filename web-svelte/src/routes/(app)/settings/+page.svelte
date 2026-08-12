@@ -7,12 +7,15 @@
   import { useToast } from "$lib/stores/toast.svelte";
   import { t, useI18n, LANGUAGE_AUTO } from "$lib/stores/i18n.svelte";
   import { statusApi } from "$lib/api/endpoints/status";
+  import type { HTTPError } from "ky";
   import {
     Bell,
     BellOff,
     Volume2,
     VolumeX,
     Languages,
+    Power,
+    PowerOff,
     Trash2,
   } from "lucide-svelte";
   import ToggleTrack from "$lib/components/ToggleTrack.svelte";
@@ -99,6 +102,20 @@
     }
   }
 
+  async function toggleAutostart() {
+    saving = true;
+    try {
+      await settingsStore.update({
+        autostart_enabled: !settingsStore.settings.autostart_enabled,
+      });
+    } catch (err) {
+      const status = (err as HTTPError).response?.status;
+      toast.error(status === 409 ? t("autostart_blocked") : t("autostart_failed"));
+    } finally {
+      saving = false;
+    }
+  }
+
   async function changeLanguage(lang: string) {
     if (settingsStore.settings.language === lang || saving) return;
     saving = true;
@@ -114,6 +131,10 @@
     settingsStore.settings.notifications_enabled === "granted",
   );
   const soundActive = $derived(!!settingsStore.settings.notification_sound);
+  const autostartActive = $derived(!!settingsStore.settings.autostart_enabled);
+  const autostartSupported = $derived(
+    !!settingsStore.settings.autostart_supported,
+  );
 </script>
 
 <div class="mx-auto flex w-full max-w-app min-h-0 flex-1 flex-col">
@@ -210,6 +231,39 @@
           </span>
           <ToggleTrack checked={soundActive} disabled={saving} />
         </button>
+
+        {#if autostartSupported}
+          <button
+            type="button"
+            role="switch"
+            aria-checked={autostartActive}
+            disabled={saving}
+            onclick={toggleAutostart}
+            class="relative z-10 grid w-full cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-4 border-t border-border-light px-5 py-3.5 text-left transition-colors hover:bg-hover disabled:cursor-not-allowed"
+          >
+            <span
+              class={cn(
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-control transition-colors",
+                autostartActive ? "bg-primary text-btn-text" : "bg-secondary text-text-muted",
+              )}
+            >
+              {#if autostartActive}
+                <Power size={17} />
+              {:else}
+                <PowerOff size={17} />
+              {/if}
+            </span>
+            <span class="min-w-0">
+              <span class="block text-sm font-medium text-text-heading">
+                {t("autostart_login")}
+              </span>
+              <span class="block truncate text-xs text-text-muted">
+                {t("settings_autostart_desc")}
+              </span>
+            </span>
+            <ToggleTrack checked={autostartActive} disabled={saving} />
+          </button>
+        {/if}
 
         <div
           class="relative z-10 grid grid-cols-[auto_1fr_auto] items-center gap-4 border-t border-border-light px-5 py-3.5"

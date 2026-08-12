@@ -5,6 +5,8 @@ export interface Settings {
   notification_sound: boolean;
   language: string;
   onboarded: boolean;
+  autostart_supported: boolean;
+  autostart_enabled: boolean;
 }
 
 export const settingsApi = {

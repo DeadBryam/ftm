@@ -6,7 +6,9 @@ let settings = $state<Settings>({
   notifications_enabled: "pending",
   notification_sound: true,
   language: "en",
-  onboarded: true
+  onboarded: true,
+  autostart_supported: false,
+  autostart_enabled: false
 });
 
 let loaded = $state(false);
