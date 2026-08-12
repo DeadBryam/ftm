@@ -101,7 +101,7 @@
 
 {#if update.error}
   <div
-    class="ftm-enter mb-app flex items-center gap-2 rounded-card border border-status-error/40 bg-status-error/10 px-3 py-2 text-sm text-status-error"
+    class="ftm-enter mb-app flex items-center gap-2 rounded-card border border-status-error/40 bg-status-error/10 px-3 py-2 text-sm text-text-error"
   >
     {t('update_apply_failed', { 0: update.error })}
   </div>
