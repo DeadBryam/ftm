@@ -23,7 +23,7 @@
     outline:
       "border-border bg-input-bg text-text hover:border-primary/50 hover:bg-hover",
     danger:
-      "border-status-error/40 bg-status-error/10 text-status-error hover:bg-status-error/20",
+      "border-status-error/40 bg-status-error/10 text-text-error hover:bg-status-error/20",
   };
 
   const SIZE_CLASSES: Record<IconButtonSize, string> = {

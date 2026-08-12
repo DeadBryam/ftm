@@ -179,7 +179,7 @@
 
     {#if tunnel.errorMessage}
       <p
-        class="m-0 line-clamp-2 shrink-0 rounded-control border border-status-error/40 bg-status-error/10 px-2 py-1 text-[11px] break-words text-status-error"
+        class="m-0 line-clamp-2 shrink-0 rounded-control border border-status-error/40 bg-status-error/10 px-2 py-1 text-[11px] break-words text-text-error"
         title={tunnel.errorMessage}
       >
         {errorHint ? t(errorHint) : tunnel.errorMessage}

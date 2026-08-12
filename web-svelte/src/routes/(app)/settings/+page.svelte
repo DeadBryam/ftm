@@ -291,7 +291,7 @@
           class="relative z-10 grid grid-cols-[auto_1fr_auto] items-center gap-4 border-t border-border-light px-5 py-3.5"
         >
           <div
-            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-status-error/15 text-status-error"
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-status-error/15 text-text-error"
           >
             <Trash2 size={17} />
           </div>

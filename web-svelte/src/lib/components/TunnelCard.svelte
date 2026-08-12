@@ -163,7 +163,7 @@
             <span
               class={cn(
                 "text-xs",
-                remaining > 0 ? "text-text-muted" : "text-status-error",
+                remaining > 0 ? "text-text-muted" : "text-text-error",
               )}
             >
               {expiryLabel}
@@ -235,7 +235,7 @@
 
     {#if tunnel.errorMessage}
       <div
-        class="flex items-start gap-2 rounded-b-card border-t border-t-status-error/70 bg-status-error/15 px-2.5 py-2 text-status-error"
+        class="flex items-start gap-2 rounded-b-card border-t border-t-status-error/70 bg-status-error/15 px-2.5 py-2 text-text-error"
       >
         <span class="mt-0.5 h-4 w-4 shrink-0"><AlertCircle size={16} /></span>
         <span class="min-w-0 flex-1">

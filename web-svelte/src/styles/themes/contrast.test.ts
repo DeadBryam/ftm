@@ -74,6 +74,15 @@ function ratio(foreground: string, background: string): number {
   return (light + 0.05) / (dark + 0.05);
 }
 
+function flatten(tint: string, surface: string, alpha: number): string {
+  const front = toRgb(tint);
+  const back = toRgb(surface);
+  const blended = front.map((channel, index) =>
+    Math.round(channel * alpha + back[index] * (1 - alpha)),
+  );
+  return `#${blended.map((channel) => channel.toString(16).padStart(2, '0')).join('')}`;
+}
+
 const TEXT_ON_SURFACE: Array<[string, string[]]> = [
   ['--color-muted', ['--color-card', '--color-bg', '--color-url-bg']],
   ['--color-text', ['--color-card', '--color-bg']],
@@ -110,6 +119,8 @@ const TEXT_ON_FILL: Array<[string, string[]]> = [
   ],
 ];
 
+const TINT_ALPHAS = [0, 0.1, 0.15, 0.2];
+
 const themes = parseThemes();
 const themeNames = Object.keys(themes).sort();
 
@@ -137,6 +148,18 @@ describe('theme contrast', () => {
           expect(Number(value.toFixed(2))).toBeGreaterThanOrEqual(AA_NORMAL_TEXT);
         });
       }
+    }
+
+    for (const alpha of TINT_ALPHAS) {
+      it(`--color-error-text on a ${alpha} error tint over --color-card clears AA`, () => {
+        const tint = flatten(
+          resolve(palette, '--color-status-error'),
+          resolve(palette, '--color-card'),
+          alpha,
+        );
+        const value = ratio(resolve(palette, '--color-error-text'), tint);
+        expect(Number(value.toFixed(2))).toBeGreaterThanOrEqual(AA_NORMAL_TEXT);
+      });
     }
   });
 });

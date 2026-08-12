@@ -141,7 +141,7 @@
         <div
           class="flex h-full min-h-40 flex-col items-center justify-center px-3 py-6 text-center text-text-muted"
         >
-          <PlugZap class="mx-auto mb-2 h-8 w-8 text-status-error" size={32} />
+          <PlugZap class="mx-auto mb-2 h-8 w-8 text-text-error" size={32} />
           <h3 class="mt-0 mb-1 text-sm text-text-heading">
             {t("panel_unreachable")}
           </h3>
