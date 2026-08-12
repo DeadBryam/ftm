@@ -176,8 +176,9 @@ function Write-AppxManifest {
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap rescap">
+  IgnorableNamespaces="uap uap5 rescap">
 
   <Identity
     Name="$xmlId"
@@ -213,6 +214,17 @@ function Write-AppxManifest {
           Square71x71Logo="Assets\Square71x71Logo.png" />
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
+      <Extensions>
+        <uap5:Extension
+          Category="windows.startupTask"
+          Executable="$xmlExe"
+          EntryPoint="Windows.FullTrustApplication">
+          <uap5:StartupTask
+            TaskId="FtmAutostart"
+            Enabled="false"
+            DisplayName="$xmlDisplay" />
+        </uap5:Extension>
+      </Extensions>
     </Application>
   </Applications>
 
