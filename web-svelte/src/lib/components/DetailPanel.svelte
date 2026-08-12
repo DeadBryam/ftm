@@ -294,7 +294,7 @@
         </dd>
         {#if stale}
           <dt class="text-text-muted">{t("connection_label")}</dt>
-          <dd class="m-0 font-medium text-status-error">
+          <dd class="m-0 font-medium text-text-error">
             {t("connection_lost")}
           </dd>
         {/if}

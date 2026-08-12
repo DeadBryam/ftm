@@ -163,7 +163,7 @@
             <span
               class={cn(
                 "text-xs",
-                remaining > 0 ? "text-text-muted" : "text-status-error",
+                remaining > 0 ? "text-text-muted" : "text-text-error",
               )}
             >
               {expiryLabel}

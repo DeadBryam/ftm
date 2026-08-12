@@ -69,7 +69,7 @@
           id="modal-title"
           class="m-0 flex items-center gap-2 text-lg font-semibold text-text-heading"
         >
-          <Trash2 size={20} class="text-status-error" />
+          <Trash2 size={20} class="text-text-error" />
           {title ?? t("confirm_delete_title")}
         </h2>
         <IconButton
