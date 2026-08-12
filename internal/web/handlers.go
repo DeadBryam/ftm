@@ -5,21 +5,24 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/sthbryan/ftm/internal/autostart"
 	"github.com/sthbryan/ftm/internal/config"
 	"github.com/sthbryan/ftm/internal/process"
 )
 
 type Handlers struct {
-	manager *process.Manager
-	config  *config.Config
-	server  *Server
+	manager   *process.Manager
+	config    *config.Config
+	server    *Server
+	autostart autostart.Manager
 }
 
 func NewHandlers(manager *process.Manager, cfg *config.Config, server *Server) *Handlers {
 	return &Handlers{
-		manager: manager,
-		config:  cfg,
-		server:  server,
+		manager:   manager,
+		config:    cfg,
+		server:    server,
+		autostart: autostart.New(),
 	}
 }
 
