@@ -22,6 +22,7 @@
   --color-status-starting: #ffa066;
   --color-status-installing: #7fb4ca;
   --color-status-error: #e46876;
+  --color-error-text: #eb6e7b;
   --color-status-stopped: var(--color-muted);
   --color-logs-bg: #16161d;
   --color-logs-text: #dcd7ba;

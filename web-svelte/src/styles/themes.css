@@ -46,6 +46,7 @@
   --color-status-starting: var(--color-status-starting);
   --color-status-installing: var(--color-status-installing);
   --color-status-error: var(--color-status-error);
+  --color-error-text: var(--color-error-text);
   --color-status-stopped: var(--color-status-stopped);
   --color-logs-bg: var(--color-logs-bg);
   --color-logs-text: var(--color-logs-text);
@@ -61,4 +62,5 @@
   --color-secondary: var(--color-secondary-btn);
   --color-text-heading: var(--color-heading);
   --color-text-muted: var(--color-muted);
+  --color-text-error: var(--color-error-text);
 }
