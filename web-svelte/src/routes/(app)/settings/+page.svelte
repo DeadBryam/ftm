@@ -130,7 +130,7 @@
           <span
             class={cn(
               "flex h-9 w-9 shrink-0 items-center justify-center rounded-control transition-colors",
-              notifActive ? "bg-primary/15 text-primary" : "bg-secondary text-text-muted",
+              notifActive ? "bg-primary text-btn-text" : "bg-secondary text-text-muted",
             )}
           >
             {#if notifActive}
@@ -161,7 +161,7 @@
           <span
             class={cn(
               "flex h-9 w-9 shrink-0 items-center justify-center rounded-control transition-colors",
-              soundActive ? "bg-primary/15 text-primary" : "bg-secondary text-text-muted",
+              soundActive ? "bg-primary text-btn-text" : "bg-secondary text-text-muted",
             )}
           >
             {#if soundActive}
