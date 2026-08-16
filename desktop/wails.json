@@ -1,7 +1,7 @@
 {
   "name": "ftm",
   "outputfilename": "ftm-desktop",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "author": {
     "name": "Bryan Villafuerte",
     "email": "bryamu.u@gmail.com"
@@ -14,7 +14,7 @@
   "info": {
     "companyName": "sthbryan",
     "productName": "Foundry Tunnel Manager",
-    "productVersion": "0.14.0",
+    "productVersion": "0.15.0",
     "copyright": "Copyright (c) Bryan Villafuerte",
     "comments": "Foundry Tunnel Manager desktop shell (Wails v3)"
   }
