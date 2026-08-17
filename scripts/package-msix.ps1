@@ -43,7 +43,7 @@ param(
     [string] $Version,
 
     # Partner Center → Product identity → Package/Identity Name
-    [string] $IdentityName = "sthbryan.ftm",
+    [string] $IdentityName = "com.justcallmebryan.ftm",
 
     # Partner Center → Package/Identity Publisher (must match exactly for Store).
     # For local sideload with -Sign, leave default or match your test cert subject.

@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	appLabel = "com.sthbryan.ftm"
+	appLabel = "com.justcallmebryan.ftm"
 	appName  = "Foundry Tunnel Manager"
 )
 

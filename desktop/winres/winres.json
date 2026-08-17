@@ -8,7 +8,7 @@
     "#1": {
       "0409": {
         "identity": {
-          "name": "sthbryan.ftm"
+          "name": "com.justcallmebryan.ftm"
         },
         "description": "Share your Foundry VTT world without port forwarding",
         "minimum-os": "win10",

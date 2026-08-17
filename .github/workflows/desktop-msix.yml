@@ -16,7 +16,7 @@ on:
         required: false
         default: ''
       identity_name:
-        description: 'MSIX Identity Name (Partner Center). Empty = secret MS_STORE_IDENTITY_NAME or sthbryan.ftm'
+        description: 'MSIX Identity Name (Partner Center). Empty = secret MS_STORE_IDENTITY_NAME or com.justcallmebryan.ftm'
         required: false
         default: ''
       publisher:
@@ -82,7 +82,7 @@ jobs:
           }
           $id = $env:INPUT_IDENTITY
           if ([string]::IsNullOrWhiteSpace($id)) { $id = $env:SECRET_IDENTITY }
-          if ([string]::IsNullOrWhiteSpace($id)) { $id = "sthbryan.ftm" }
+          if ([string]::IsNullOrWhiteSpace($id)) { $id = "com.justcallmebryan.ftm" }
           $pub = $env:INPUT_PUBLISHER
           if ([string]::IsNullOrWhiteSpace($pub)) { $pub = $env:SECRET_PUBLISHER }
           if ([string]::IsNullOrWhiteSpace($pub)) { $pub = "CN=ftm-ci" }

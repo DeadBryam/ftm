@@ -18,7 +18,7 @@ func TestMethodFor(t *testing.T) {
 		},
 		{
 			name:     "msix install is owned by the store",
-			execPath: `C:\Program Files\WindowsApps\sthbryan.ftm_0.11.0.0_x64__abc\ftm-desktop.exe`,
+			execPath: `C:\Program Files\WindowsApps\com.justcallmebryan.ftm_0.11.0.0_x64__abc\ftm-desktop.exe`,
 			goos:     "windows",
 			want:     MethodStore,
 		},
@@ -49,7 +49,7 @@ func TestMethodFor(t *testing.T) {
 		},
 		{
 			name:     "store install wins over the desktop marker",
-			execPath: `C:\Program Files\WindowsApps\sthbryan.ftm\ftm-desktop.exe`,
+			execPath: `C:\Program Files\WindowsApps\com.justcallmebryan.ftm\ftm-desktop.exe`,
 			goos:     "windows",
 			desktop:  true,
 			want:     MethodStore,

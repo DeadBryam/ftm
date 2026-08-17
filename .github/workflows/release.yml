@@ -194,7 +194,7 @@ jobs:
         run: |
           $ver = $env:GITHUB_REF_NAME.TrimStart('v')
           $id = $env:SECRET_IDENTITY
-          if ([string]::IsNullOrWhiteSpace($id)) { $id = "sthbryan.ftm" }
+          if ([string]::IsNullOrWhiteSpace($id)) { $id = "com.justcallmebryan.ftm" }
           $pub = $env:SECRET_PUBLISHER
           if ([string]::IsNullOrWhiteSpace($pub)) { $pub = "CN=ftm-ci" }
           Write-Host "MSIX IdentityName=$id Publisher=$pub Version=$ver"

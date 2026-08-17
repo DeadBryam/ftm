@@ -76,7 +76,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleExecutable</key>
   <string>ftm-desktop</string>
   <key>CFBundleIdentifier</key>
-  <string>com.sthbryan.ftm</string>
+  <string>com.justcallmebryan.ftm</string>
   <key>CFBundleName</key>
   <string>${BUNDLE_NAME%.app}</string>
   <key>CFBundleDisplayName</key>
